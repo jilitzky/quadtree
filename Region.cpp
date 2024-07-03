@@ -6,7 +6,13 @@ Region::Region(Point center, int halfExtent) : _center(center), _halfExtent(half
 
 Region::~Region()
 {
-    delete _entry;
+    Entry* current = _entry;
+    while (current != nullptr)
+    {
+        Entry* next = current->Next;
+        delete current;
+        current = next;
+    }
     _entry = nullptr;
 
     for (int i = 0; i < 4; i++)
@@ -18,13 +24,24 @@ Region::~Region()
 
 void Region::Add(int value, Point position)
 {
-    // Leaf regions can hold an entry or stop being a leaf by passing their existing entry onto a child
     if (_leaf)
     {
+        // Hold the entry if the leaf doesn't have one yet
         if (_entry == nullptr)
         {
             _entry = new Entry{ value, position };
         }
+        // Chain the entry if it's in the same position or if we can't subdivide further
+        else if (position == _entry->Position || _halfExtent / 2 == 0)
+        {
+            Entry* tail = _entry;
+            while (tail->Next != nullptr)
+            {
+                tail = tail->Next;
+            }
+            tail->Next = new Entry{ value, position };
+        }
+        // Stop being a leaf by passing the chain of entries onto a child
         else
         {
             _leaf = false;
@@ -33,7 +50,7 @@ void Region::Add(int value, Point position)
         }
     }
 
-    // Branch regions simply forward the request onto their children
+    // Non-leaf regions simply forward the request onto their children
     if (!_leaf)
     {
         AddToChild(value, position);
@@ -61,8 +78,8 @@ void Region::AddToChild(int value, Point position)
     // Create the child if it doesn't exist yet
     if (_children[childIndex] == nullptr)
     {
-        const int quarterExtent = _halfExtent / 2;
         Point childCenter = _center;
+        const int quarterExtent = _halfExtent / 2;
         childCenter.X += position.X < _center.X ? -quarterExtent : quarterExtent;
         childCenter.Y += position.Y < _center.Y ? -quarterExtent : quarterExtent;
         _children[childIndex] = new Region(childCenter, quarterExtent);
