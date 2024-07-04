@@ -64,7 +64,7 @@ bool Region::IsEmpty() const
         return false;
     }
 
-    for (Region* child : _children)
+    for (const Region* child : _children)
     {
         if (child != nullptr)
         {
@@ -128,10 +128,10 @@ void Region::AddToChild(int value, Point position)
 
 int Region::GetChildIndex(Point position) const
 {
-    constexpr int bottomLeft = 0;
-    constexpr int topLeft = 1;
-    constexpr int bottomRight = 2;
-    constexpr int topRight = 3;
+    constexpr int topLeft = 0;
+    constexpr int topRight = 1;
+    constexpr int bottomLeft = 2;
+    constexpr int bottomRight = 3;
 
     if (position.X < _center.X)
     {
