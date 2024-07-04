@@ -7,6 +7,8 @@ public:
     Quadtree(Point center, int extent);
 
     bool Add(int value, Point position);
+    bool Remove(int value, Point position);
+    const Region& Root() const { return _root; }
     size_t Size() const { return _size; }
 
 private:
