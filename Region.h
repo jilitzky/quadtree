@@ -13,10 +13,8 @@ public:
     bool Remove(int value, Point position);
 
 private:
-    void AddToChild(int value, Point position);
-    bool CanSubdivide() const;
     int GetChildIndex(Point position) const;
-    bool RemoveFromChild(int value, Point position);
+    Region* GetOrCreateChild(Point position);
 
     bool _leaf = true;
     Point _center = {};

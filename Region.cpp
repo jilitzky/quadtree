@@ -17,25 +17,23 @@ void Region::Add(int value, Point position)
 {
     if (_leaf)
     {
-        if (_entries.empty() || _entries.front().Position == position || !CanSubdivide())
+        auto canSubdivide = [this] { return _halfExtent / 2 > 0; };
+        if (_entries.empty() || _entries.front().Position == position || !canSubdivide())
         {
             _entries.emplace_front(value, position);
         }
         else
         {
-            // TODO: Look at doing a proper transfer of the entries, possibly via a move
-            for (const auto& entry : _entries)
-            {
-                AddToChild(entry.Value, entry.Position);
-            }
-            _entries.clear();
+            Region* child = GetOrCreateChild(_entries.front().Position);
+            child->_entries.splice_after(child->_entries.cbefore_begin(), _entries);
             _leaf = false;
         }
     }
 
     if (!_leaf)
     {
-        AddToChild(value, position);
+        Region* child = GetOrCreateChild(position);
+        child->Add(value, position);
     }
 }
 
@@ -70,28 +68,20 @@ bool Region::Remove(int value, Point position)
         }
         return false;
     }
-    return RemoveFromChild(value, position);
-}
 
-void Region::AddToChild(int value, Point position)
-{
     const int index = GetChildIndex(position);
-
-    if (_children[index] == nullptr)
+    Region* child = _children[index];
+    if (child != nullptr)
     {
-        Point childCenter = _center;
-        const int quarterExtent = _halfExtent / 2;
-        childCenter.X += position.X < _center.X ? -quarterExtent : quarterExtent;
-        childCenter.Y += position.Y < _center.Y ? -quarterExtent : quarterExtent;
-        _children[index] = new Region(childCenter, quarterExtent);
+        const bool removed = child->Remove(value, position);
+        if (removed && child->Empty())
+        {
+            delete child;
+            _children[index] = nullptr;
+        }
+        return removed;
     }
-
-    _children[index]->Add(value, position);
-}
-
-bool Region::CanSubdivide() const
-{
-    return _halfExtent / 2 > 0;
+    return false;
 }
 
 int Region::GetChildIndex(Point position) const
@@ -108,20 +98,16 @@ int Region::GetChildIndex(Point position) const
     return position.Y < _center.Y ? bottomRight : topRight;
 }
 
-bool Region::RemoveFromChild(int value, Point position)
+Region* Region::GetOrCreateChild(Point position)
 {
     const int index = GetChildIndex(position);
-
-    Region* child = _children[index];
-    if (child != nullptr)
+    if (_children[index] == nullptr)
     {
-        const bool removed = child->Remove(value, position);
-        if (removed && child->Empty())
-        {
-            delete child;
-            _children[index] = nullptr;
-        }
-        return removed;
+        Point childCenter = _center;
+        const int quarterExtent = _halfExtent / 2;
+        childCenter.X += position.X < _center.X ? -quarterExtent : quarterExtent;
+        childCenter.Y += position.Y < _center.Y ? -quarterExtent : quarterExtent;
+        _children[index] = new Region(childCenter, quarterExtent);
     }
-    return false;
+    return _children[index];
 }
