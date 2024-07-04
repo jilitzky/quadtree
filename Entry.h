@@ -3,7 +3,8 @@
 
 struct Entry
 {
-    int Value = -1;
-    Point Position = {};
-    Entry* Next = nullptr;
+    Entry(int value, Point position) : Value(value), Position(position) {}
+
+    int Value;
+    Point Position;
 };

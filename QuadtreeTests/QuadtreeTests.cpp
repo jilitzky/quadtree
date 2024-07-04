@@ -82,7 +82,23 @@ namespace QuadtreeTests
             removed = _tree.Remove(1, Point{ 50, 50 });
             Assert::IsTrue(removed);
             Assert::IsTrue(_tree.Size() == 0);
-            Assert::IsTrue(_tree.Root().IsEmpty());
+            Assert::IsTrue(_tree.Root().Empty());
+        }
+
+        TEST_METHOD(Remove_NotFound)
+        {
+            bool removed = _tree.Remove(1, Point{ 50, 50 });
+            Assert::IsFalse(removed);
+
+            _tree.Add(1, Point{ 50, 50 });
+
+            removed = _tree.Remove(2, Point{ 87, 87 });
+            Assert::IsFalse(removed);
+
+            _tree.Add(2, Point{ 87, 87 });
+
+            removed = _tree.Remove(2, Point{ 56, 68 });
+            Assert::IsFalse(removed);
         }
 
     private:

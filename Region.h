@@ -1,4 +1,5 @@
 #pragma once
+#include <forward_list>
 #include "Entry.h"
 
 class Region
@@ -8,17 +9,18 @@ public:
     virtual ~Region();
 
     void Add(int value, Point position);
-    bool IsEmpty() const;
+    bool Empty() const;
     bool Remove(int value, Point position);
 
 private:
     void AddToChild(int value, Point position);
+    bool CanSubdivide() const;
     int GetChildIndex(Point position) const;
     bool RemoveFromChild(int value, Point position);
 
     bool _leaf = true;
     Point _center = {};
     int _halfExtent = 0;
-    Entry* _entry = nullptr;
+    std::forward_list<Entry> _entries;
     Region* _children[4] = {};
 };

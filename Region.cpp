@@ -6,15 +6,6 @@ Region::Region(Point center, int halfExtent) : _center(center), _halfExtent(half
 
 Region::~Region()
 {
-    Entry* current = _entry;
-    while (current != nullptr)
-    {
-        Entry* next = current->Next;
-        delete current;
-        current = next;
-    }
-    _entry = nullptr;
-
     for (int i = 0; i < 4; i++)
     {
         delete _children[i];
@@ -26,52 +17,42 @@ void Region::Add(int value, Point position)
 {
     if (_leaf)
     {
-        // Hold the entry if the leaf doesn't have one yet
-        if (_entry == nullptr)
+        if (_entries.empty() || _entries.front().Position == position || !CanSubdivide())
         {
-            _entry = new Entry{ value, position };
+            _entries.emplace_front(value, position);
         }
-        // Chain the entry if it's in the same position or if we can't subdivide further
-        else if (position == _entry->Position || _halfExtent / 2 == 0)
-        {
-            Entry* tail = _entry;
-            while (tail->Next != nullptr)
-            {
-                tail = tail->Next;
-            }
-            tail->Next = new Entry{ value, position };
-        }
-        // Stop being a leaf by passing the chain of entries onto a child
         else
         {
+            // TODO: Look at doing a proper transfer of the entries, possibly via a move
+            for (const auto& entry : _entries)
+            {
+                AddToChild(entry.Value, entry.Position);
+            }
+            _entries.clear();
             _leaf = false;
-            AddToChild(_entry->Value, _entry->Position);
-            _entry = nullptr;
         }
     }
 
-    // Non-leaf regions simply forward the request onto their children
     if (!_leaf)
     {
         AddToChild(value, position);
     }
 }
 
-bool Region::IsEmpty() const
+bool Region::Empty() const
 {
-    if (_entry != nullptr)
+    if (_leaf && _entries.empty())
     {
-        return false;
+        return true;
     }
 
-    for (const Region* child : _children)
+    for (const auto* child : _children)
     {
         if (child != nullptr)
         {
             return false;
         }
     }
-
     return true;
 }
 
@@ -79,32 +60,15 @@ bool Region::Remove(int value, Point position)
 {
     if (_leaf)
     {
-        // Move the head of the chain to the next entry
-        if (_entry->Value == value)
+        const size_t removed = _entries.remove_if(
+            [value](const Entry& entry) { return entry.Value == value; });
+
+        if (removed > 0)
         {
-            Entry* previousHead = _entry;
-            _entry = _entry->Next;
-            delete previousHead;
-            _leaf = _entry != nullptr;
+            _leaf = !_entries.empty();
             return true;
         }
-        // Search for the entry in the rest of the chain and unlink it
-        else
-        {
-            Entry* current = _entry;
-            while (current != nullptr)
-            {
-                Entry* next = current->Next;
-                if (next->Value == value)
-                {
-                    current->Next = next->Next;
-                    delete next;
-                    return true;
-                }
-                current = next;
-            }
-            return false;
-        }
+        return false;
     }
     return RemoveFromChild(value, position);
 }
@@ -113,7 +77,6 @@ void Region::AddToChild(int value, Point position)
 {
     const int index = GetChildIndex(position);
 
-    // Create the child if it doesn't exist yet
     if (_children[index] == nullptr)
     {
         Point childCenter = _center;
@@ -124,6 +87,11 @@ void Region::AddToChild(int value, Point position)
     }
 
     _children[index]->Add(value, position);
+}
+
+bool Region::CanSubdivide() const
+{
+    return _halfExtent / 2 > 0;
 }
 
 int Region::GetChildIndex(Point position) const
@@ -143,11 +111,12 @@ int Region::GetChildIndex(Point position) const
 bool Region::RemoveFromChild(int value, Point position)
 {
     const int index = GetChildIndex(position);
+
     Region* child = _children[index];
     if (child != nullptr)
     {
         const bool removed = child->Remove(value, position);
-        if (removed && child->IsEmpty())
+        if (removed && child->Empty())
         {
             delete child;
             _children[index] = nullptr;
