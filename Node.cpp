@@ -1,4 +1,5 @@
 #include "Node.h"
+#include <cmath>
 
 Node::Node(const Point& min, const Point& max) : _min(min), _max(max)
 {
@@ -70,6 +71,41 @@ bool Node::Empty() const
 
 void Node::FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const
 {
+    const double nearestDistance = nearest.first;
+    if (point.X < _min.X - nearestDistance || point.X > _max.X + nearestDistance || point.Y < _min.Y - nearestDistance || point.Y > _max.Y + nearestDistance)
+    {
+        return;
+    }
+
+    if (_point != nullptr)
+    {
+        const double deltaX = _point->X - point.X;
+        const double deltaY = _point->Y - point.Y;
+        const double distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance < nearestDistance)
+        {
+            nearest.first = distance;
+            nearest.second = _point;
+        }
+    }
+
+    const Point center = Center();
+    const int isRight = point.X >= center.X;
+    const int isBottom = point.Y < center.Y;
+
+    int nearestIndices[4]{};
+    nearestIndices[0] = isBottom * 2 + isRight;
+    nearestIndices[1] = isBottom * 2 + (1 - isRight);
+    nearestIndices[2] = (1 - isBottom) * 2 + isRight;
+    nearestIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
+    for (int index : nearestIndices)
+    {
+        const Node* child = _children[index];
+        if (child != nullptr)
+        {
+            child->FindNearest(point, nearest);
+        }
+    }
 }
 
 bool Node::Remove(const Point& point)
@@ -103,17 +139,17 @@ bool Node::Remove(const Point& point)
 
 int Node::GetChildIndex(const Point& point) const
 {
-    constexpr int topLeft = 0;
-    constexpr int topRight = 1;
-    constexpr int bottomLeft = 2;
-    constexpr int bottomRight = 3;
-
+    int index = 0;
     const Point center = Center();
-    if (point.X < center.X)
+    if (point.X >= center.X)
     {
-        return point.Y < center.Y ? bottomLeft : topLeft;
+        index += 1;
     }
-    return point.Y < center.Y ? bottomRight : topRight;
+    if (point.Y < center.Y)
+    {
+        index += 2;
+    }
+    return index;
 }
 
 Node* Node::GetOrCreateChild(const Point& point)

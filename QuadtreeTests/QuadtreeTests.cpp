@@ -62,6 +62,15 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 1);
         }
 
+        TEST_METHOD(FindNearest_Single)
+        {
+            const Point point{ 25, 25 };
+            _tree.Add(point);
+            const Point* nearest = _tree.FindNearest(Point{ 50, 50 });
+            Assert::IsNotNull(nearest);
+            Assert::IsTrue(*nearest == point);
+        }
+
         TEST_METHOD(FindNearest_Empty)
         {
             const Point* point = _tree.FindNearest(Point{ 50, 50 });

@@ -26,8 +26,8 @@ const Point* Quadtree::FindNearest(const Point& point) const
         return nullptr;
     }
 
-    const double maxDistance = _root.Width() + _root.Height();
-    std::pair<double, const Point*> nearest(maxDistance, nullptr);
+    const double nearestDistance = _root.Width() + _root.Height();
+    std::pair<double, const Point*> nearest(nearestDistance, nullptr);
     _root.FindNearest(point, nearest);
     return nearest.second;
 }
