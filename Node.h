@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 #include "Point.h"
 
 class Node
@@ -8,15 +9,16 @@ public:
     virtual ~Node();
 
     bool Add(const Point& point);
+    Point Center() const { return (_min + _max) / 2; }
     bool Contains(const Point& point) const;
     bool Empty() const;
+    void FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const;
+    int Height() const { return _max.Y - _min.Y; }
     bool Remove(const Point& point);
+    int Width() const { return _max.X - _min.X; }
 
 private:
-    Point GetCenter() const { return (_min + _max) / 2; }
     int GetChildIndex(const Point& point) const;
-    int GetExtentX() const { return _max.X - _min.X; }
-    int GetExtentY() const { return _max.Y - _min.Y; }
     Node* GetOrCreateChild(const Point& point);
 
     const Point _min;

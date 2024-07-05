@@ -26,7 +26,7 @@ bool Node::Add(const Point& point)
             return true;
         }
 
-        auto canSubdivide = [this] { return GetExtentX() / 2 > 0 || GetExtentY() / 2 > 0; };
+        auto canSubdivide = [this] { return Width() / 2 > 0 || Height() / 2 > 0; };
         if (*_point == point || !canSubdivide())
         {
             return false;
@@ -68,6 +68,10 @@ bool Node::Empty() const
     return true;
 }
 
+void Node::FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const
+{
+}
+
 bool Node::Remove(const Point& point)
 {
     if (_leaf)
@@ -104,7 +108,7 @@ int Node::GetChildIndex(const Point& point) const
     constexpr int bottomLeft = 2;
     constexpr int bottomRight = 3;
 
-    const Point center = GetCenter();
+    const Point center = Center();
     if (point.X < center.X)
     {
         return point.Y < center.Y ? bottomLeft : topLeft;
@@ -120,26 +124,26 @@ Node* Node::GetOrCreateChild(const Point& point)
         Point childMin = _min;
         Point childMax = _max;
 
-        const Point center = GetCenter();
-        const int halfExtentX = GetExtentX() / 2;
-        const int halfExtentY = GetExtentY() / 2;
+        const Point center = Center();
+        const int halfWidth = Width() / 2;
+        const int halfHeight = Height() / 2;
 
         if (point.X < center.X)
         {
-            childMax.X -= halfExtentX;
+            childMax.X -= halfWidth;
         }
         else
         {
-            childMin.X += halfExtentX;
+            childMin.X += halfWidth;
         }
 
         if (point.Y < center.Y)
         {
-            childMax.Y -= halfExtentY;
+            childMax.Y -= halfHeight;
         }
         else
         {
-            childMin.Y += halfExtentY;
+            childMin.Y += halfHeight;
         }
 
         _children[index] = new Node(childMin, childMax);
