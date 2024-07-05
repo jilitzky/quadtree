@@ -59,7 +59,7 @@ bool Node::Empty() const
         return true;
     }
 
-    for (const auto* child : _children)
+    for (const Node* child : _children)
     {
         if (child != nullptr)
         {
