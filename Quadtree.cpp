@@ -7,26 +7,29 @@ Quadtree::Quadtree(Point center, int extent) : _root(center, extent / 2)
     _max = Point{ center.X + halfExtent, center.Y + halfExtent };
 }
 
-bool Quadtree::Add(int value, Point position)
+bool Quadtree::Add(Point point)
 {
-    if (!Contains(position))
+    if (!Contains(point))
     {
         return false;
     }
 
-    _root.Add(value, position);
-    _size++;
-    return true;
+    const bool added = _root.Add(point);
+    if (added)
+    {
+        _size++;
+    }
+    return added;
 }
 
-bool Quadtree::Remove(int value, Point position)
+bool Quadtree::Remove(Point point)
 {
-    if (!Contains(position))
+    if (!Contains(point))
     {
         return false;
     }
 
-    const bool removed = _root.Remove(value, position);
+    const bool removed = _root.Remove(point);
     if (removed)
     {
         _size--;
@@ -34,7 +37,7 @@ bool Quadtree::Remove(int value, Point position)
     return removed;
 }
 
-bool Quadtree::Contains(Point position) const
+bool Quadtree::Contains(Point point) const
 {
-    return position.X >= _min.X && position.X <= _max.X && position.Y >= _min.Y && position.Y <= _max.Y;
+    return point.X >= _min.X && point.X <= _max.X && point.Y >= _min.Y && point.Y <= _max.Y;
 }

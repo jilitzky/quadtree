@@ -6,13 +6,13 @@ class Quadtree
 public:
     Quadtree(Point center, int extent);
 
-    bool Add(int value, Point position);
-    bool Remove(int value, Point position);
+    bool Add(Point point);
+    bool Remove(Point point);
     const Node& Root() const { return _root; }
     size_t Size() const { return _size; }
 
 private:
-    bool Contains(Point position) const;
+    bool Contains(Point point) const;
 
     Node _root;
     Point _min = {};

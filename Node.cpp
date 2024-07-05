@@ -6,6 +6,9 @@ Node::Node(Point center, int halfExtent) : _center(center), _halfExtent(halfExte
 
 Node::~Node()
 {
+    delete _point;
+    _point = nullptr;
+
     for (int i = 0; i < 4; i++)
     {
         delete _children[i];
@@ -13,33 +16,39 @@ Node::~Node()
     }
 }
 
-void Node::Add(int value, Point position)
+bool Node::Add(Point point)
 {
     if (_leaf)
     {
+        if (_point == nullptr)
+        {
+            _point = new Point(point);
+            return true;
+        }
+
         auto canSubdivide = [this] { return _halfExtent / 2 > 0; };
-        if (_entries.empty() || _entries.front().Position == position || !canSubdivide())
+        if (*_point == point || !canSubdivide())
         {
-            _entries.emplace_front(value, position);
+            return false;
         }
-        else
-        {
-            Node* child = GetOrCreateChild(_entries.front().Position);
-            child->_entries.splice_after(child->_entries.cbefore_begin(), _entries);
-            _leaf = false;
-        }
+
+        Node* child = GetOrCreateChild(*_point);
+        child->_point = _point;
+        _point = nullptr;
+        _leaf = false;
     }
 
     if (!_leaf)
     {
-        Node* child = GetOrCreateChild(position);
-        child->Add(value, position);
+        Node* child = GetOrCreateChild(point);
+        return child->Add(point);
     }
+    return false;
 }
 
 bool Node::Empty() const
 {
-    if (_leaf && _entries.empty())
+    if (_leaf && _point == nullptr)
     {
         return true;
     }
@@ -54,26 +63,25 @@ bool Node::Empty() const
     return true;
 }
 
-bool Node::Remove(int value, Point position)
+bool Node::Remove(Point point)
 {
     if (_leaf)
     {
-        const size_t removed = _entries.remove_if(
-            [value](const Entry& entry) { return entry.Value == value; });
-
-        if (removed > 0)
+        if (_point != nullptr && *_point == point)
         {
-            _leaf = !_entries.empty();
+            delete _point;
+            _point = nullptr;
+            _leaf = false;
             return true;
         }
         return false;
     }
 
-    const int index = GetChildIndex(position);
+    const int index = GetChildIndex(point);
     Node* child = _children[index];
     if (child != nullptr)
     {
-        const bool removed = child->Remove(value, position);
+        const bool removed = child->Remove(point);
         if (removed && child->Empty())
         {
             delete child;
@@ -84,29 +92,29 @@ bool Node::Remove(int value, Point position)
     return false;
 }
 
-int Node::GetChildIndex(Point position) const
+int Node::GetChildIndex(Point point) const
 {
     constexpr int topLeft = 0;
     constexpr int topRight = 1;
     constexpr int bottomLeft = 2;
     constexpr int bottomRight = 3;
 
-    if (position.X < _center.X)
+    if (point.X < _center.X)
     {
-        return position.Y < _center.Y ? bottomLeft : topLeft;
+        return point.Y < _center.Y ? bottomLeft : topLeft;
     }
-    return position.Y < _center.Y ? bottomRight : topRight;
+    return point.Y < _center.Y ? bottomRight : topRight;
 }
 
-Node* Node::GetOrCreateChild(Point position)
+Node* Node::GetOrCreateChild(Point point)
 {
-    const int index = GetChildIndex(position);
+    const int index = GetChildIndex(point);
     if (_children[index] == nullptr)
     {
         Point childCenter = _center;
         const int quarterExtent = _halfExtent / 2;
-        childCenter.X += position.X < _center.X ? -quarterExtent : quarterExtent;
-        childCenter.Y += position.Y < _center.Y ? -quarterExtent : quarterExtent;
+        childCenter.X += point.X < _center.X ? -quarterExtent : quarterExtent;
+        childCenter.Y += point.Y < _center.Y ? -quarterExtent : quarterExtent;
         _children[index] = new Node(childCenter, quarterExtent);
     }
     return _children[index];

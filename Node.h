@@ -1,6 +1,5 @@
 #pragma once
-#include <forward_list>
-#include "Entry.h"
+#include "Point.h"
 
 class Node
 {
@@ -8,17 +7,17 @@ public:
     Node(Point center, int halfExtent);
     virtual ~Node();
 
-    void Add(int value, Point position);
+    bool Add(Point point);
     bool Empty() const;
-    bool Remove(int value, Point position);
+    bool Remove(Point point);
 
 private:
-    int GetChildIndex(Point position) const;
-    Node* GetOrCreateChild(Point position);
+    int GetChildIndex(Point point) const;
+    Node* GetOrCreateChild(Point point);
 
     bool _leaf = true;
-    Point _center = {};
+    Point _center = {}; // TODO: This needs to change to _min and _max
     int _halfExtent = 0;
-    std::forward_list<Entry> _entries;
+    Point* _point = nullptr;
     Node* _children[4] = {};
 };
