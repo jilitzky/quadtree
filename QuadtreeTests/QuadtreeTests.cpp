@@ -35,7 +35,7 @@ namespace QuadtreeTests
 
         TEST_METHOD(Add_CannotSubdivide)
         {
-            Quadtree tinyTree = { Point{1, 1}, 2 };
+            Quadtree tinyTree(Point{ 0, 0 }, Point{ 1, 1 });
 
             tinyTree.Add(Point{ 0, 0 });
             Assert::IsTrue(tinyTree.Size() == 1);
@@ -101,6 +101,7 @@ namespace QuadtreeTests
         }
 
     private:
-        Quadtree _tree = { Point{50, 50}, 100 };
+
+        Quadtree _tree = { Point{ 0, 0 }, Point{ 100, 100 } };
     };
 }

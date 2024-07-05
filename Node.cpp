@@ -1,6 +1,6 @@
 #include "Node.h"
 
-Node::Node(Point center, int halfExtent) : _center(center), _halfExtent(halfExtent)
+Node::Node(const Point& min, const Point& max) : _min(min), _max(max)
 {
 }
 
@@ -16,7 +16,7 @@ Node::~Node()
     }
 }
 
-bool Node::Add(Point point)
+bool Node::Add(const Point& point)
 {
     if (_leaf)
     {
@@ -26,7 +26,7 @@ bool Node::Add(Point point)
             return true;
         }
 
-        auto canSubdivide = [this] { return _halfExtent / 2 > 0; };
+        auto canSubdivide = [this] { return GetExtentX() / 2 > 0 || GetExtentY() / 2 > 0; };
         if (*_point == point || !canSubdivide())
         {
             return false;
@@ -46,6 +46,11 @@ bool Node::Add(Point point)
     return false;
 }
 
+bool Node::Contains(const Point& point) const
+{
+    return point.X >= _min.X && point.X <= _max.X && point.Y >= _min.Y && point.Y <= _max.Y;
+}
+
 bool Node::Empty() const
 {
     if (_leaf && _point == nullptr)
@@ -63,7 +68,7 @@ bool Node::Empty() const
     return true;
 }
 
-bool Node::Remove(Point point)
+bool Node::Remove(const Point& point)
 {
     if (_leaf)
     {
@@ -92,30 +97,52 @@ bool Node::Remove(Point point)
     return false;
 }
 
-int Node::GetChildIndex(Point point) const
+int Node::GetChildIndex(const Point& point) const
 {
     constexpr int topLeft = 0;
     constexpr int topRight = 1;
     constexpr int bottomLeft = 2;
     constexpr int bottomRight = 3;
 
-    if (point.X < _center.X)
+    const Point center = GetCenter();
+    if (point.X < center.X)
     {
-        return point.Y < _center.Y ? bottomLeft : topLeft;
+        return point.Y < center.Y ? bottomLeft : topLeft;
     }
-    return point.Y < _center.Y ? bottomRight : topRight;
+    return point.Y < center.Y ? bottomRight : topRight;
 }
 
-Node* Node::GetOrCreateChild(Point point)
+Node* Node::GetOrCreateChild(const Point& point)
 {
     const int index = GetChildIndex(point);
     if (_children[index] == nullptr)
     {
-        Point childCenter = _center;
-        const int quarterExtent = _halfExtent / 2;
-        childCenter.X += point.X < _center.X ? -quarterExtent : quarterExtent;
-        childCenter.Y += point.Y < _center.Y ? -quarterExtent : quarterExtent;
-        _children[index] = new Node(childCenter, quarterExtent);
+        Point childMin = _min;
+        Point childMax = _max;
+
+        const Point center = GetCenter();
+        const int halfExtentX = GetExtentX() / 2;
+        const int halfExtentY = GetExtentY() / 2;
+
+        if (point.X < center.X)
+        {
+            childMax.X -= halfExtentX;
+        }
+        else
+        {
+            childMin.X += halfExtentX;
+        }
+
+        if (point.Y < center.Y)
+        {
+            childMax.Y -= halfExtentY;
+        }
+        else
+        {
+            childMin.Y += halfExtentY;
+        }
+
+        _children[index] = new Node(childMin, childMax);
     }
     return _children[index];
 }

@@ -4,20 +4,24 @@
 class Node
 {
 public:
-    Node(Point center, int halfExtent);
+    Node(const Point& min, const Point& max);
     virtual ~Node();
 
-    bool Add(Point point);
+    bool Add(const Point& point);
+    bool Contains(const Point& point) const;
     bool Empty() const;
-    bool Remove(Point point);
+    bool Remove(const Point& point);
 
 private:
-    int GetChildIndex(Point point) const;
-    Node* GetOrCreateChild(Point point);
+    Point GetCenter() const { return (_min + _max) / 2; }
+    int GetChildIndex(const Point& point) const;
+    int GetExtentX() const { return _max.X - _min.X; }
+    int GetExtentY() const { return _max.Y - _min.Y; }
+    Node* GetOrCreateChild(const Point& point);
 
+    const Point _min;
+    const Point _max;
     bool _leaf = true;
-    Point _center = {}; // TODO: This needs to change to _min and _max
-    int _halfExtent = 0;
     Point* _point = nullptr;
     Node* _children[4] = {};
 };

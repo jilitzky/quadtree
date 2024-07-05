@@ -1,15 +1,12 @@
 #include "Quadtree.h"
 
-Quadtree::Quadtree(Point center, int extent) : _root(center, extent / 2)
+Quadtree::Quadtree(const Point& min, const Point& max) : _root(min, max)
 {
-    const int halfExtent = extent / 2;
-    _min = Point{ center.X - halfExtent, center.Y - halfExtent };
-    _max = Point{ center.X + halfExtent, center.Y + halfExtent };
 }
 
-bool Quadtree::Add(Point point)
+bool Quadtree::Add(const Point& point)
 {
-    if (!Contains(point))
+    if (!_root.Contains(point))
     {
         return false;
     }
@@ -22,9 +19,9 @@ bool Quadtree::Add(Point point)
     return added;
 }
 
-bool Quadtree::Remove(Point point)
+bool Quadtree::Remove(const Point& point)
 {
-    if (!Contains(point))
+    if (!_root.Contains(point))
     {
         return false;
     }
@@ -35,9 +32,4 @@ bool Quadtree::Remove(Point point)
         _size--;
     }
     return removed;
-}
-
-bool Quadtree::Contains(Point point) const
-{
-    return point.X >= _min.X && point.X <= _max.X && point.Y >= _min.Y && point.Y <= _max.Y;
 }
