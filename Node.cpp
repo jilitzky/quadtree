@@ -1,10 +1,10 @@
-#include "Region.h"
+#include "Node.h"
 
-Region::Region(Point center, int halfExtent) : _center(center), _halfExtent(halfExtent)
+Node::Node(Point center, int halfExtent) : _center(center), _halfExtent(halfExtent)
 {
 }
 
-Region::~Region()
+Node::~Node()
 {
     for (int i = 0; i < 4; i++)
     {
@@ -13,7 +13,7 @@ Region::~Region()
     }
 }
 
-void Region::Add(int value, Point position)
+void Node::Add(int value, Point position)
 {
     if (_leaf)
     {
@@ -24,7 +24,7 @@ void Region::Add(int value, Point position)
         }
         else
         {
-            Region* child = GetOrCreateChild(_entries.front().Position);
+            Node* child = GetOrCreateChild(_entries.front().Position);
             child->_entries.splice_after(child->_entries.cbefore_begin(), _entries);
             _leaf = false;
         }
@@ -32,12 +32,12 @@ void Region::Add(int value, Point position)
 
     if (!_leaf)
     {
-        Region* child = GetOrCreateChild(position);
+        Node* child = GetOrCreateChild(position);
         child->Add(value, position);
     }
 }
 
-bool Region::Empty() const
+bool Node::Empty() const
 {
     if (_leaf && _entries.empty())
     {
@@ -54,7 +54,7 @@ bool Region::Empty() const
     return true;
 }
 
-bool Region::Remove(int value, Point position)
+bool Node::Remove(int value, Point position)
 {
     if (_leaf)
     {
@@ -70,7 +70,7 @@ bool Region::Remove(int value, Point position)
     }
 
     const int index = GetChildIndex(position);
-    Region* child = _children[index];
+    Node* child = _children[index];
     if (child != nullptr)
     {
         const bool removed = child->Remove(value, position);
@@ -84,7 +84,7 @@ bool Region::Remove(int value, Point position)
     return false;
 }
 
-int Region::GetChildIndex(Point position) const
+int Node::GetChildIndex(Point position) const
 {
     constexpr int topLeft = 0;
     constexpr int topRight = 1;
@@ -98,7 +98,7 @@ int Region::GetChildIndex(Point position) const
     return position.Y < _center.Y ? bottomRight : topRight;
 }
 
-Region* Region::GetOrCreateChild(Point position)
+Node* Node::GetOrCreateChild(Point position)
 {
     const int index = GetChildIndex(position);
     if (_children[index] == nullptr)
@@ -107,7 +107,7 @@ Region* Region::GetOrCreateChild(Point position)
         const int quarterExtent = _halfExtent / 2;
         childCenter.X += position.X < _center.X ? -quarterExtent : quarterExtent;
         childCenter.Y += position.Y < _center.Y ? -quarterExtent : quarterExtent;
-        _children[index] = new Region(childCenter, quarterExtent);
+        _children[index] = new Node(childCenter, quarterExtent);
     }
     return _children[index];
 }

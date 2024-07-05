@@ -21,7 +21,7 @@
     <ClCompile Include="..\Quadtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Region.cpp">
+    <ClCompile Include="..\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClInclude Include="..\Point.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Region.h">
+    <ClInclude Include="..\Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

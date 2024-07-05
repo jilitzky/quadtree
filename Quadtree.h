@@ -1,5 +1,5 @@
 #pragma once
-#include "Region.h"
+#include "Node.h"
 
 class Quadtree
 {
@@ -8,13 +8,13 @@ public:
 
     bool Add(int value, Point position);
     bool Remove(int value, Point position);
-    const Region& Root() const { return _root; }
+    const Node& Root() const { return _root; }
     size_t Size() const { return _size; }
 
 private:
     bool Contains(Point position) const;
 
-    Region _root;
+    Node _root;
     Point _min = {};
     Point _max = {};
     size_t _size = 0;

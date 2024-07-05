@@ -2,11 +2,11 @@
 #include <forward_list>
 #include "Entry.h"
 
-class Region
+class Node
 {
 public:
-    Region(Point center, int halfExtent);
-    virtual ~Region();
+    Node(Point center, int halfExtent);
+    virtual ~Node();
 
     void Add(int value, Point position);
     bool Empty() const;
@@ -14,11 +14,11 @@ public:
 
 private:
     int GetChildIndex(Point position) const;
-    Region* GetOrCreateChild(Point position);
+    Node* GetOrCreateChild(Point position);
 
     bool _leaf = true;
     Point _center = {};
     int _halfExtent = 0;
     std::forward_list<Entry> _entries;
-    Region* _children[4] = {};
+    Node* _children[4] = {};
 };

@@ -92,14 +92,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Quadtree.cpp" />
-    <ClCompile Include="..\Region.cpp" />
+    <ClCompile Include="..\Node.cpp" />
     <ClCompile Include="QuadtreeTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Entry.h" />
     <ClInclude Include="..\Point.h" />
     <ClInclude Include="..\Quadtree.h" />
-    <ClInclude Include="..\Region.h" />
+    <ClInclude Include="..\Node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
