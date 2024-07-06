@@ -8,14 +8,16 @@ public:
     Node(const Point& min, const Point& max);
     virtual ~Node();
 
-    bool Add(const Point& point);
-    Point Center() const { return (_min + _max) / 2; }
-    bool Contains(const Point& point) const;
-    bool Empty() const;
-    void FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const;
-    int Height() const { return _max.y - _min.y; }
-    bool Remove(const Point& point);
     int Width() const { return _max.x - _min.x; }
+    int Height() const { return _max.y - _min.y; }
+    Point Center() const { return (_min + _max) / 2; }
+
+    bool Add(const Point& point);
+    bool Remove(const Point& point);
+    bool Contains(const Point& point) const;
+    bool IsEmpty() const;
+
+    void FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const;
 
 private:
     int GetChildIndex(const Point& point) const;

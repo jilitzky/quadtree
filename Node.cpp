@@ -47,12 +47,41 @@ bool Node::Add(const Point& point)
     return false;
 }
 
+bool Node::Remove(const Point& point)
+{
+    if (_leaf)
+    {
+        if (_point != nullptr && *_point == point)
+        {
+            delete _point;
+            _point = nullptr;
+            _leaf = false;
+            return true;
+        }
+        return false;
+    }
+
+    const int index = GetChildIndex(point);
+    Node* child = _children[index];
+    if (child != nullptr)
+    {
+        const bool removed = child->Remove(point);
+        if (removed && child->IsEmpty())
+        {
+            delete child;
+            _children[index] = nullptr;
+        }
+        return removed;
+    }
+    return false;
+}
+
 bool Node::Contains(const Point& point) const
 {
     return point.x >= _min.x && point.x <= _max.x && point.y >= _min.y && point.y <= _max.y;
 }
 
-bool Node::Empty() const
+bool Node::IsEmpty() const
 {
     if (_leaf && _point == nullptr)
     {
@@ -106,35 +135,6 @@ void Node::FindNearest(const Point& point, std::pair<double, const Point*>& near
             child->FindNearest(point, nearest);
         }
     }
-}
-
-bool Node::Remove(const Point& point)
-{
-    if (_leaf)
-    {
-        if (_point != nullptr && *_point == point)
-        {
-            delete _point;
-            _point = nullptr;
-            _leaf = false;
-            return true;
-        }
-        return false;
-    }
-
-    const int index = GetChildIndex(point);
-    Node* child = _children[index];
-    if (child != nullptr)
-    {
-        const bool removed = child->Remove(point);
-        if (removed && child->Empty())
-        {
-            delete child;
-            _children[index] = nullptr;
-        }
-        return removed;
-    }
-    return false;
 }
 
 int Node::GetChildIndex(const Point& point) const

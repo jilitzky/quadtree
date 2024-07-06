@@ -19,19 +19,6 @@ bool Quadtree::Add(const Point& point)
     return added;
 }
 
-const Point* Quadtree::FindNearest(const Point& point) const
-{
-    if (!_root.Contains(point))
-    {
-        return nullptr;
-    }
-
-    const double nearestDistance = _root.Width() + _root.Height();
-    std::pair<double, const Point*> nearest(nearestDistance, nullptr);
-    _root.FindNearest(point, nearest);
-    return nearest.second;
-}
-
 bool Quadtree::Remove(const Point& point)
 {
     if (!_root.Contains(point))
@@ -45,4 +32,17 @@ bool Quadtree::Remove(const Point& point)
         _size--;
     }
     return removed;
+}
+
+const Point* Quadtree::FindNearest(const Point& point) const
+{
+    if (!_root.Contains(point))
+    {
+        return nullptr;
+    }
+
+    const double nearestDistance = _root.Width() + _root.Height();
+    std::pair<double, const Point*> nearest(nearestDistance, nullptr);
+    _root.FindNearest(point, nearest);
+    return nearest.second;
 }

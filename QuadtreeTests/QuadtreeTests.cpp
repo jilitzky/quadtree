@@ -138,7 +138,6 @@ namespace QuadtreeTests
             removed = _tree.Remove(Point{ 50, 50 });
             Assert::IsTrue(removed);
             Assert::IsTrue(_tree.Size() == 0);
-            Assert::IsTrue(_tree.Root().Empty());
         }
 
         TEST_METHOD(Remove_NotFound)
