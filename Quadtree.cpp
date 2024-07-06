@@ -1,9 +1,5 @@
 #include "Quadtree.h"
 
-Quadtree::Quadtree(const Point& min, const Point& max) : _root(min, max)
-{
-}
-
 bool Quadtree::Add(const Point& point)
 {
     if (!_root.Contains(point))

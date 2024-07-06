@@ -1,10 +1,6 @@
 #include "Node.h"
 #include <cmath>
 
-Node::Node(const Point& min, const Point& max) : _min(min), _max(max)
-{
-}
-
 Node::~Node()
 {
     delete _point;
@@ -76,28 +72,6 @@ bool Node::Remove(const Point& point)
     return false;
 }
 
-bool Node::Contains(const Point& point) const
-{
-    return point.x >= _min.x && point.x <= _max.x && point.y >= _min.y && point.y <= _max.y;
-}
-
-bool Node::IsEmpty() const
-{
-    if (_leaf && _point == nullptr)
-    {
-        return true;
-    }
-
-    for (const Node* child : _children)
-    {
-        if (child != nullptr)
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
 void Node::FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const
 {
     const double nearestDistance = nearest.first;
@@ -137,21 +111,6 @@ void Node::FindNearest(const Point& point, std::pair<double, const Point*>& near
     }
 }
 
-int Node::GetChildIndex(const Point& point) const
-{
-    int index = 0;
-    const Point center = Center();
-    if (point.x >= center.x)
-    {
-        index += 1;
-    }
-    if (point.y < center.y)
-    {
-        index += 2;
-    }
-    return index;
-}
-
 Node* Node::GetOrCreateChild(const Point& point)
 {
     const int index = GetChildIndex(point);
@@ -185,4 +144,36 @@ Node* Node::GetOrCreateChild(const Point& point)
         _children[index] = new Node(childMin, childMax);
     }
     return _children[index];
+}
+
+int Node::GetChildIndex(const Point& point) const
+{
+    int index = 0;
+    const Point center = Center();
+    if (point.x >= center.x)
+    {
+        index += 1;
+    }
+    if (point.y < center.y)
+    {
+        index += 2;
+    }
+    return index;
+}
+
+bool Node::IsEmpty() const
+{
+    if (_leaf && _point == nullptr)
+    {
+        return true;
+    }
+
+    for (const Node* child : _children)
+    {
+        if (child != nullptr)
+        {
+            return false;
+        }
+    }
+    return true;
 }
