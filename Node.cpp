@@ -49,7 +49,7 @@ bool Node::Add(const Point& point)
 
 bool Node::Contains(const Point& point) const
 {
-    return point.X >= _min.X && point.X <= _max.X && point.Y >= _min.Y && point.Y <= _max.Y;
+    return point.x >= _min.x && point.x <= _max.x && point.y >= _min.y && point.y <= _max.y;
 }
 
 bool Node::Empty() const
@@ -72,15 +72,15 @@ bool Node::Empty() const
 void Node::FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const
 {
     const double nearestDistance = nearest.first;
-    if (point.X < _min.X - nearestDistance || point.X > _max.X + nearestDistance || point.Y < _min.Y - nearestDistance || point.Y > _max.Y + nearestDistance)
+    if (point.x < _min.x - nearestDistance || point.x > _max.x + nearestDistance || point.y < _min.y - nearestDistance || point.y > _max.y + nearestDistance)
     {
         return;
     }
 
     if (_point != nullptr)
     {
-        const double deltaX = _point->X - point.X;
-        const double deltaY = _point->Y - point.Y;
+        const double deltaX = _point->x - point.x;
+        const double deltaY = _point->y - point.y;
         const double distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
         if (distance < nearestDistance)
         {
@@ -90,8 +90,8 @@ void Node::FindNearest(const Point& point, std::pair<double, const Point*>& near
     }
 
     const Point center = Center();
-    const int isRight = point.X >= center.X;
-    const int isBottom = point.Y < center.Y;
+    const int isRight = point.x >= center.x;
+    const int isBottom = point.y < center.y;
 
     int nearestIndices[4]{};
     nearestIndices[0] = isBottom * 2 + isRight;
@@ -141,11 +141,11 @@ int Node::GetChildIndex(const Point& point) const
 {
     int index = 0;
     const Point center = Center();
-    if (point.X >= center.X)
+    if (point.x >= center.x)
     {
         index += 1;
     }
-    if (point.Y < center.Y)
+    if (point.y < center.y)
     {
         index += 2;
     }
@@ -164,22 +164,22 @@ Node* Node::GetOrCreateChild(const Point& point)
         const int halfWidth = Width() / 2;
         const int halfHeight = Height() / 2;
 
-        if (point.X < center.X)
+        if (point.x < center.x)
         {
-            childMax.X -= halfWidth;
+            childMax.x -= halfWidth;
         }
         else
         {
-            childMin.X += halfWidth;
+            childMin.x += halfWidth;
         }
 
-        if (point.Y < center.Y)
+        if (point.y < center.y)
         {
-            childMax.Y -= halfHeight;
+            childMax.y -= halfHeight;
         }
         else
         {
-            childMin.Y += halfHeight;
+            childMin.y += halfHeight;
         }
 
         _children[index] = new Node(childMin, childMax);

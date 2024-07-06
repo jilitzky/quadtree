@@ -3,36 +3,36 @@
 
 struct Point
 {
-    int X = 0;
-    int Y = 0;
+    int x = 0;
+    int y = 0;
 
     auto operator<=>(const Point&) const = default;
 
     Point& operator+=(const Point& rhs)
     {
-        X += rhs.X;
-        Y += rhs.Y;
+        x += rhs.x;
+        y += rhs.y;
         return *this;
     }
 
     Point& operator-=(const Point& rhs)
     {
-        X -= rhs.X;
-        Y -= rhs.Y;
+        x -= rhs.x;
+        y -= rhs.y;
         return *this;
     }
 
     Point& operator*=(int rhs)
     {
-        X *= rhs;
-        Y *= rhs;
+        x *= rhs;
+        y *= rhs;
         return *this;
     }
 
     Point& operator/=(int rhs)
     {
-        X /= rhs;
-        Y /= rhs;
+        x /= rhs;
+        y /= rhs;
         return *this;
     }
 

@@ -13,9 +13,9 @@ public:
     bool Contains(const Point& point) const;
     bool Empty() const;
     void FindNearest(const Point& point, std::pair<double, const Point*>& nearest) const;
-    int Height() const { return _max.Y - _min.Y; }
+    int Height() const { return _max.y - _min.y; }
     bool Remove(const Point& point);
-    int Width() const { return _max.X - _min.X; }
+    int Width() const { return _max.x - _min.x; }
 
 private:
     int GetChildIndex(const Point& point) const;
