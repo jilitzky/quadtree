@@ -1,9 +1,10 @@
 #pragma once
+#include <optional>
 #include "Point.h"
 
 struct NearestPoint
 {
-    Point* point;
+    std::optional<Point> point;
     double distance;
 };
 
@@ -30,6 +31,6 @@ private:
     const Point _min;
     const Point _max;
     bool _leaf = true;
-    Point* _point = nullptr;
+    std::optional<Point> _point;
     Node* _children[4] = {};
 };

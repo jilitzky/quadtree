@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include "Node.h"
 
 class Quadtree
@@ -9,7 +10,7 @@ public:
     size_t Size() const { return _size; }
 
     bool Add(const Point& point);
-    const Point* FindNearest(const Point& point) const;
+    std::optional<Point> FindNearest(const Point& point) const;
     bool Remove(const Point& point);
 
 private:

@@ -3,9 +3,6 @@
 
 Node::~Node()
 {
-    delete _point;
-    _point = nullptr;
-
     for (int i = 0; i < 4; i++)
     {
         delete _children[i];
@@ -17,9 +14,9 @@ bool Node::Add(const Point& point)
 {
     if (_leaf)
     {
-        if (_point == nullptr)
+        if (!_point.has_value())
         {
-            _point = new Point(point);
+            _point = point;
             return true;
         }
 
@@ -31,7 +28,7 @@ bool Node::Add(const Point& point)
 
         Node* child = GetOrCreateChild(*_point);
         child->_point = _point;
-        _point = nullptr;
+        _point.reset();
         _leaf = false;
     }
 
@@ -50,7 +47,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
         return;
     }
 
-    if (_point != nullptr)
+    if (_point.has_value())
     {
         const double deltaX = _point->x - point.x;
         const double deltaY = _point->y - point.y;
@@ -85,10 +82,9 @@ bool Node::Remove(const Point& point)
 {
     if (_leaf)
     {
-        if (_point != nullptr && *_point == point)
+        if (_point.has_value() && *_point == point)
         {
-            delete _point;
-            _point = nullptr;
+            _point.reset();
             _leaf = false;
             return true;
         }
@@ -162,7 +158,7 @@ Node* Node::GetOrCreateChild(const Point& point)
 
 bool Node::IsEmpty() const
 {
-    if (_leaf && _point == nullptr)
+    if (_leaf && !_point.has_value())
     {
         return true;
     }

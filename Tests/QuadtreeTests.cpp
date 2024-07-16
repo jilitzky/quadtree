@@ -1,3 +1,4 @@
+#include <optional>
 #include "CppUnitTest.h"
 #include "Quadtree.h"
 
@@ -83,30 +84,29 @@ namespace QuadtreeTests
             const Point expected = Point{ 68, 68 };
             _tree.Add(expected);
 
-            const Point* nearest = _tree.FindNearest(Point{ 75, 75 });
-            Assert::IsNotNull(nearest);
-            Assert::IsTrue(*nearest == expected);
+            std::optional<Point> nearest = _tree.FindNearest(Point{ 75, 75 });
+            Assert::IsTrue(nearest.value() == expected);
         }
 
         TEST_METHOD(FindNearest_Single)
         {
-            const Point point{ 25, 25 };
-            _tree.Add(point);
-            const Point* nearest = _tree.FindNearest(Point{ 50, 50 });
-            Assert::IsNotNull(nearest);
-            Assert::IsTrue(*nearest == point);
+            const Point expected{ 25, 25 };
+            _tree.Add(expected);
+
+            std::optional<Point> nearest = _tree.FindNearest(Point{ 50, 50 });
+            Assert::IsTrue(nearest.value() == expected);
         }
 
         TEST_METHOD(FindNearest_Empty)
         {
-            const Point* point = _tree.FindNearest(Point{ 50, 50 });
-            Assert::IsTrue(point == nullptr);
+            std::optional<Point> nearest = _tree.FindNearest(Point{ 50, 50 });
+            Assert::IsFalse(nearest.has_value());
         }
 
         TEST_METHOD(FindNearest_OutOfBounds)
         {
-            const Point* point = _tree.FindNearest(Point{ 101, 101 });
-            Assert::IsTrue(point == nullptr);
+            std::optional<Point> nearest = _tree.FindNearest(Point{ 101, 101 });
+            Assert::IsFalse(nearest.has_value());
         }
 
         TEST_METHOD(Remove)

@@ -15,15 +15,15 @@ bool Quadtree::Add(const Point& point)
     return added;
 }
 
-const Point* Quadtree::FindNearest(const Point& point) const
+std::optional<Point> Quadtree::FindNearest(const Point& point) const
 {
     if (!_root.Contains(point))
     {
-        return nullptr;
+        return std::nullopt;
     }
 
     const double maxDistance = _root.Width() + _root.Height();
-    NearestPoint nearest{ nullptr, maxDistance };
+    NearestPoint nearest{ std::optional<Point>(), maxDistance};
     _root.FindNearest(point, nearest);
     return nearest.point;
 }
