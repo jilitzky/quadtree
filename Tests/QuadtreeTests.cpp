@@ -11,6 +11,66 @@ namespace QuadtreeTests
     public:
         TEST_METHOD(Add)
         {
+            //  ______________________
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |______________________|
+
+            Assert::IsTrue(_tree.Size() == 0);
+            Assert::IsTrue(_tree.Depth() == 1);
+
+            _tree.Add(Point{ 25, 25 });
+            
+            //  ______________________
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |    *                 |
+            // |                      |
+            // |______________________|
+            
+            Assert::IsTrue(_tree.Size() == 1);
+            Assert::IsTrue(_tree.Depth() == 1);
+
+            _tree.Add(Point{ 87, 87 });
+            
+            //  __________ ___________
+            // |          |        *  |
+            // |          |           |
+            // |          |           |
+            // |__________|___________|
+            // |          |           |
+            // |    *     |           |
+            // |          |           |
+            // |__________|___________|
+            
+            Assert::IsTrue(_tree.Size() == 2);
+            Assert::IsTrue(_tree.Depth() == 2);
+
+            _tree.Add(Point{ 56, 68 });
+            
+            //  __________ ___________
+            // |          |     |  *  |
+            // |          |_____|_____|
+            // |          | *   |     |
+            // |__________|_____|_____|
+            // |          |           |
+            // |    *     |           |
+            // |          |           |
+            // |__________|___________|
+            
+            Assert::IsTrue(_tree.Size() == 3);
+            Assert::IsTrue(_tree.Depth() == 3);
+
+            _tree.Add(Point{ 68, 56 });
+            
             //  __________ ___________
             // |          |     |  *  |
             // |          |_____|_____|
@@ -20,18 +80,9 @@ namespace QuadtreeTests
             // |    *     |           |
             // |          |           |
             // |__________|___________|
-
-            _tree.Add(Point{ 25, 25 });
-            Assert::IsTrue(_tree.Size() == 1);
-
-            _tree.Add(Point{ 87, 87 });
-            Assert::IsTrue(_tree.Size() == 2);
-
-            _tree.Add(Point{ 56, 68 });
-            Assert::IsTrue(_tree.Size() == 3);
-
-            _tree.Add(Point{ 68, 56 });
+            
             Assert::IsTrue(_tree.Size() == 4);
+            Assert::IsTrue(_tree.Depth() == 4);
         }
 
         TEST_METHOD(Add_CannotSubdivide)
@@ -65,6 +116,15 @@ namespace QuadtreeTests
 
         TEST_METHOD(FindNearest)
         {
+            _tree.Add(Point{ 25, 25 });
+            _tree.Add(Point{ 87, 87 });
+            _tree.Add(Point{ 87, 68 });
+            _tree.Add(Point{ 56, 56 });
+            _tree.Add(Point{ 56, 68 });
+
+            const Point expected = Point{ 68, 68 };
+            _tree.Add(expected);
+            
             //  __________ ___________
             // |          |     |  *  |
             // |          |_____|O____|
@@ -74,15 +134,6 @@ namespace QuadtreeTests
             // |    *     |           |
             // |          |           |
             // |__________|___________|
-
-            _tree.Add(Point{ 25, 25 });
-            _tree.Add(Point{ 87, 87 });
-            _tree.Add(Point{ 87, 68 });
-            _tree.Add(Point{ 56, 56 });
-            _tree.Add(Point{ 56, 68 });
-
-            const Point expected = Point{ 68, 68 };
-            _tree.Add(expected);
 
             std::optional<Point> nearest = _tree.FindNearest(Point{ 75, 75 });
             Assert::IsTrue(nearest.value() == expected);
@@ -111,33 +162,87 @@ namespace QuadtreeTests
 
         TEST_METHOD(Remove)
         {
-            _tree.Add(Point{ 50, 50 });
-            Assert::IsTrue(_tree.Size() == 1);
-
+            _tree.Add(Point{ 25, 25 });
             _tree.Add(Point{ 87, 87 });
-            Assert::IsTrue(_tree.Size() == 2);
-
             _tree.Add(Point{ 56, 68 });
-            Assert::IsTrue(_tree.Size() == 3);
-
             _tree.Add(Point{ 68, 56 });
+
+            //  __________ ___________
+            // |          |     |  *  |
+            // |          |_____|_____|
+            // |          |_*|__|     |
+            // |__________|__|*_|_____|
+            // |          |           |
+            // |    *     |           |
+            // |          |           |
+            // |__________|___________|
+
             Assert::IsTrue(_tree.Size() == 4);
+            Assert::IsTrue(_tree.Depth() == 4);
 
             bool removed = _tree.Remove(Point{ 68, 56 });
             Assert::IsTrue(removed);
+
+            //  __________ ___________
+            // |          |     |  *  |
+            // |          |_____|_____|
+            // |          | *   |     |
+            // |__________|_____|_____|
+            // |          |           |
+            // |    *     |           |
+            // |          |           |
+            // |__________|___________|
+
             Assert::IsTrue(_tree.Size() == 3);
+            Assert::IsTrue(_tree.Depth() == 3);
 
             removed = _tree.Remove(Point{ 56, 68 });
             Assert::IsTrue(removed);
+
+            //  __________ ___________
+            // |          |        *  |
+            // |          |           |
+            // |          |           |
+            // |__________|___________|
+            // |          |           |
+            // |    *     |           |
+            // |          |           |
+            // |__________|___________|
+
             Assert::IsTrue(_tree.Size() == 2);
+            Assert::IsTrue(_tree.Depth() == 2);
 
             removed = _tree.Remove(Point{ 87, 87 });
             Assert::IsTrue(removed);
-            Assert::IsTrue(_tree.Size() == 1);
 
-            removed = _tree.Remove(Point{ 50, 50 });
+            //  ______________________
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |    *                 |
+            // |                      |
+            // |______________________|
+
+            Assert::IsTrue(_tree.Size() == 1);
+            Assert::IsTrue(_tree.Depth() == 1);
+
+            removed = _tree.Remove(Point{ 25, 25 });
             Assert::IsTrue(removed);
+
+            //  ______________________
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |                      |
+            // |______________________|
+
             Assert::IsTrue(_tree.Size() == 0);
+            Assert::IsTrue(_tree.Depth() == 1);
         }
 
         TEST_METHOD(Remove_NotFound)

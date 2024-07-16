@@ -17,6 +17,7 @@ public:
 
     Point Center() const { return (_min + _max) / 2; }
     bool Contains(const Point& point) const { return point >= _min && point <= _max; }
+    size_t Depth() const { return _depth; }
     int Height() const { return _max.y - _min.y; }
     int Width() const { return _max.x - _min.x; }
 
@@ -25,12 +26,14 @@ public:
     bool Remove(const Point& point);
 
 private:
-    int GetChildIndex(const Point& point) const;
+    int ChildCount() const;
+    int ChildIndex(const Point& point) const;
     Node* GetOrCreateChild(const Point& point);
-    bool HasChildren() const;
+    void RefreshDepth();
 
     const Point _min;
     const Point _max;
+    size_t _depth = 1;
     std::optional<Point> _point = std::nullopt;
     std::array<Node*, 4> _children = {};
 };

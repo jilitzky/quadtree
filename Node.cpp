@@ -12,7 +12,7 @@ Node::~Node()
 
 bool Node::Add(const Point& point)
 {
-    if (!HasChildren())
+    if (ChildCount() == 0)
     {
         // Set the point at this level if there isn't one yet
         if (!_point.has_value())
@@ -22,25 +22,30 @@ bool Node::Add(const Point& point)
         }
 
         // Fail the add request if the point already exists or if we can't subdivide further
+        const Point& existingPoint = *_point;
         auto canSubdivide = [this] { return Width() / 2 > 0 || Height() / 2 > 0; };
-        if (*_point == point || !canSubdivide())
+        if (existingPoint == point || !canSubdivide())
         {
             return false;
         }
 
         // If the new point is different from what we have, transfer the existing point to a child
-        Node* child = GetOrCreateChild(*_point);
-        child->_point = _point;
+        Node* child = GetOrCreateChild(existingPoint);
+        const bool added = child->Add(existingPoint);
+        if (added)
+        {
+            RefreshDepth();
+        }
         _point.reset();
     }
 
-    if (HasChildren())
+    Node* child = GetOrCreateChild(point);
+    const bool added = child->Add(point);
+    if (added)
     {
-        Node* child = GetOrCreateChild(point);
-        return child->Add(point);
+        RefreshDepth();
     }
-
-    return false;
+    return added;
 }
 
 void Node::FindNearest(const Point& point, NearestPoint& nearest) const
@@ -64,7 +69,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
         }
     }
     // If the node has children, explore them sorted by their proximity to the query point
-    else if (HasChildren())
+    else if (ChildCount() > 0)
     {
         const Point center = Center();
         const int isRight = point.x >= center.x;
@@ -96,24 +101,57 @@ bool Node::Remove(const Point& point)
     }
 
     // Attempt to remove the point from the child matching the coordinates
-    const int index = GetChildIndex(point);
+    const int index = ChildIndex(point);
     Node* child = _children[index];
     if (child != nullptr)
     {
-        // Delete a child if it's completely empty after a removal
         const bool removed = child->Remove(point);
-        auto childIsEmpty = [child] { return !child->_point.has_value() && !child->HasChildren(); };
-        if (removed && childIsEmpty())
+        if (removed)
         {
-            delete child;
-            _children[index] = nullptr;
+            // Delete a child if it's completely empty after a removal
+            auto childIsEmpty = [child] { return !child->_point.has_value() && child->ChildCount() == 0; };
+            if (childIsEmpty())
+            {
+                delete child;
+                _children[index] = nullptr;
+            }
+
+            // Attempt to merge the last remaining child with the parent
+            if (ChildCount() == 1)
+            {
+                for (int i = 0; i < _children.size(); i++)
+                {
+                    const Node* remainingChild = _children[i];
+                    if (remainingChild != nullptr && remainingChild->_point.has_value())
+                    {
+                        _point = remainingChild->_point;
+                        delete remainingChild;
+                        _children[i] = nullptr;
+                    }
+                }
+            }
+
+            RefreshDepth();
         }
         return removed;
     }
     return false;
 }
 
-int Node::GetChildIndex(const Point& point) const
+int Node::ChildCount() const
+{
+    int count = 0;
+    for (const Node* child : _children)
+    {
+        if (child != nullptr)
+        {
+            count++;
+        }
+    }
+    return count;
+}
+
+int Node::ChildIndex(const Point& point) const
 {
     // Child indices follow a Z-order curve
     // 0 = Top-Left
@@ -135,7 +173,7 @@ int Node::GetChildIndex(const Point& point) const
 
 Node* Node::GetOrCreateChild(const Point& point)
 {
-    const int index = GetChildIndex(point);
+    const int index = ChildIndex(point);
     if (_children[index] == nullptr)
     {
         const Point center = Center();
@@ -170,14 +208,15 @@ Node* Node::GetOrCreateChild(const Point& point)
     return _children[index];
 }
 
-bool Node::HasChildren() const
+void Node::RefreshDepth()
 {
+    size_t maxChildDepth = 0;
     for (const Node* child : _children)
     {
         if (child != nullptr)
         {
-            return true;
+            maxChildDepth = std::max(child->Depth(), maxChildDepth);
         }
     }
-    return false;
+    _depth = maxChildDepth + 1;
 }
