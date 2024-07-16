@@ -27,11 +27,10 @@ public:
 private:
     int GetChildIndex(const Point& point) const;
     Node* GetOrCreateChild(const Point& point);
-    bool IsEmpty() const;
+    bool HasChildren() const;
 
     const Point _min;
     const Point _max;
-    bool _leaf = true;
     std::optional<Point> _point = std::nullopt;
     std::array<Node*, 4> _children = {};
 };

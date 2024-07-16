@@ -12,31 +12,34 @@ Node::~Node()
 
 bool Node::Add(const Point& point)
 {
-    if (_leaf)
+    if (!HasChildren())
     {
+        // Set the point at this level if there isn't one yet
         if (!_point.has_value())
         {
             _point = point;
             return true;
         }
 
+        // Fail the add request if the point already exists or if we can't subdivide further
         auto canSubdivide = [this] { return Width() / 2 > 0 || Height() / 2 > 0; };
         if (*_point == point || !canSubdivide())
         {
             return false;
         }
 
+        // If the new point is different from what we have, transfer the existing point to a child
         Node* child = GetOrCreateChild(*_point);
         child->_point = _point;
         _point.reset();
-        _leaf = false;
     }
 
-    if (!_leaf)
+    if (HasChildren())
     {
         Node* child = GetOrCreateChild(point);
         return child->Add(point);
     }
+
     return false;
 }
 
@@ -80,23 +83,22 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
 
 bool Node::Remove(const Point& point)
 {
-    if (_leaf)
+    // Remove the point at this level if it matches the given value
+    if (_point.has_value() && *_point == point)
     {
-        if (_point.has_value() && *_point == point)
-        {
-            _point.reset();
-            _leaf = false;
-            return true;
-        }
-        return false;
+        _point.reset();
+        return true;
     }
 
+    // Attempt to remove the point from the child matching the coordinates
     const int index = GetChildIndex(point);
     Node* child = _children[index];
     if (child != nullptr)
     {
+        // Delete a child if it's completely empty after a removal
         const bool removed = child->Remove(point);
-        if (removed && child->IsEmpty())
+        auto childIsEmpty = [child] { return !child->_point.has_value() && !child->HasChildren(); };
+        if (removed && childIsEmpty())
         {
             delete child;
             _children[index] = nullptr;
@@ -156,19 +158,14 @@ Node* Node::GetOrCreateChild(const Point& point)
     return _children[index];
 }
 
-bool Node::IsEmpty() const
+bool Node::HasChildren() const
 {
-    if (_leaf && !_point.has_value())
-    {
-        return true;
-    }
-
     for (const Node* child : _children)
     {
         if (child != nullptr)
         {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
