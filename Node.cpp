@@ -3,7 +3,7 @@
 
 Node::~Node()
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < _children.size(); i++)
     {
         delete _children[i];
         _children[i] = nullptr;
@@ -63,7 +63,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
     const int isRight = point.x >= center.x;
     const int isBottom = point.y < center.y;
 
-    int nearestIndices[4]{};
+    std::array<int, 4> nearestIndices{};
     nearestIndices[0] = isBottom * 2 + isRight;
     nearestIndices[1] = isBottom * 2 + (1 - isRight);
     nearestIndices[2] = (1 - isBottom) * 2 + isRight;

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <optional>
 #include "Point.h"
 
@@ -31,6 +32,6 @@ private:
     const Point _min;
     const Point _max;
     bool _leaf = true;
-    std::optional<Point> _point;
-    Node* _children[4] = {};
+    std::optional<Point> _point = std::nullopt;
+    std::array<Node*, 4> _children = {};
 };

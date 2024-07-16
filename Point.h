@@ -3,8 +3,8 @@
 
 struct Point
 {
-    int x = 0;
-    int y = 0;
+    int x;
+    int y;
 
     auto operator<=>(const Point&) const = default;
 
