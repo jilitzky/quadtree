@@ -9,8 +9,8 @@ public:
     size_t Size() const { return _size; }
 
     bool Add(const Point& point);
-    bool Remove(const Point& point);
     const Point* FindNearest(const Point& point) const;
+    bool Remove(const Point& point);
 
 private:
     Node _root;
