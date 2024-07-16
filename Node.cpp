@@ -45,11 +45,13 @@ bool Node::Add(const Point& point)
 
 void Node::FindNearest(const Point& point, NearestPoint& nearest) const
 {
+    // Do an early out if the point is farther away on each axis than the nearest distance we've already found
     if (point.x < _min.x - nearest.distance || point.x > _max.x + nearest.distance || point.y < _min.y - nearest.distance || point.y > _max.y + nearest.distance)
     {
         return;
     }
 
+    // If the node has a point, consider it as a candidate
     if (_point.has_value())
     {
         const double deltaX = _point->x - point.x;
@@ -61,22 +63,25 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
             nearest.point = _point;
         }
     }
-
-    const Point center = Center();
-    const int isRight = point.x >= center.x;
-    const int isBottom = point.y < center.y;
-
-    std::array<int, 4> nearestIndices{};
-    nearestIndices[0] = isBottom * 2 + isRight;
-    nearestIndices[1] = isBottom * 2 + (1 - isRight);
-    nearestIndices[2] = (1 - isBottom) * 2 + isRight;
-    nearestIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
-    for (int index : nearestIndices)
+    // If the node has children, explore them sorted by their proximity to the query point
+    else if (HasChildren())
     {
-        const Node* child = _children[index];
-        if (child != nullptr)
+        const Point center = Center();
+        const int isRight = point.x >= center.x;
+        const int isBottom = point.y < center.y;
+
+        std::array<int, 4> sortedIndices{};
+        sortedIndices[0] = isBottom * 2 + isRight;
+        sortedIndices[1] = isBottom * 2 + (1 - isRight);
+        sortedIndices[2] = (1 - isBottom) * 2 + isRight;
+        sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
+        for (int index : sortedIndices)
         {
-            child->FindNearest(point, nearest);
+            const Node* child = _children[index];
+            if (child != nullptr)
+            {
+                child->FindNearest(point, nearest);
+            }
         }
     }
 }
@@ -110,6 +115,11 @@ bool Node::Remove(const Point& point)
 
 int Node::GetChildIndex(const Point& point) const
 {
+    // Child indices follow a Z-order curve
+    // 0 = Top-Left
+    // 1 = Top-Right
+    // 2 = Bottom-Left
+    // 3 = Bottom-Right
     int index = 0;
     const Point center = Center();
     if (point.x >= center.x)
@@ -128,13 +138,13 @@ Node* Node::GetOrCreateChild(const Point& point)
     const int index = GetChildIndex(point);
     if (_children[index] == nullptr)
     {
+        const Point center = Center();
+
         Point childMin = _min;
         Point childMax = _max;
 
-        const Point center = Center();
+        // Adjust child's position horizontally
         const int halfWidth = Width() / 2;
-        const int halfHeight = Height() / 2;
-
         if (point.x < center.x)
         {
             childMax.x -= halfWidth;
@@ -144,6 +154,8 @@ Node* Node::GetOrCreateChild(const Point& point)
             childMin.x += halfWidth;
         }
 
+        // Adjust child's position vertically
+        const int halfHeight = Height() / 2;
         if (point.y < center.y)
         {
             childMax.y -= halfHeight;
