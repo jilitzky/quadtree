@@ -1,7 +1,6 @@
 # quadtree
-## Summary
 A basic implementation of a quadtree spatial partition and a find-nearest search.
-## API
+## Member Functions
 ### Accessors
 - **Depth:** Returns the number of levels
 - **Size:** Returns the number of points
