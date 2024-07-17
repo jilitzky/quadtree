@@ -3,8 +3,8 @@
 A basic implementation of a quadtree spatial partition and a find-nearest search.
 ## API
 ### Accessors
-- **Depth:** Access the number of levels in the tree
-- **Size:** Access the number of points in the tree
+- **Depth:** Returns the number of levels
+- **Size:** Returns the number of points
 ### Modifiers
 - **Add:** Adds a point
 - **FindNearest:** Returns the closest point to the query location
