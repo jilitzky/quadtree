@@ -1,15 +1,6 @@
 #include "Node.h"
 #include <cmath>
 
-Node::~Node()
-{
-    for (int i = 0; i < _children.size(); i++)
-    {
-        delete _children[i];
-        _children[i] = nullptr;
-    }
-}
-
 bool Node::Add(const Point& point)
 {
     if (ChildCount() == 0)
@@ -30,7 +21,7 @@ bool Node::Add(const Point& point)
         }
 
         // If the new point is different from what we have, transfer the existing point to a child
-        Node* child = GetOrCreateChild(existingPoint);
+        std::unique_ptr<Node>& child = GetOrCreateChild(existingPoint);
         const bool added = child->Add(existingPoint);
         if (added)
         {
@@ -39,7 +30,7 @@ bool Node::Add(const Point& point)
         _point.reset();
     }
 
-    Node* child = GetOrCreateChild(point);
+    std::unique_ptr<Node>& child = GetOrCreateChild(point);
     const bool added = child->Add(point);
     if (added)
     {
@@ -82,7 +73,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
         sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
         for (int index : sortedIndices)
         {
-            const Node* child = _children[index];
+            const std::unique_ptr<Node>& child = _children[index];
             if (child != nullptr)
             {
                 child->FindNearest(point, nearest);
@@ -102,17 +93,16 @@ bool Node::Remove(const Point& point)
 
     // Attempt to remove the point from the child matching the coordinates
     const int index = ChildIndex(point);
-    Node* child = _children[index];
+    const std::unique_ptr<Node>& child = _children[index];
     if (child != nullptr)
     {
         const bool removed = child->Remove(point);
         if (removed)
         {
-            // Delete a child if it's completely empty after a removal
-            auto childIsEmpty = [child] { return !child->_point.has_value() && child->ChildCount() == 0; };
-            if (childIsEmpty())
+            // Invalidate a child if it's completely empty after a removal
+            auto nodeIsEmpty = [](const std::unique_ptr<Node>& node) { return !node->_point.has_value() && node->ChildCount() == 0; };
+            if (nodeIsEmpty(child))
             {
-                delete child;
                 _children[index] = nullptr;
             }
 
@@ -121,11 +111,10 @@ bool Node::Remove(const Point& point)
             {
                 for (int i = 0; i < _children.size(); i++)
                 {
-                    const Node* remainingChild = _children[i];
+                    const std::unique_ptr<Node>& remainingChild = _children[i];
                     if (remainingChild != nullptr && remainingChild->_point.has_value())
                     {
                         _point = remainingChild->_point;
-                        delete remainingChild;
                         _children[i] = nullptr;
                     }
                 }
@@ -141,7 +130,7 @@ bool Node::Remove(const Point& point)
 int Node::ChildCount() const
 {
     int count = 0;
-    for (const Node* child : _children)
+    for (auto&& child : _children)
     {
         if (child != nullptr)
         {
@@ -171,7 +160,7 @@ int Node::ChildIndex(const Point& point) const
     return index;
 }
 
-Node* Node::GetOrCreateChild(const Point& point)
+std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
 {
     const int index = ChildIndex(point);
     if (_children[index] == nullptr)
@@ -203,7 +192,7 @@ Node* Node::GetOrCreateChild(const Point& point)
             childMin.y += halfHeight;
         }
 
-        _children[index] = new Node(childMin, childMax);
+        _children[index] = std::make_unique<Node>(childMin, childMax);
     }
     return _children[index];
 }
@@ -211,7 +200,7 @@ Node* Node::GetOrCreateChild(const Point& point)
 void Node::RefreshDepth()
 {
     size_t maxChildDepth = 0;
-    for (const Node* child : _children)
+    for (auto&& child : _children)
     {
         if (child != nullptr)
         {
