@@ -2,6 +2,7 @@
 #include <array>
 #include <memory>
 #include <optional>
+#include "Bounds.h"
 #include "Point.h"
 
 struct NearestPoint
@@ -13,13 +14,10 @@ struct NearestPoint
 class Node
 {
 public:
-    Node(const Point& min, const Point& max) : _min(min), _max(max) {}
+    Node(const Point& min, const Point& max) : _bounds(min, max) {}
 
-    Point Center() const { return (_min + _max) / 2; }
-    bool Contains(const Point& point) const { return point >= _min && point <= _max; }
+    Bounds GetBounds() const { return _bounds; }
     size_t Depth() const { return _depth; }
-    int Height() const { return _max.y - _min.y; }
-    int Width() const { return _max.x - _min.x; }
 
     bool Add(const Point& point);
     void FindNearest(const Point& point, NearestPoint& nearest) const;
@@ -31,8 +29,7 @@ private:
     std::unique_ptr<Node>& GetOrCreateChild(const Point& point);
     void RefreshDepth();
 
-    const Point _min;
-    const Point _max;
+    const Bounds _bounds;
     size_t _depth = 1;
     std::optional<Point> _point = std::nullopt;
     std::array<std::unique_ptr<Node>, 4> _children = {};

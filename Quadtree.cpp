@@ -2,7 +2,7 @@
 
 bool Quadtree::Add(const Point& point)
 {
-    if (!_root.Contains(point))
+    if (!_root.GetBounds().Contains(point))
     {
         return false;
     }
@@ -17,20 +17,21 @@ bool Quadtree::Add(const Point& point)
 
 std::optional<Point> Quadtree::FindNearest(const Point& point) const
 {
-    if (!_root.Contains(point))
+    if (!_root.GetBounds().Contains(point))
     {
         return std::nullopt;
     }
 
-    const double maxDistance = _root.Width() + _root.Height();
-    NearestPoint nearest{ std::nullopt, maxDistance};
+    const Bounds& rootBounds = _root.GetBounds();
+    const double maxDistance = rootBounds.Width() + rootBounds.Height();
+    NearestPoint nearest{ std::nullopt, maxDistance };
     _root.FindNearest(point, nearest);
     return nearest.point;
 }
 
 bool Quadtree::Remove(const Point& point)
 {
-    if (!_root.Contains(point))
+    if (!_root.GetBounds().Contains(point))
     {
         return false;
     }

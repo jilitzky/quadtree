@@ -96,6 +96,7 @@
     <ClCompile Include="QuadtreeTests.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Bounds.h" />
     <ClInclude Include="..\Point.h" />
     <ClInclude Include="..\Quadtree.h" />
     <ClInclude Include="..\Node.h" />

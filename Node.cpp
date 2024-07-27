@@ -14,7 +14,7 @@ bool Node::Add(const Point& point)
 
         // Fail the add request if the point already exists or if we can't subdivide further
         const Point& existingPoint = *_point;
-        auto canSubdivide = [this] { return Width() / 2 > 0 || Height() / 2 > 0; };
+        auto canSubdivide = [this] { return _bounds.Width() / 2 > 0 || _bounds.Height() / 2 > 0; };
         if (existingPoint == point || !canSubdivide())
         {
             return false;
@@ -42,7 +42,9 @@ bool Node::Add(const Point& point)
 void Node::FindNearest(const Point& point, NearestPoint& nearest) const
 {
     // Do an early out if the point is farther away on each axis than the nearest distance we've already found
-    if (point.x < _min.x - nearest.distance || point.x > _max.x + nearest.distance || point.y < _min.y - nearest.distance || point.y > _max.y + nearest.distance)
+    const Point& min = _bounds.min;
+    const Point& max = _bounds.max;
+    if (point.x < min.x - nearest.distance || point.x > max.x + nearest.distance || point.y < min.y - nearest.distance || point.y > max.y + nearest.distance)
     {
         return;
     }
@@ -62,7 +64,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
     // If the node has children, explore them sorted by their proximity to the query point
     else if (ChildCount() > 0)
     {
-        const Point center = Center();
+        const Point center = _bounds.Center();
         const int isRight = point.x >= center.x;
         const int isBottom = point.y < center.y;
 
@@ -148,7 +150,7 @@ int Node::ChildIndex(const Point& point) const
     // 2 = Bottom-Left
     // 3 = Bottom-Right
     int index = 0;
-    const Point center = Center();
+    const Point center = _bounds.Center();
     if (point.x >= center.x)
     {
         index += 1;
@@ -165,13 +167,13 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
     const int index = ChildIndex(point);
     if (_children[index] == nullptr)
     {
-        const Point center = Center();
+        const Point center = _bounds.Center();
 
-        Point childMin = _min;
-        Point childMax = _max;
+        Point childMin = _bounds.min;
+        Point childMax = _bounds.max;
 
         // Adjust child's position horizontally
-        const int halfWidth = Width() / 2;
+        const int halfWidth = _bounds.Width() / 2;
         if (point.x < center.x)
         {
             childMax.x -= halfWidth;
@@ -182,7 +184,7 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
         }
 
         // Adjust child's position vertically
-        const int halfHeight = Height() / 2;
+        const int halfHeight = _bounds.Height() / 2;
         if (point.y < center.y)
         {
             childMax.y -= halfHeight;
