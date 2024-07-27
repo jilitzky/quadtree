@@ -1,6 +1,11 @@
 #include "Node.h"
 #include <cmath>
 
+Node::Node(const Point& min, const Point& max)
+{
+    _bounds = { min, max };
+}
+
 bool Node::Add(const Point& point)
 {
     if (ChildCount() == 0)
@@ -194,7 +199,7 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
             childMin.y += halfHeight;
         }
 
-        _children[index] = std::make_unique<Node>(Bounds{ childMin, childMax });
+        _children[index] = std::make_unique<Node>(childMin, childMax);
     }
     return _children[index];
 }

@@ -14,7 +14,7 @@ struct NearestPoint
 class Node
 {
 public:
-    Node(const Bounds& bounds) : _bounds(bounds) {}
+    Node(const Point& min, const Point& max);
 
     const Bounds& GetBounds() const { return _bounds; }
     size_t Depth() const { return _depth; }
@@ -29,7 +29,7 @@ private:
     std::unique_ptr<Node>& GetOrCreateChild(const Point& point);
     void RefreshDepth();
 
-    const Bounds _bounds;
+    Bounds _bounds;
     size_t _depth = 1;
     std::optional<Point> _point = std::nullopt;
     std::array<std::unique_ptr<Node>, 4> _children = {};

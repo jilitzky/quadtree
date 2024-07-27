@@ -5,7 +5,7 @@
 class Quadtree
 {
 public:
-    Quadtree(const Point& min, const Point& max) : _root(Bounds{ min, max }) {}
+    Quadtree(const Point& min, const Point& max) : _root(min, max) {}
 
     size_t Depth() const { return _root.Depth(); }
     size_t Size() const { return _size; }
