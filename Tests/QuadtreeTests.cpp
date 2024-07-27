@@ -25,7 +25,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Depth() == 1);
 
             _tree.Add(Point{ 25, 25 });
-            
+
             //  ______________________
             // |                      |
             // |                      |
@@ -35,12 +35,12 @@ namespace QuadtreeTests
             // |    *                 |
             // |                      |
             // |______________________|
-            
+
             Assert::IsTrue(_tree.Size() == 1);
             Assert::IsTrue(_tree.Depth() == 1);
 
             _tree.Add(Point{ 87, 87 });
-            
+
             //  __________ ___________
             // |          |        *  |
             // |          |           |
@@ -50,12 +50,12 @@ namespace QuadtreeTests
             // |    *     |           |
             // |          |           |
             // |__________|___________|
-            
+
             Assert::IsTrue(_tree.Size() == 2);
             Assert::IsTrue(_tree.Depth() == 2);
 
             _tree.Add(Point{ 56, 68 });
-            
+
             //  __________ ___________
             // |          |     |  *  |
             // |          |_____|_____|
@@ -65,12 +65,12 @@ namespace QuadtreeTests
             // |    *     |           |
             // |          |           |
             // |__________|___________|
-            
+
             Assert::IsTrue(_tree.Size() == 3);
             Assert::IsTrue(_tree.Depth() == 3);
 
             _tree.Add(Point{ 68, 56 });
-            
+
             //  __________ ___________
             // |          |     |  *  |
             // |          |_____|_____|
@@ -80,7 +80,7 @@ namespace QuadtreeTests
             // |    *     |           |
             // |          |           |
             // |__________|___________|
-            
+
             Assert::IsTrue(_tree.Size() == 4);
             Assert::IsTrue(_tree.Depth() == 4);
         }
@@ -124,7 +124,7 @@ namespace QuadtreeTests
 
             const Point expected = Point{ 68, 68 };
             _tree.Add(expected);
-            
+
             //  __________ ___________
             // |          |     |  *  |
             // |          |_____|O____|
@@ -252,7 +252,6 @@ namespace QuadtreeTests
         }
 
     private:
-
         Quadtree _tree = { Point{ 0, 0 }, Point{ 100, 100 } };
     };
 }

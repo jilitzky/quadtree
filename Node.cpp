@@ -194,7 +194,7 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
             childMin.y += halfHeight;
         }
 
-        _children[index] = std::make_unique<Node>(childMin, childMax);
+        _children[index] = std::make_unique<Node>(Bounds{ childMin, childMax });
     }
     return _children[index];
 }

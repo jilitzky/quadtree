@@ -6,14 +6,23 @@ struct Bounds
     Point min;
     Point max;
 
-    Bounds(const Point& min, const Point& max)
+    Point Center() const
     {
-        this->min = min;
-        this->max = max;
+        return (min + max) / 2;
     }
 
-    Point Center() const { return (min + max) / 2; }
-    bool Contains(const Point& point) const { return point >= min && point <= max; }
-    int Height() const { return max.y - min.y; }
-    int Width() const { return max.x - min.x; }
+    bool Contains(const Point& point) const
+    {
+        return point >= min && point <= max;
+    }
+
+    int Height() const
+    {
+        return max.y - min.y;
+    }
+
+    int Width() const
+    {
+        return max.x - min.x;
+    }
 };

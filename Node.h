@@ -14,9 +14,9 @@ struct NearestPoint
 class Node
 {
 public:
-    Node(const Point& min, const Point& max) : _bounds(min, max) {}
+    Node(const Bounds& bounds) : _bounds(bounds) {}
 
-    Bounds GetBounds() const { return _bounds; }
+    const Bounds& GetBounds() const { return _bounds; }
     size_t Depth() const { return _depth; }
 
     bool Add(const Point& point);
