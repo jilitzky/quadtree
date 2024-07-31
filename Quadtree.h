@@ -5,14 +5,14 @@
 class Quadtree
 {
 public:
-    Quadtree(const Point& min, const Point& max) : _root(min, max) {}
+    Quadtree(const Vector2& min, const Vector2& max) : _root(min, max) {}
 
     size_t Depth() const { return _root.Depth(); }
     size_t Size() const { return _size; }
 
-    bool Add(const Point& point);
-    std::optional<Point> FindNearest(const Point& point) const;
-    bool Remove(const Point& point);
+    bool Add(const Vector2& point);
+    std::optional<Vector2> FindNearest(const Vector2& point) const;
+    bool Remove(const Vector2& point);
 
 private:
     Node _root;

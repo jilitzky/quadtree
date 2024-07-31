@@ -1,60 +1,60 @@
 #pragma once
 #include <compare>
 
-struct Point
+struct Vector2
 {
     int x;
     int y;
 
-    auto operator<=>(const Point&) const = default;
+    auto operator<=>(const Vector2&) const = default;
 
-    Point& operator+=(const Point& rhs)
+    Vector2& operator+=(const Vector2& rhs)
     {
         x += rhs.x;
         y += rhs.y;
         return *this;
     }
 
-    Point& operator-=(const Point& rhs)
+    Vector2& operator-=(const Vector2& rhs)
     {
         x -= rhs.x;
         y -= rhs.y;
         return *this;
     }
 
-    Point& operator*=(int rhs)
+    Vector2& operator*=(int rhs)
     {
         x *= rhs;
         y *= rhs;
         return *this;
     }
 
-    Point& operator/=(int rhs)
+    Vector2& operator/=(int rhs)
     {
         x /= rhs;
         y /= rhs;
         return *this;
     }
 
-    friend Point operator+(Point lhs, const Point& rhs)
+    friend Vector2 operator+(Vector2 lhs, const Vector2& rhs)
     {
         lhs += rhs;
         return lhs;
     }
 
-    friend Point operator-(Point lhs, const Point& rhs)
+    friend Vector2 operator-(Vector2 lhs, const Vector2& rhs)
     {
         lhs -= rhs;
         return lhs;
     }
 
-    friend Point operator*(Point lhs, int rhs)
+    friend Vector2 operator*(Vector2 lhs, int rhs)
     {
         lhs *= rhs;
         return lhs;
     }
 
-    friend Point operator/(Point lhs, int rhs)
+    friend Vector2 operator/(Vector2 lhs, int rhs)
     {
         lhs /= rhs;
         return lhs;

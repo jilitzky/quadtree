@@ -97,7 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Bounds.h" />
-    <ClInclude Include="..\Point.h" />
+    <ClInclude Include="..\Vector2.h" />
     <ClInclude Include="..\Quadtree.h" />
     <ClInclude Include="..\Node.h" />
   </ItemGroup>

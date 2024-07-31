@@ -1,12 +1,12 @@
 #include "Node.h"
 #include <cmath>
 
-Node::Node(const Point& min, const Point& max)
+Node::Node(const Vector2& min, const Vector2& max)
 {
     _bounds = { min, max };
 }
 
-bool Node::Add(const Point& point)
+bool Node::Add(const Vector2& point)
 {
     if (ChildCount() == 0)
     {
@@ -18,7 +18,7 @@ bool Node::Add(const Point& point)
         }
 
         // Fail the add request if the point already exists or if we can't subdivide further
-        const Point& existingPoint = *_point;
+        const Vector2& existingPoint = *_point;
         auto canSubdivide = [this] { return _bounds.Width() / 2 > 0 || _bounds.Height() / 2 > 0; };
         if (existingPoint == point || !canSubdivide())
         {
@@ -44,11 +44,11 @@ bool Node::Add(const Point& point)
     return added;
 }
 
-void Node::FindNearest(const Point& point, NearestPoint& nearest) const
+void Node::FindNearest(const Vector2& point, NearestPoint& nearest) const
 {
     // Do an early out if the point is farther away on each axis than the nearest distance we've already found
-    const Point& min = _bounds.min;
-    const Point& max = _bounds.max;
+    const Vector2& min = _bounds.min;
+    const Vector2& max = _bounds.max;
     if (point.x < min.x - nearest.distance || point.x > max.x + nearest.distance || point.y < min.y - nearest.distance || point.y > max.y + nearest.distance)
     {
         return;
@@ -69,7 +69,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
     // If the node has children, explore them sorted by their proximity to the query point
     else if (ChildCount() > 0)
     {
-        const Point center = _bounds.Center();
+        const Vector2 center = _bounds.Center();
         const int isRight = point.x >= center.x;
         const int isBottom = point.y < center.y;
 
@@ -89,7 +89,7 @@ void Node::FindNearest(const Point& point, NearestPoint& nearest) const
     }
 }
 
-bool Node::Remove(const Point& point)
+bool Node::Remove(const Vector2& point)
 {
     // Remove the point at this level if it matches the given value
     if (_point.has_value() && *_point == point)
@@ -147,7 +147,7 @@ int Node::ChildCount() const
     return count;
 }
 
-int Node::ChildIndex(const Point& point) const
+int Node::ChildIndex(const Vector2& point) const
 {
     // Child indices follow a Z-order curve
     // 0 = Top-Left
@@ -155,7 +155,7 @@ int Node::ChildIndex(const Point& point) const
     // 2 = Bottom-Left
     // 3 = Bottom-Right
     int index = 0;
-    const Point center = _bounds.Center();
+    const Vector2 center = _bounds.Center();
     if (point.x >= center.x)
     {
         index += 1;
@@ -167,15 +167,15 @@ int Node::ChildIndex(const Point& point) const
     return index;
 }
 
-std::unique_ptr<Node>& Node::GetOrCreateChild(const Point& point)
+std::unique_ptr<Node>& Node::GetOrCreateChild(const Vector2& point)
 {
     const int index = ChildIndex(point);
     if (_children[index] == nullptr)
     {
-        const Point center = _bounds.Center();
+        const Vector2 center = _bounds.Center();
 
-        Point childMin = _bounds.min;
-        Point childMax = _bounds.max;
+        Vector2 childMin = _bounds.min;
+        Vector2 childMax = _bounds.max;
 
         // Adjust child's position horizontally
         const int halfWidth = _bounds.Width() / 2;

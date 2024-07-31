@@ -24,7 +24,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 0);
             Assert::IsTrue(_tree.Depth() == 1);
 
-            _tree.Add(Point{ 25, 25 });
+            _tree.Add({ 25, 25 });
 
             //  ______________________
             // |                      |
@@ -39,7 +39,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 1);
             Assert::IsTrue(_tree.Depth() == 1);
 
-            _tree.Add(Point{ 87, 87 });
+            _tree.Add({ 87, 87 });
 
             //  __________ ___________
             // |          |        *  |
@@ -54,7 +54,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 2);
             Assert::IsTrue(_tree.Depth() == 2);
 
-            _tree.Add(Point{ 56, 68 });
+            _tree.Add({ 56, 68 });
 
             //  __________ ___________
             // |          |     |  *  |
@@ -69,7 +69,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 3);
             Assert::IsTrue(_tree.Depth() == 3);
 
-            _tree.Add(Point{ 68, 56 });
+            _tree.Add({ 68, 56 });
 
             //  __________ ___________
             // |          |     |  *  |
@@ -87,42 +87,42 @@ namespace QuadtreeTests
 
         TEST_METHOD(Add_CannotSubdivide)
         {
-            Quadtree tinyTree(Point{ 0, 0 }, Point{ 1, 1 });
+            Quadtree tinyTree({ 0, 0 }, { 1, 1 });
 
-            tinyTree.Add(Point{ 0, 0 });
+            tinyTree.Add({ 0, 0 });
             Assert::IsTrue(tinyTree.Size() == 1);
 
-            const bool added = tinyTree.Add(Point{ 1, 1 });
+            const bool added = tinyTree.Add({ 1, 1 });
             Assert::IsFalse(added);
             Assert::IsTrue(tinyTree.Size() == 1);
         }
 
         TEST_METHOD(Add_OutOfBounds)
         {
-            const bool added = _tree.Add(Point{ 101, 101 });
+            const bool added = _tree.Add({ 101, 101 });
             Assert::IsFalse(added);
             Assert::IsTrue(_tree.Size() == 0);
         }
 
         TEST_METHOD(Add_Overlapping)
         {
-            _tree.Add(Point{ 50, 50 });
+            _tree.Add({ 50, 50 });
             Assert::IsTrue(_tree.Size() == 1);
 
-            const bool added = _tree.Add(Point{ 50, 50 });
+            const bool added = _tree.Add({ 50, 50 });
             Assert::IsFalse(added);
             Assert::IsTrue(_tree.Size() == 1);
         }
 
         TEST_METHOD(FindNearest)
         {
-            _tree.Add(Point{ 25, 25 });
-            _tree.Add(Point{ 87, 87 });
-            _tree.Add(Point{ 87, 68 });
-            _tree.Add(Point{ 56, 56 });
-            _tree.Add(Point{ 56, 68 });
+            _tree.Add({ 25, 25 });
+            _tree.Add({ 87, 87 });
+            _tree.Add({ 87, 68 });
+            _tree.Add({ 56, 56 });
+            _tree.Add({ 56, 68 });
 
-            const Point expected = Point{ 68, 68 };
+            const Vector2 expected = { 68, 68 };
             _tree.Add(expected);
 
             //  __________ ___________
@@ -135,37 +135,37 @@ namespace QuadtreeTests
             // |          |           |
             // |__________|___________|
 
-            std::optional<Point> nearest = _tree.FindNearest(Point{ 75, 75 });
+            std::optional<Vector2> nearest = _tree.FindNearest({ 75, 75 });
             Assert::IsTrue(nearest.value() == expected);
         }
 
         TEST_METHOD(FindNearest_Single)
         {
-            const Point expected{ 25, 25 };
+            const Vector2 expected = { 25, 25 };
             _tree.Add(expected);
 
-            std::optional<Point> nearest = _tree.FindNearest(Point{ 50, 50 });
+            std::optional<Vector2> nearest = _tree.FindNearest({ 50, 50 });
             Assert::IsTrue(nearest.value() == expected);
         }
 
         TEST_METHOD(FindNearest_Empty)
         {
-            std::optional<Point> nearest = _tree.FindNearest(Point{ 50, 50 });
+            std::optional<Vector2> nearest = _tree.FindNearest({ 50, 50 });
             Assert::IsFalse(nearest.has_value());
         }
 
         TEST_METHOD(FindNearest_OutOfBounds)
         {
-            std::optional<Point> nearest = _tree.FindNearest(Point{ 101, 101 });
+            std::optional<Vector2> nearest = _tree.FindNearest({ 101, 101 });
             Assert::IsFalse(nearest.has_value());
         }
 
         TEST_METHOD(Remove)
         {
-            _tree.Add(Point{ 25, 25 });
-            _tree.Add(Point{ 87, 87 });
-            _tree.Add(Point{ 56, 68 });
-            _tree.Add(Point{ 68, 56 });
+            _tree.Add({ 25, 25 });
+            _tree.Add({ 87, 87 });
+            _tree.Add({ 56, 68 });
+            _tree.Add({ 68, 56 });
 
             //  __________ ___________
             // |          |     |  *  |
@@ -180,7 +180,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 4);
             Assert::IsTrue(_tree.Depth() == 4);
 
-            bool removed = _tree.Remove(Point{ 68, 56 });
+            bool removed = _tree.Remove({ 68, 56 });
             Assert::IsTrue(removed);
 
             //  __________ ___________
@@ -196,7 +196,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 3);
             Assert::IsTrue(_tree.Depth() == 3);
 
-            removed = _tree.Remove(Point{ 56, 68 });
+            removed = _tree.Remove({ 56, 68 });
             Assert::IsTrue(removed);
 
             //  __________ ___________
@@ -212,7 +212,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 2);
             Assert::IsTrue(_tree.Depth() == 2);
 
-            removed = _tree.Remove(Point{ 87, 87 });
+            removed = _tree.Remove({ 87, 87 });
             Assert::IsTrue(removed);
 
             //  ______________________
@@ -228,7 +228,7 @@ namespace QuadtreeTests
             Assert::IsTrue(_tree.Size() == 1);
             Assert::IsTrue(_tree.Depth() == 1);
 
-            removed = _tree.Remove(Point{ 25, 25 });
+            removed = _tree.Remove({ 25, 25 });
             Assert::IsTrue(removed);
 
             //  ______________________
@@ -247,11 +247,11 @@ namespace QuadtreeTests
 
         TEST_METHOD(Remove_NotFound)
         {
-            bool removed = _tree.Remove(Point{ 50, 50 });
+            bool removed = _tree.Remove({ 50, 50 });
             Assert::IsFalse(removed);
         }
 
     private:
-        Quadtree _tree = { Point{ 0, 0 }, Point{ 100, 100 } };
+        Quadtree _tree = { { 0, 0 }, { 100, 100 } };
     };
 }

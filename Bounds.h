@@ -1,17 +1,17 @@
 #pragma once
-#include "Point.h"
+#include "Vector2.h"
 
 struct Bounds
 {
-    Point min;
-    Point max;
+    Vector2 min;
+    Vector2 max;
 
-    Point Center() const
+    Vector2 Center() const
     {
         return (min + max) / 2;
     }
 
-    bool Contains(const Point& point) const
+    bool Contains(const Vector2& point) const
     {
         return point >= min && point <= max;
     }

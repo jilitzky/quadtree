@@ -1,6 +1,6 @@
 #include "Quadtree.h"
 
-bool Quadtree::Add(const Point& point)
+bool Quadtree::Add(const Vector2& point)
 {
     if (!_root.GetBounds().Contains(point))
     {
@@ -15,7 +15,7 @@ bool Quadtree::Add(const Point& point)
     return added;
 }
 
-std::optional<Point> Quadtree::FindNearest(const Point& point) const
+std::optional<Vector2> Quadtree::FindNearest(const Vector2& point) const
 {
     if (!_root.GetBounds().Contains(point))
     {
@@ -29,7 +29,7 @@ std::optional<Point> Quadtree::FindNearest(const Point& point) const
     return nearest.point;
 }
 
-bool Quadtree::Remove(const Point& point)
+bool Quadtree::Remove(const Vector2& point)
 {
     if (!_root.GetBounds().Contains(point))
     {
