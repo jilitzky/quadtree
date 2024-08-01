@@ -123,6 +123,7 @@ bool Node::Remove(const Vector2& point)
                     {
                         _point = remainingChild->_point;
                         _children[i] = nullptr;
+                        break;
                     }
                 }
             }
