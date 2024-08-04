@@ -119,7 +119,7 @@ bool Node::Remove(const Vector2& point)
                 for (int i = 0; i < _children.size(); i++)
                 {
                     const std::unique_ptr<Node>& remainingChild = _children[i];
-                    if (remainingChild != nullptr && remainingChild->_point.has_value())
+                    if (remainingChild != nullptr && remainingChild->ChildCount() == 0)
                     {
                         _point = remainingChild->_point;
                         _children[i] = nullptr;
