@@ -6,7 +6,39 @@ struct Vector2
     int x;
     int y;
 
-    auto operator<=>(const Vector2&) const = default;
+    bool operator==(const Vector2& other) const
+    {
+        return (x == other.x) && (y == other.y);
+    }
+
+    bool operator!=(const Vector2& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator<(const Vector2& other) const
+    {
+        if (x != other.x)
+        {
+            return x < other.x;
+        }
+        return y < other.y;
+    }
+
+    bool operator>(const Vector2& other) const
+    {
+        return other < *this;
+    }
+
+    bool operator<=(const Vector2& other) const
+    {
+        return !(*this > other);
+    }
+
+    bool operator>=(const Vector2& other) const
+    {
+        return !(*this < other);
+    }
 
     Vector2& operator+=(const Vector2& rhs)
     {

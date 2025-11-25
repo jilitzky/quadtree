@@ -2,15 +2,11 @@
 #include <gtest/gtest.h>
 #include "Quadtree.h"
 
-// TODO: Do I actually need this namespace?
-namespace
+class QuadtreeTest : public ::testing::Test
 {
-    class QuadtreeTest : public ::testing::Test
-    {
-    protected:
-        Quadtree _tree = { { 0, 0 }, { 100, 100 } };
-    };
-}
+protected:
+    Quadtree _tree = { { 0, 0 }, { 100, 100 } };
+};
 
 TEST_F(QuadtreeTest, Add)
 {
