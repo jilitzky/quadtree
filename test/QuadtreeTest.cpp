@@ -4,7 +4,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace QuadtreeTests
+namespace QuadtreeTest
 {
     TEST_CLASS(QuadtreeTests)
     {
