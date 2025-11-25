@@ -1,5 +1,5 @@
 # quadtree
-A modern C++ implementation of a quadtree spatial partition.
+A C++17 implementation of a quadtree spatial partition.
 ## Methods
 - **Add:** Adds a point to the tree
 - **Depth:** Returns the maximum depth of the tree
