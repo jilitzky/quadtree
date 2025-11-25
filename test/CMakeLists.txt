@@ -11,6 +11,6 @@ target_include_directories(QuadtreeTest PRIVATE
 )
 
 target_link_libraries(QuadtreeTest PRIVATE 
-    QuadtreeTest 
+    QuadtreeLib
     GTest::gtest_main
 )
