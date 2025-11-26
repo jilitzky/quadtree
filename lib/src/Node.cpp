@@ -1,9 +1,8 @@
 #include "Node.h"
 #include <cmath>
 
-Node::Node(const Vector2& min, const Vector2& max)
+Node::Node(const Vector2& min, const Vector2& max) : _bounds(min, max)
 {
-    _bounds = { min, max };
 }
 
 bool Node::Add(const Vector2& point)
@@ -19,7 +18,7 @@ bool Node::Add(const Vector2& point)
 
         // Fail the add request if the point already exists or if we can't subdivide further
         const Vector2& existingPoint = *_point;
-        auto canSubdivide = [this] { return _bounds.Width() / 2 > 0 || _bounds.Height() / 2 > 0; };
+        auto canSubdivide = [this] { return _bounds.GetWidth() / 2 > 0 || _bounds.GetHeight() / 2 > 0; };
         if (existingPoint == point || !canSubdivide())
         {
             return false;
@@ -69,7 +68,7 @@ void Node::FindNearest(const Vector2& point, NearestPoint& nearest) const
     // If the node has children, explore them sorted by their proximity to the query point
     else if (ChildCount() > 0)
     {
-        const Vector2 center = _bounds.Center();
+        const Vector2 center = _bounds.GetCenter();
         const int isRight = point.x >= center.x;
         const int isBottom = point.y < center.y;
 
@@ -156,7 +155,7 @@ int Node::ChildIndex(const Vector2& point) const
     // 2 = Bottom-Left
     // 3 = Bottom-Right
     int index = 0;
-    const Vector2 center = _bounds.Center();
+    const Vector2 center = _bounds.GetCenter();
     if (point.x >= center.x)
     {
         index += 1;
@@ -173,13 +172,13 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Vector2& point)
     const int index = ChildIndex(point);
     if (_children[index] == nullptr)
     {
-        const Vector2 center = _bounds.Center();
+        const Vector2 center = _bounds.GetCenter();
 
         Vector2 childMin = _bounds.min;
         Vector2 childMax = _bounds.max;
 
         // Adjust child's position horizontally
-        const int halfWidth = _bounds.Width() / 2;
+        const int halfWidth = _bounds.GetWidth() / 2;
         if (point.x < center.x)
         {
             childMax.x -= halfWidth;
@@ -190,7 +189,7 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Vector2& point)
         }
 
         // Adjust child's position vertically
-        const int halfHeight = _bounds.Height() / 2;
+        const int halfHeight = _bounds.GetHeight() / 2;
         if (point.y < center.y)
         {
             childMax.y -= halfHeight;
