@@ -18,8 +18,7 @@ bool Node::Add(const Vector2& point)
 
         // Fail the add request if the point already exists or if we can't subdivide further
         const Vector2& existingPoint = *_point;
-        auto canSubdivide = [this] { return _bounds.GetWidth() / 2 > 0 || _bounds.GetHeight() / 2 > 0; };
-        if (existingPoint == point || !canSubdivide())
+        if (existingPoint == point || !CanSubdivide())
         {
             return false;
         }
@@ -132,6 +131,12 @@ bool Node::Remove(const Vector2& point)
         return removed;
     }
     return false;
+}
+
+bool Node::CanSubdivide() const
+{
+    const float minSize = 1.f;
+    return _bounds.GetWidth() * 0.5f > minSize || _bounds.GetHeight() * 0.5f >= minSize;
 }
 
 int Node::ChildCount() const

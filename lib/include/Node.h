@@ -24,6 +24,7 @@ public:
     bool Remove(const Vector2& point);
 
 private:
+    bool CanSubdivide() const;
     int ChildCount() const;
     int ChildIndex(const Vector2& point) const;
     std::unique_ptr<Node>& GetOrCreateChild(const Vector2& point);

@@ -2,10 +2,10 @@
 
 struct Vector2
 {
-    int x;
-    int y;
+    float x;
+    float y;
     
-    Vector2(int x = 0, int y = 0) : x(x), y(y) {}
+    Vector2(float x = 0.f, float y = 0.f) : x(x), y(y) {}
     
     bool operator==(const Vector2& other) const
     {
