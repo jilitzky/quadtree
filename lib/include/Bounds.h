@@ -13,7 +13,7 @@ struct Bounds
 
     bool Contains(const Vector2& point) const
     {
-        return point >= min && point <= max;
+        return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
     }
 
     int Height() const
