@@ -2,7 +2,7 @@
 #include <array>
 #include <memory>
 #include <optional>
-#include "Bounds.h"
+#include "AABB.h"
 #include "Vector2.h"
 
 struct NearestPoint
@@ -16,7 +16,7 @@ class Node
 public:
     Node(const Vector2& min, const Vector2& max);
 
-    const Bounds& GetBounds() const { return _bounds; }
+    const AABB& GetBounds() const { return _bounds; }
     size_t Depth() const { return _depth; }
 
     bool Add(const Vector2& point);
@@ -29,7 +29,7 @@ private:
     std::unique_ptr<Node>& GetOrCreateChild(const Vector2& point);
     void RefreshDepth();
 
-    Bounds _bounds;
+    AABB _bounds;
     size_t _depth = 1;
     std::optional<Vector2> _point = std::nullopt;
     std::array<std::unique_ptr<Node>, 4> _children = {};

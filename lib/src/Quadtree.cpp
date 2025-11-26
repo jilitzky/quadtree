@@ -22,8 +22,8 @@ std::optional<Vector2> Quadtree::FindNearest(const Vector2& point) const
         return std::nullopt;
     }
 
-    const Bounds& rootBounds = _root.GetBounds();
-    const double maxDistance = rootBounds.Width() + rootBounds.Height();
+    const AABB& rootBounds = _root.GetBounds();
+    const double maxDistance = rootBounds.GetWidth() + rootBounds.GetHeight();
     NearestPoint nearest{ std::nullopt, maxDistance };
     _root.FindNearest(point, nearest);
     return nearest.point;
