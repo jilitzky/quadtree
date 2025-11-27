@@ -55,3 +55,9 @@ target_link_libraries(QuadtreeBenchmark PRIVATE
     Quadtree
     GTest::gtest_main
 )
+
+add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/bench/data"
+        "$<TARGET_FILE_DIR:QuadtreeBenchmark>/bench/data"
+)
