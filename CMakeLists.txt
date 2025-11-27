@@ -1,9 +1,27 @@
-cmake_minimum_required(VERSION 3.14)
-project(Quadtree)
+cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+project(Quadtree VERSION 1.0)
+
 set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0")
+
+# --- Quadtree ---
+
+add_library(Quadtree STATIC
+    include/AABB.h
+    include/Node.h
+    include/Quadtree.h
+    include/Vector2.h
+    src/Node.cpp 
+    src/Quadtree.cpp
+)
+
+target_compile_features(Quadtree PUBLIC cxx_std_17)
+
+target_include_directories(Quadtree PUBLIC
+    include
+)
+
+# --- QuadtreeTest ---
 
 include(FetchContent)
 FetchContent_Declare(
@@ -14,5 +32,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-add_subdirectory(lib)
-add_subdirectory(test)
+add_executable(QuadtreeTest 
+    test/QuadtreeTest.cpp 
+)
+
+target_compile_features(QuadtreeTest PRIVATE cxx_std_17)
+
+target_link_libraries(QuadtreeTest PRIVATE 
+    Quadtree
+    GTest::gtest_main
+)
