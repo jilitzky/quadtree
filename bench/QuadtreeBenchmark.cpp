@@ -18,15 +18,29 @@ TEST_F(QuadtreeBenchmark, Benchmark)
     std::ifstream stream("bench/data/Points.txt");
     ASSERT_TRUE(stream.is_open());
     std::vector<Vector2> points = ReadPoints(stream);
-    std::cout << "Successfully read " << points.size() << " points" << std::endl;
     stream.close();
     
     auto start = std::chrono::high_resolution_clock::now();
+    
+    for (const auto& point : points)
+    {
+        _tree.Add(point);
+    }
+    
+    for (const auto& point : points)
+    {
+        _tree.FindNearest(point);
+    }
+    
+    for (auto it = points.rbegin(); it != points.rend(); ++it)
+    {
+        _tree.Remove(*it);
+    }
+    
     auto end = std::chrono::high_resolution_clock::now();
-
+    
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Benchmark time: " << duration << " ms" << std::endl;
-
+    std::cout << "Benchmark took " << duration << " ms for " << points.size() << " points" << std::endl;
     SUCCEED();
 }
 
