@@ -29,15 +29,7 @@ target_include_directories(Quadtree PUBLIC
 )
 
 add_executable(QuadtreeTest 
-    QuadtreeTest.cpp 
-)
-
-set_target_properties(QuadtreeTest PROPERTIES 
-    OSX_DEPLOYMENT_TARGET "15.0"
-)
-
-target_include_directories(QuadtreeTest PRIVATE 
-    include
+    test/QuadtreeTest.cpp 
 )
 
 target_link_libraries(QuadtreeTest PRIVATE 
