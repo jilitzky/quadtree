@@ -4,37 +4,24 @@
 
 namespace
 {
-    std::istream& operator>>(std::istream& is, Vector2& v);
+std::vector<Vector2> ReadPoints(std::istream& stream);
 }
 
 class QuadtreeBenchmark : public ::testing::Test
 {
 protected:
-    Quadtree _tree = { { 0, 0 }, { 1000, 1000 } };
+    Quadtree _tree = { { -1000, -1000 }, { 1000, 1000 } };
 };
 
 TEST_F(QuadtreeBenchmark, Benchmark)
 {
-    auto start = std::chrono::high_resolution_clock::now();
-
     std::ifstream stream("bench/data/Points.txt");
     ASSERT_TRUE(stream.is_open());
-    
-    std::vector<Vector2> points;
-    Vector2 point;
-    while (stream >> point)
-    {
-        points.push_back(point);
-    }
-
+    std::vector<Vector2> points = ReadPoints(stream);
+    std::cout << "Successfully read " << points.size() << " points" << std::endl;
     stream.close();
-
-    // Verification: Print the data back out
-    std::cout << "Successfully loaded " << points.size() << " points:\n";
-    for (const auto& p : points) {
-        std::cout << "X: " << p.x << " | Y: " << p.y << "\n";
-    }
     
+    auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -45,16 +32,30 @@ TEST_F(QuadtreeBenchmark, Benchmark)
 
 namespace
 {
-    std::istream& operator>>(std::istream& is, Vector2& v)
+    std::istream& operator>>(std::istream& stream, Vector2& vector)
     {
         char separator;
-        if (is >> v.x >> separator >> v.y)
+        if (stream >> vector.x >> separator >> vector.y)
         {
             if (separator != ',')
             {
-                is.setstate(std::ios::failbit);
+                stream.setstate(std::ios::failbit);
             }
         }
-        return is;
+        return stream;
+    }
+
+    std::vector<Vector2> ReadPoints(std::istream& stream)
+    {
+        std::vector<Vector2> points;
+        points.reserve(10000);
+        
+        Vector2 point;
+        while (stream >> point)
+        {
+            points.push_back(point);
+        }
+        
+        return points;
     }
 }
