@@ -40,7 +40,7 @@ int main()
     auto end = std::chrono::high_resolution_clock::now();
     
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Benchmark finished in " << duration << " ms" << std::endl;
+    std::cout << "Benchmark Time: " << duration << " ms" << std::endl;
     return 0;
 }
 
