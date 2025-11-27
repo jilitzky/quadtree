@@ -4,9 +4,9 @@ project(Quadtree VERSION 1.0)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0")
 
-# --- QuadtreeLib ---
+# --- Quadtree ---
 
-add_library(QuadtreeLib STATIC
+add_library(Quadtree STATIC
     include/AABB.h
     include/Node.h
     include/Quadtree.h
@@ -15,9 +15,9 @@ add_library(QuadtreeLib STATIC
     src/Quadtree.cpp
 )
 
-target_compile_features(QuadtreeLib PUBLIC cxx_std_17)
+target_compile_features(Quadtree PUBLIC cxx_std_17)
 
-target_include_directories(QuadtreeLib PUBLIC
+target_include_directories(Quadtree PUBLIC
     include
 )
 
@@ -39,6 +39,6 @@ add_executable(QuadtreeTest
 target_compile_features(QuadtreeTest PRIVATE cxx_std_17)
 
 target_link_libraries(QuadtreeTest PRIVATE 
-    QuadtreeLib
+    Quadtree
     GTest::gtest_main
 )
