@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+
 project(Quadtree)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,5 +15,32 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-add_subdirectory(lib)
-add_subdirectory(test)
+add_library(Quadtree STATIC
+    src/Node.cpp 
+    src/Quadtree.cpp 
+    include/AABB.h
+    include/Node.h
+    include/Quadtree.h
+    include/Vector2.h
+)
+
+target_include_directories(Quadtree PUBLIC 
+    include
+)
+
+add_executable(QuadtreeTest 
+    QuadtreeTest.cpp 
+)
+
+set_target_properties(QuadtreeTest PROPERTIES 
+    OSX_DEPLOYMENT_TARGET "15.0"
+)
+
+target_include_directories(QuadtreeTest PRIVATE 
+    include
+)
+
+target_link_libraries(QuadtreeTest PRIVATE 
+    Quadtree
+    GTest::gtest_main
+)
