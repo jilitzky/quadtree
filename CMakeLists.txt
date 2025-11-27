@@ -46,14 +46,13 @@ target_link_libraries(QuadtreeTest PRIVATE
 # --- QuadtreeBenchmark ---
 
 add_executable(QuadtreeBenchmark 
-    bench/QuadtreeBenchmark.cpp 
+    bench/main.cpp 
 )
 
 target_compile_features(QuadtreeBenchmark PRIVATE cxx_std_17)
 
 target_link_libraries(QuadtreeBenchmark PRIVATE 
     Quadtree
-    GTest::gtest_main
 )
 
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
