@@ -76,7 +76,7 @@ void Node::FindNearest(const Vector2& point, NearestPoint& nearest) const
         sortedIndices[1] = isBottom * 2 + (1 - isRight);
         sortedIndices[2] = (1 - isBottom) * 2 + isRight;
         sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
-        for (int index : sortedIndices)
+        for (auto index : sortedIndices)
         {
             const std::unique_ptr<Node>& child = _children[index];
             if (child != nullptr)
@@ -114,7 +114,7 @@ bool Node::Remove(const Vector2& point)
             // Attempt to merge the last remaining child with the parent
             if (ChildCount() == 1)
             {
-                for (int i = 0; i < _children.size(); i++)
+                for (auto i = 0; i < _children.size(); i++)
                 {
                     const std::unique_ptr<Node>& remainingChild = _children[i];
                     if (remainingChild != nullptr && remainingChild->ChildCount() == 0)
@@ -142,7 +142,7 @@ bool Node::CanSubdivide() const
 int Node::ChildCount() const
 {
     int count = 0;
-    for (auto&& child : _children)
+    for (const auto& child : _children)
     {
         if (child != nullptr)
         {
@@ -212,7 +212,7 @@ std::unique_ptr<Node>& Node::GetOrCreateChild(const Vector2& point)
 void Node::RefreshDepth()
 {
     size_t maxChildDepth = 0;
-    for (auto&& child : _children)
+    for (const auto& child : _children)
     {
         if (child != nullptr)
         {
