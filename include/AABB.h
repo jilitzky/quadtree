@@ -13,12 +13,27 @@ struct AABB
         return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
     }
     
-    int GetWidth() const
+    bool Intersects(const AABB& other) const
+    {
+        if (max.x < other.min.x || min.x > other.max.x)
+        {
+            return false;
+        }
+        
+        if (max.y < other.min.y || min.y > other.max.y)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    
+    float GetWidth() const
     {
         return max.x - min.x;
     }
     
-    int GetHeight() const
+    float GetHeight() const
     {
         return max.y - min.y;
     }

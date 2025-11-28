@@ -1,10 +1,6 @@
 #include "Node.h"
 #include <cmath>
 
-Node::Node(const Vector2& min, const Vector2& max) : _bounds(min, max)
-{
-}
-
 bool Node::Add(const Vector2& point)
 {
     if (ChildCount() == 0)
