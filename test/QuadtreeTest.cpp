@@ -1,11 +1,13 @@
 #include <optional>
 #include <gtest/gtest.h>
 #include "Quadtree.h"
+#include "NewQuadtree.h"
 
 class QuadtreeTest : public ::testing::Test
 {
 protected:
     Quadtree _tree = { AABB({ 0, 0 }, { 100, 100 }) };
+    NewQuadtree _newTree = { AABB({ 0, 0 }, { 100, 100 }) };
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -20,10 +22,10 @@ TEST_F(QuadtreeTest, Insert)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.GetSize() == 0);
-    ASSERT_TRUE(_tree.GetDepth() == 1);
+    ASSERT_TRUE(_newTree.GetSize() == 0);
+    ASSERT_TRUE(_newTree.GetHeight() == 1);
 
-    _tree.Insert({ 25, 25 });
+    _newTree.Insert({ 25, 25 });
 
     //  ______________________
     // |                      |
@@ -35,10 +37,10 @@ TEST_F(QuadtreeTest, Insert)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.GetSize() == 1);
-    ASSERT_TRUE(_tree.GetDepth() == 1);
+    ASSERT_TRUE(_newTree.GetSize() == 1);
+    ASSERT_TRUE(_newTree.GetHeight() == 1);
 
-    _tree.Insert({ 87, 87 });
+    _newTree.Insert({ 87, 87 });
 
     //  __________ ___________
     // |          |        *  |
@@ -50,10 +52,10 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 2);
-    ASSERT_TRUE(_tree.GetDepth() == 2);
+    ASSERT_TRUE(_newTree.GetSize() == 2);
+    ASSERT_TRUE(_newTree.GetHeight() == 2);
 
-    _tree.Insert({ 56, 68 });
+    _newTree.Insert({ 56, 68 });
 
     //  __________ ___________
     // |          |     |  *  |
@@ -65,10 +67,10 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 3);
-    ASSERT_TRUE(_tree.GetDepth() == 3);
+    ASSERT_TRUE(_newTree.GetSize() == 3);
+    ASSERT_TRUE(_newTree.GetHeight() == 3);
 
-    _tree.Insert({ 68, 56 });
+    _newTree.Insert({ 68, 56 });
 
     //  __________ ___________
     // |          |     |  *  |
@@ -80,8 +82,8 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 4);
-    ASSERT_TRUE(_tree.GetDepth() == 4);
+    ASSERT_TRUE(_newTree.GetSize() == 4);
+    ASSERT_TRUE(_newTree.GetHeight() == 4);
 }
 
 TEST_F(QuadtreeTest, Insert_CannotSubdivide)

@@ -6,13 +6,13 @@
 class NewQuadtree
 {
 public:
-    NewQuadtree(const AABB& bounds, int nodeCapacity);
+    NewQuadtree(const AABB& bounds);
     NewQuadtree(const NewQuadtree& other) = delete;
     NewQuadtree(NewQuadtree&& other) = default;
     
     const AABB& GetBounds() const;
-    int GetSize() const;
-    int GetDepth() const;
+    size_t GetSize() const;
+    size_t GetHeight() const;
     
     bool Insert(const Vector2& position);
 
@@ -24,9 +24,9 @@ private:
     
     void Subdivide();
     
-    AABB m_bounds;
-    int m_nodeCapacity;
-    std::vector<Vector2> m_elements;
-    std::array<std::unique_ptr<NewQuadtree>, 4> m_children;
-    bool m_isLeaf = true;
+    static constexpr int kNodeCapacity = 1;
+    AABB mBounds;
+    bool mIsLeaf = true;
+    std::vector<Vector2> mElements;
+    std::array<std::unique_ptr<NewQuadtree>, 4> mChildren;
 };
