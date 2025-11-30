@@ -1,6 +1,6 @@
 #include <fstream>
 #include <iostream>
-#include "Quadtree.h"
+#include "NewQuadtree.h"
 
 const int POINTS_CAPACITY = 10000;
 
@@ -8,7 +8,7 @@ std::vector<Vector2> ReadPoints(std::istream& stream);
 
 int main()
 {
-    Quadtree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }) };
+    NewQuadtree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
     std::ifstream stream("bench/data/Points.txt");
     if (!stream.is_open())
