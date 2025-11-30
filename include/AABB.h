@@ -8,9 +8,24 @@ struct AABB
     
     AABB(const Vector2& min, const Vector2& max) : min(min), max(max) {}
     
-    bool Contains(const Vector2& point) const
+    float GetWidth() const
     {
-        return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
+        return max.x - min.x;
+    }
+    
+    float GetHeight() const
+    {
+        return max.y - min.y;
+    }
+    
+    Vector2 GetCenter() const
+    {
+        return (min + max) * 0.5f;
+    }
+    
+    bool Contains(const Vector2& position) const
+    {
+        return position.x >= min.x && position.y >= min.y && position.x <= max.x && position.y <= max.y;
     }
     
     bool Intersects(const AABB& other) const
@@ -28,18 +43,10 @@ struct AABB
         return true;
     }
     
-    float GetWidth() const
+    float DistanceSquaredTo(const Vector2& position)
     {
-        return max.x - min.x;
-    }
-    
-    float GetHeight() const
-    {
-        return max.y - min.y;
-    }
-    
-    Vector2 GetCenter() const
-    {
-        return (min + max) / 2;
+        float dx = std::max({min.x - position.x, 0.0f, position.x - max.x});
+        float dy = std::max({min.y - position.y, 0.0f, position.y - max.y});
+        return dx * dx + dy * dy;
     }
 };
