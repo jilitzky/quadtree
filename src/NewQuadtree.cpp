@@ -97,6 +97,14 @@ bool NewQuadtree::Remove(const Vector2& position)
     return false;
 }
 
+std::optional<Vector2> NewQuadtree::FindNearest(const Vector2& target) const
+{
+    std::optional<Vector2> nearest = std::nullopt;
+    float bestDistanceSq = std::numeric_limits<float>::max();
+    FindNearest(target, bestDistanceSq, nearest);
+    return nearest;
+}
+
 int NewQuadtree::GetChildIndex(const Vector2& position) const
 {
     int index = 0;
@@ -173,5 +181,46 @@ void NewQuadtree::TryMerge()
         }
 
         mIsLeaf = true;
+    }
+}
+
+void NewQuadtree::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Vector2>& nearest) const
+{
+    for (const auto& element : mElements)
+    {
+        float distanceSq = element.DistanceSquared(target);
+        if (distanceSq < bestDistanceSq)
+        {
+            bestDistanceSq = distanceSq;
+            nearest = element;
+        }
+    }
+
+    if (mIsLeaf)
+    {
+        return;
+    }
+    
+    Vector2 center = mBounds.GetCenter();
+    int isRight = target.x >= center.x;
+    int isBottom = target.y < center.y;
+
+    std::array<int, 4> sortedIndices;
+    sortedIndices[0] = isBottom * 2 + isRight;
+    sortedIndices[1] = isBottom * 2 + (1 - isRight);
+    sortedIndices[2] = (1 - isBottom) * 2 + isRight;
+    sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
+
+    for (int index : sortedIndices)
+    {
+        const auto& child = mChildren[index];
+        AABB childBounds = child->mBounds;
+        float dx = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
+        float dy = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
+        float childDistSq = (dx * dx) + (dy * dy);
+        if (childDistSq < bestDistanceSq)
+        {
+            child->FindNearest(target, bestDistanceSq, nearest);
+        }
     }
 }

@@ -7,6 +7,13 @@ struct Vector2
     
     Vector2(float x = 0.f, float y = 0.f) : x(x), y(y) {}
     
+    float DistanceSquared(const Vector2& other) const
+    {
+        float dx = other.x - x;
+        float dy = other.y - y;
+        return (dx * dx) + (dy * dy);
+    }
+    
     bool operator==(const Vector2& other) const
     {
         return x == other.x && y == other.y;

@@ -42,11 +42,4 @@ struct AABB
 
         return true;
     }
-    
-    float DistanceSquaredTo(const Vector2& position)
-    {
-        float dx = std::max({min.x - position.x, 0.0f, position.x - max.x});
-        float dy = std::max({min.y - position.y, 0.0f, position.y - max.y});
-        return dx * dx + dy * dy;
-    }
 };

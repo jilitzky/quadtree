@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <vector>
 #include "AABB.h"
 
@@ -15,6 +16,8 @@ public:
     
     bool Insert(const Vector2& position);
     bool Remove(const Vector2& position);
+    
+    std::optional<Vector2> FindNearest(const Vector2& target) const;
 
     NewQuadtree& operator=(const NewQuadtree&) = delete;
     NewQuadtree& operator=(NewQuadtree&&) = default;
@@ -24,6 +27,8 @@ private:
     
     void Subdivide();
     void TryMerge();
+    
+    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Vector2>& nearest) const;
     
     AABB mBounds;
     int mNodeCapacity;
