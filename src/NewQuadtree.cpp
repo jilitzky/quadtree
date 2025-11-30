@@ -1,6 +1,8 @@
 #include "NewQuadtree.h"
 
-NewQuadtree::NewQuadtree(const AABB& bounds) : mBounds(bounds)
+NewQuadtree::NewQuadtree(const AABB& bounds, int nodeCapacity) :
+    mBounds(bounds),
+    mNodeCapacity(nodeCapacity)
 {
 }
 
@@ -57,12 +59,42 @@ bool NewQuadtree::Insert(const Vector2& position)
     mElements.push_back({ position });
 
     bool canSubdivide = mBounds.GetWidth() >= 2.f && mBounds.GetHeight() >= 2.f;
-    if (mElements.size() > kNodeCapacity && canSubdivide)
+    if (mElements.size() > mNodeCapacity && canSubdivide)
     {
         Subdivide();
     }
 
     return true;
+}
+
+bool NewQuadtree::Remove(const Vector2& position)
+{
+    if (!mBounds.Contains(position))
+    {
+        return false;
+    }
+
+    if (mIsLeaf)
+    {
+        auto it = std::find(mElements.begin(), mElements.end(), position);
+        if (it != mElements.end())
+        {
+            *it = mElements.back();
+            mElements.pop_back();
+            return true;
+        }
+        
+        return false;
+    }
+
+    int index = GetChildIndex(position);
+    if (mChildren[index]->Remove(position))
+    {
+        TryMerge();
+        return true;
+    }
+
+    return false;
 }
 
 int NewQuadtree::GetChildIndex(const Vector2& position) const
@@ -88,15 +120,15 @@ void NewQuadtree::Subdivide()
     Vector2 max = mBounds.max;
     Vector2 center = mBounds.GetCenter();
 
-    AABB nwBounds(Vector2(min.x, center.y), Vector2(center.x, max.y));
-    AABB neBounds(Vector2(center.x, center.y), Vector2(max.x, max.y));
-    AABB swBounds(Vector2(min.x, min.y), Vector2(center.x, center.y));
-    AABB seBounds(Vector2(center.x, min.y), Vector2(max.x, center.y));
+    AABB topLeft(Vector2(min.x, center.y), Vector2(center.x, max.y));
+    AABB topRight(Vector2(center.x, center.y), Vector2(max.x, max.y));
+    AABB bottomLeft(Vector2(min.x, min.y), Vector2(center.x, center.y));
+    AABB bottomRight(Vector2(center.x, min.y), Vector2(max.x, center.y));
 
-    mChildren[0] = std::make_unique<NewQuadtree>(nwBounds);
-    mChildren[1] = std::make_unique<NewQuadtree>(neBounds);
-    mChildren[2] = std::make_unique<NewQuadtree>(swBounds);
-    mChildren[3] = std::make_unique<NewQuadtree>(seBounds);
+    mChildren[0] = std::make_unique<NewQuadtree>(topLeft, mNodeCapacity);
+    mChildren[1] = std::make_unique<NewQuadtree>(topRight, mNodeCapacity);
+    mChildren[2] = std::make_unique<NewQuadtree>(bottomLeft, mNodeCapacity);
+    mChildren[3] = std::make_unique<NewQuadtree>(bottomRight, mNodeCapacity);
 
     for (const auto& element : mElements)
     {
@@ -106,4 +138,40 @@ void NewQuadtree::Subdivide()
 
     mIsLeaf = false;
     mElements.clear();
+}
+
+void NewQuadtree::TryMerge()
+{
+    for (const auto& child : mChildren)
+    {
+        if (!child->mIsLeaf)
+        {
+            return;
+        }
+    }
+
+    size_t totalSize = 0;
+    for (const auto& child : mChildren)
+    {
+        totalSize += child->mElements.size();
+    }
+
+    if (totalSize <= mNodeCapacity)
+    {
+        mElements.reserve(totalSize);
+        for (auto& child : mChildren)
+        {
+            for (auto& element : child->mElements)
+            {
+                mElements.push_back(std::move(element));
+            }
+        }
+
+        for (auto& child : mChildren)
+        {
+            child.reset();
+        }
+
+        mIsLeaf = true;
+    }
 }
