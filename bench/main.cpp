@@ -8,7 +8,7 @@ std::vector<Vector2> ReadPoints(std::istream& stream);
 
 int main()
 {
-    Quadtree tree = { { -1000, -1000 }, { 1000, 1000 } };
+    Quadtree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
     std::ifstream stream("bench/data/Points.txt");
     if (!stream.is_open())
@@ -24,7 +24,7 @@ int main()
     
     for (const auto& point : points)
     {
-        tree.Add(point);
+        tree.Insert(point);
     }
     
     for (const auto& point : points)

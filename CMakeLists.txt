@@ -17,10 +17,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_library(Quadtree STATIC
     include/AABB.h
-    include/Node.h
     include/Quadtree.h
     include/Vector2.h
-    src/Node.cpp 
     src/Quadtree.cpp
 )
 

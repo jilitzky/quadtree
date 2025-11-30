@@ -1,20 +1,38 @@
 #pragma once
 #include <optional>
-#include "Node.h"
+#include <vector>
+#include "AABB.h"
 
 class Quadtree
 {
 public:
-    Quadtree(const Vector2& min, const Vector2& max) : _root(min, max) {}
+    Quadtree(const AABB& bounds, int nodeCapacity);
+    Quadtree(const Quadtree& other) = delete;
+    Quadtree(Quadtree&& other) = default;
+    
+    const AABB& GetBounds() const;
+    size_t GetSize() const;
+    size_t GetHeight() const;
+    
+    bool Insert(const Vector2& position);
+    bool Remove(const Vector2& position);
+    
+    std::optional<Vector2> FindNearest(const Vector2& target) const;
 
-    size_t Depth() const { return _root.Depth(); }
-    size_t Size() const { return _size; }
-
-    bool Add(const Vector2& point);
-    std::optional<Vector2> FindNearest(const Vector2& point) const;
-    bool Remove(const Vector2& point);
-
+    Quadtree& operator=(const Quadtree&) = delete;
+    Quadtree& operator=(Quadtree&&) = default;
+    
 private:
-    Node _root;
-    size_t _size = 0;
+    int GetChildIndex(const Vector2& position) const;
+    
+    void Subdivide();
+    void TryMerge();
+    
+    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Vector2>& nearest) const;
+    
+    AABB mBounds;
+    int mNodeCapacity;
+    bool mIsLeaf = true;
+    std::vector<Vector2> mElements;
+    std::array<std::unique_ptr<Quadtree>, 4> mChildren;
 };
