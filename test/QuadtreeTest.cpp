@@ -5,7 +5,7 @@
 class QuadtreeTest : public ::testing::Test
 {
 protected:
-    Quadtree _tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
+    Quadtree<int> _tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -112,7 +112,7 @@ TEST_F(QuadtreeTest, FindNearest)
     // |          |           |
     // |__________|___________|
 
-    std::optional<Quadtree::Element> nearest = _tree.FindNearest({ 75, 75 });
+    std::optional<Quadtree<int>::Element> nearest = _tree.FindNearest({ 75, 75 });
     ASSERT_TRUE(nearest.value().position == expected);
 }
 
@@ -121,19 +121,19 @@ TEST_F(QuadtreeTest, FindNearest_Single)
     Vector2 expected = { 25, 25 };
     _tree.Insert(expected, 1);
 
-    std::optional<Quadtree::Element> nearest = _tree.FindNearest({ 50, 50 });
+    std::optional<Quadtree<int>::Element> nearest = _tree.FindNearest({ 50, 50 });
     ASSERT_TRUE(nearest.value().position == expected);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Empty)
 {
-    std::optional<Quadtree::Element> nearest = _tree.FindNearest({ 50, 50 });
+    std::optional<Quadtree<int>::Element> nearest = _tree.FindNearest({ 50, 50 });
     ASSERT_FALSE(nearest.has_value());
 }
 
 TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
 {
-    std::optional<Quadtree::Element> nearest = _tree.FindNearest({ 101, 101 });
+    std::optional<Quadtree<int>::Element> nearest = _tree.FindNearest({ 101, 101 });
     ASSERT_FALSE(nearest.has_value());
 }
 
