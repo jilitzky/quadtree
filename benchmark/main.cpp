@@ -6,9 +6,9 @@ std::vector<Vector2> ReadPositions(std::istream& stream);
 
 int main()
 {
-    Quadtree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
+    Quadtree<size_t> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
-    std::ifstream stream("bench/data/Positions.txt");
+    std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
     {
         std::cout << "ERROR: Failed to open input stream" << std::endl;

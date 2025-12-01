@@ -13,48 +13,40 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# --- Quadtree ---
-
-add_library(Quadtree STATIC
-    include/AABB.h
-    include/Quadtree.h
-    include/Vector2.h
-    src/Quadtree.cpp
-)
-
-target_compile_features(Quadtree PUBLIC cxx_std_17)
-
-target_include_directories(Quadtree PUBLIC
-    include
-)
-
 # --- QuadtreeTest ---
 
-add_executable(QuadtreeTest 
+add_executable(QuadtreeTest
+    include/AABB.h
+    include/Quadtree.h
+    include/Quadtree.inl
+    include/Vector2.h
     test/QuadtreeTest.cpp 
 )
 
 target_compile_features(QuadtreeTest PRIVATE cxx_std_17)
 
+target_include_directories(QuadtreeTest PRIVATE
+    include
+)
+
 target_link_libraries(QuadtreeTest PRIVATE 
-    Quadtree
     GTest::gtest_main
 )
 
 # --- QuadtreeBenchmark ---
 
 add_executable(QuadtreeBenchmark 
-    bench/main.cpp 
+    benchmark/main.cpp 
 )
 
 target_compile_features(QuadtreeBenchmark PRIVATE cxx_std_17)
 
-target_link_libraries(QuadtreeBenchmark PRIVATE 
-    Quadtree
+target_include_directories(QuadtreeBenchmark PRIVATE
+    include
 )
 
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/bench/data"
-        "$<TARGET_FILE_DIR:QuadtreeBenchmark>/bench/data"
+        "${CMAKE_CURRENT_SOURCE_DIR}/benchmark/data"
+        "$<TARGET_FILE_DIR:QuadtreeBenchmark>/benchmark/data"
 )
