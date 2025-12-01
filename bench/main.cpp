@@ -2,39 +2,38 @@
 #include <iostream>
 #include "Quadtree.h"
 
-const int POINTS_CAPACITY = 10000;
-
-std::vector<Vector2> ReadPoints(std::istream& stream);
+std::vector<Vector2> ReadPositions(std::istream& stream);
 
 int main()
 {
     Quadtree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
-    std::ifstream stream("bench/data/Points.txt");
+    std::ifstream stream("bench/data/Positions.txt");
     if (!stream.is_open())
     {
         std::cout << "ERROR: Failed to open input stream" << std::endl;
         return 1;
     }
     
-    std::vector<Vector2> points = ReadPoints(stream);
+    std::vector<Vector2> positions = ReadPositions(stream);
     stream.close();
     
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (const auto& point : points)
+    for (size_t i = 0; i < positions.size(); i++)
     {
-        tree.Insert(point);
+        tree.Insert(positions[i], i);
     }
     
-    for (const auto& point : points)
+    for (const auto& position : positions)
     {
-        tree.FindNearest(point);
+        tree.FindNearest(position);
     }
     
-    for (auto it = points.rbegin(); it != points.rend(); ++it)
+    size_t data = positions.size();
+    for (auto it = positions.rbegin(); it != positions.rend(); ++it)
     {
-        tree.Remove(*it);
+        tree.Remove(*it, data--);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
@@ -57,16 +56,16 @@ std::istream& operator>>(std::istream& stream, Vector2& vector)
     return stream;
 }
 
-std::vector<Vector2> ReadPoints(std::istream& stream)
+std::vector<Vector2> ReadPositions(std::istream& stream)
 {
-    std::vector<Vector2> points;
-    points.reserve(POINTS_CAPACITY);
+    std::vector<Vector2> positions;
+    positions.reserve(10000);
     
-    Vector2 point;
-    while (stream >> point)
+    Vector2 position;
+    while (stream >> position)
     {
-        points.push_back(point);
+        positions.push_back(position);
     }
     
-    return points;
+    return positions;
 }

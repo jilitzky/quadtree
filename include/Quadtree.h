@@ -9,7 +9,7 @@ public:
     struct Element
     {
         Vector2 position;
-        int data;
+        size_t data;
     };
     
     Quadtree(const AABB& bounds, int nodeCapacity);
@@ -20,8 +20,8 @@ public:
     size_t GetSize() const;
     size_t GetHeight() const;
     
-    bool Insert(const Vector2& position, int data);
-    bool Remove(const Vector2& position, int data);
+    bool Insert(const Vector2& position, size_t data);
+    bool Remove(const Vector2& position, size_t data);
     
     std::optional<Element> FindNearest(const Vector2& target) const;
 

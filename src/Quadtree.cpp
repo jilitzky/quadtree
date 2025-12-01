@@ -43,7 +43,7 @@ size_t Quadtree::GetHeight() const
     return height + 1;
 }
 
-bool Quadtree::Insert(const Vector2& position, int data)
+bool Quadtree::Insert(const Vector2& position, size_t data)
 {
     if (!mBounds.Contains(position))
     {
@@ -67,7 +67,7 @@ bool Quadtree::Insert(const Vector2& position, int data)
     return true;
 }
 
-bool Quadtree::Remove(const Vector2& position, int data)
+bool Quadtree::Remove(const Vector2& position, size_t data)
 {
     if (!mBounds.Contains(position))
     {
