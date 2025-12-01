@@ -43,7 +43,7 @@ size_t Quadtree::GetHeight() const
     return height + 1;
 }
 
-bool Quadtree::Insert(const Vector2& position)
+bool Quadtree::Insert(const Vector2& position, size_t data)
 {
     if (!mBounds.Contains(position))
     {
@@ -53,10 +53,10 @@ bool Quadtree::Insert(const Vector2& position)
     if (!mIsLeaf)
     {
         int index = GetChildIndex(position);
-        return mChildren[index]->Insert(position);
+        return mChildren[index]->Insert(position, data);
     }
 
-    mElements.push_back({ position });
+    mElements.push_back({ position, data });
 
     bool canSubdivide = mBounds.GetWidth() >= 2.f && mBounds.GetHeight() >= 2.f;
     if (mElements.size() > mNodeCapacity && canSubdivide)
@@ -67,7 +67,7 @@ bool Quadtree::Insert(const Vector2& position)
     return true;
 }
 
-bool Quadtree::Remove(const Vector2& position)
+bool Quadtree::Remove(const Vector2& position, size_t data)
 {
     if (!mBounds.Contains(position))
     {
@@ -76,7 +76,11 @@ bool Quadtree::Remove(const Vector2& position)
 
     if (mIsLeaf)
     {
-        auto it = std::find(mElements.begin(), mElements.end(), position);
+        auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
+        {
+            return element.position == position && element.data == data;
+        });
+        
         if (it != mElements.end())
         {
             *it = mElements.back();
@@ -88,7 +92,7 @@ bool Quadtree::Remove(const Vector2& position)
     }
 
     int index = GetChildIndex(position);
-    if (mChildren[index]->Remove(position))
+    if (mChildren[index]->Remove(position, data))
     {
         TryMerge();
         return true;
@@ -97,9 +101,9 @@ bool Quadtree::Remove(const Vector2& position)
     return false;
 }
 
-std::optional<Vector2> Quadtree::FindNearest(const Vector2& target) const
+std::optional<Quadtree::Element> Quadtree::FindNearest(const Vector2& target) const
 {
-    std::optional<Vector2> nearest = std::nullopt;
+    std::optional<Element> nearest = std::nullopt;
     float bestDistanceSq = std::numeric_limits<float>::max();
     FindNearest(target, bestDistanceSq, nearest);
     return nearest;
@@ -140,8 +144,8 @@ void Quadtree::Subdivide()
 
     for (const auto& element : mElements)
     {
-        int index = GetChildIndex(element);
-        mChildren[index]->Insert(element);
+        int index = GetChildIndex(element.position);
+        mChildren[index]->Insert(element.position, element.data);
     }
 
     mIsLeaf = false;
@@ -184,11 +188,11 @@ void Quadtree::TryMerge()
     }
 }
 
-void Quadtree::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Vector2>& nearest) const
+void Quadtree::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
 {
     for (const auto& element : mElements)
     {
-        float distanceSq = element.DistanceSquared(target);
+        float distanceSq = element.position.DistanceSquared(target);
         if (distanceSq < bestDistanceSq)
         {
             bestDistanceSq = distanceSq;
@@ -217,8 +221,8 @@ void Quadtree::FindNearest(const Vector2& target, float& bestDistanceSq, std::op
         AABB childBounds = child->mBounds;
         float dx = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
         float dy = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
-        float childDistSq = (dx * dx) + (dy * dy);
-        if (childDistSq < bestDistanceSq)
+        float childDistanceSq = (dx * dx) + (dy * dy);
+        if (childDistanceSq < bestDistanceSq)
         {
             child->FindNearest(target, bestDistanceSq, nearest);
         }
