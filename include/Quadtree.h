@@ -6,6 +6,12 @@
 class Quadtree
 {
 public:
+    struct Element
+    {
+        Vector2 position;
+        int data;
+    };
+    
     Quadtree(const AABB& bounds, int nodeCapacity);
     Quadtree(const Quadtree& other) = delete;
     Quadtree(Quadtree&& other) = default;
@@ -14,10 +20,10 @@ public:
     size_t GetSize() const;
     size_t GetHeight() const;
     
-    bool Insert(const Vector2& position);
-    bool Remove(const Vector2& position);
+    bool Insert(const Vector2& position, int data);
+    bool Remove(const Vector2& position, int data);
     
-    std::optional<Vector2> FindNearest(const Vector2& target) const;
+    std::optional<Element> FindNearest(const Vector2& target) const;
 
     Quadtree& operator=(const Quadtree&) = delete;
     Quadtree& operator=(Quadtree&&) = default;
@@ -28,11 +34,11 @@ private:
     void Subdivide();
     void TryMerge();
     
-    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Vector2>& nearest) const;
+    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const;
     
     AABB mBounds;
     int mNodeCapacity;
     bool mIsLeaf = true;
-    std::vector<Vector2> mElements;
+    std::vector<Element> mElements;
     std::array<std::unique_ptr<Quadtree>, 4> mChildren;
 };
