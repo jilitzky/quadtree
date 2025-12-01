@@ -20,7 +20,7 @@ int main()
     
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (size_t i = 0; i < positions.size(); i++)
+    for (size_t i = 0; i < positions.size(); ++i)
     {
         tree.Insert(positions[i], i + 1);
     }
