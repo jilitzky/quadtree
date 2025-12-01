@@ -22,7 +22,7 @@ int main()
     
     for (size_t i = 0; i < positions.size(); i++)
     {
-        tree.Insert(positions[i], i);
+        tree.Insert(positions[i], i + 1);
     }
     
     for (const auto& position : positions)
