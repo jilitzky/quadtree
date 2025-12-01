@@ -19,7 +19,7 @@ add_library(Quadtree STATIC
     include/AABB.h
     include/Quadtree.h
     include/Vector2.h
-    src/Quadtree.cpp
+    source/Quadtree.cpp
 )
 
 target_compile_features(Quadtree PUBLIC cxx_std_17)
@@ -44,7 +44,7 @@ target_link_libraries(QuadtreeTest PRIVATE
 # --- QuadtreeBenchmark ---
 
 add_executable(QuadtreeBenchmark 
-    bench/main.cpp 
+    benchmark/main.cpp 
 )
 
 target_compile_features(QuadtreeBenchmark PRIVATE cxx_std_17)
@@ -55,6 +55,6 @@ target_link_libraries(QuadtreeBenchmark PRIVATE
 
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/bench/data"
-        "$<TARGET_FILE_DIR:QuadtreeBenchmark>/bench/data"
+        "${CMAKE_CURRENT_SOURCE_DIR}/benchmark/data"
+        "$<TARGET_FILE_DIR:QuadtreeBenchmark>/benchmark/data"
 )
