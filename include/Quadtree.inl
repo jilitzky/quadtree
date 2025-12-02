@@ -1,20 +1,18 @@
 #include "Quadtree.h"
 
-template<typename T>
-Quadtree<T>::Quadtree(const AABB& bounds, int nodeCapacity) :
-    mBounds(bounds),
-    mNodeCapacity(nodeCapacity)
+template<typename T, size_t Capacity>
+Quadtree<T, Capacity>::Quadtree(const AABB& bounds) : mBounds(bounds)
 {
 }
 
-template<typename T>
-const AABB& Quadtree<T>::GetBounds() const
+template<typename T, size_t Capacity>
+const AABB& Quadtree<T, Capacity>::GetBounds() const
 {
     return mBounds;
 }
 
-template<typename T>
-size_t Quadtree<T>::GetSize() const
+template<typename T, size_t Capacity>
+size_t Quadtree<T, Capacity>::GetSize() const
 {
     if (mIsLeaf)
     {
@@ -30,8 +28,8 @@ size_t Quadtree<T>::GetSize() const
     return size;
 }
 
-template<typename T>
-size_t Quadtree<T>::GetHeight() const
+template<typename T, size_t Capacity>
+size_t Quadtree<T, Capacity>::GetHeight() const
 {
     if (mIsLeaf)
     {
@@ -47,8 +45,8 @@ size_t Quadtree<T>::GetHeight() const
     return height + 1;
 }
 
-template<typename T>
-bool Quadtree<T>::Insert(const Vector2& position, T data)
+template<typename T, size_t Capacity>
+bool Quadtree<T, Capacity>::Insert(const Vector2& position, T data)
 {
     if (!mBounds.Contains(position))
     {
@@ -64,7 +62,7 @@ bool Quadtree<T>::Insert(const Vector2& position, T data)
     mElements.push_back({ position, data });
 
     bool canSubdivide = mBounds.GetWidth() >= 2.f && mBounds.GetHeight() >= 2.f;
-    if (mElements.size() > mNodeCapacity && canSubdivide)
+    if (mElements.size() > Capacity && canSubdivide)
     {
         Subdivide();
     }
@@ -72,8 +70,8 @@ bool Quadtree<T>::Insert(const Vector2& position, T data)
     return true;
 }
 
-template<typename T>
-bool Quadtree<T>::Remove(const Vector2& position, T data)
+template<typename T, size_t Capacity>
+bool Quadtree<T, Capacity>::Remove(const Vector2& position, T data)
 {
     if (!mBounds.Contains(position))
     {
@@ -107,8 +105,8 @@ bool Quadtree<T>::Remove(const Vector2& position, T data)
     return false;
 }
 
-template<typename T>
-std::optional<typename Quadtree<T>::Element> Quadtree<T>::FindNearest(const Vector2& target) const
+template<typename T, size_t Capacity>
+std::optional<typename Quadtree<T, Capacity>::Element> Quadtree<T, Capacity>::FindNearest(const Vector2& target) const
 {
     std::optional<Element> nearest = std::nullopt;
     float bestDistanceSq = std::numeric_limits<float>::max();
@@ -116,8 +114,8 @@ std::optional<typename Quadtree<T>::Element> Quadtree<T>::FindNearest(const Vect
     return nearest;
 }
 
-template<typename T>
-int Quadtree<T>::GetChildIndex(const Vector2& position) const
+template<typename T, size_t Capacity>
+int Quadtree<T, Capacity>::GetChildIndex(const Vector2& position) const
 {
     int index = 0;
  
@@ -134,8 +132,8 @@ int Quadtree<T>::GetChildIndex(const Vector2& position) const
     return index;
 }
 
-template<typename T>
-void Quadtree<T>::Subdivide()
+template<typename T, size_t Capacity>
+void Quadtree<T, Capacity>::Subdivide()
 {
     Vector2 min = mBounds.min;
     Vector2 max = mBounds.max;
@@ -146,10 +144,10 @@ void Quadtree<T>::Subdivide()
     AABB bottomLeft(Vector2(min.x, min.y), Vector2(center.x, center.y));
     AABB bottomRight(Vector2(center.x, min.y), Vector2(max.x, center.y));
 
-    mChildren[0] = std::make_unique<Quadtree>(topLeft, mNodeCapacity);
-    mChildren[1] = std::make_unique<Quadtree>(topRight, mNodeCapacity);
-    mChildren[2] = std::make_unique<Quadtree>(bottomLeft, mNodeCapacity);
-    mChildren[3] = std::make_unique<Quadtree>(bottomRight, mNodeCapacity);
+    mChildren[0] = std::make_unique<Quadtree>(topLeft);
+    mChildren[1] = std::make_unique<Quadtree>(topRight);
+    mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
+    mChildren[3] = std::make_unique<Quadtree>(bottomRight);
 
     for (const auto& element : mElements)
     {
@@ -161,8 +159,8 @@ void Quadtree<T>::Subdivide()
     mElements.clear();
 }
 
-template<typename T>
-void Quadtree<T>::TryMerge()
+template<typename T, size_t Capacity>
+void Quadtree<T, Capacity>::TryMerge()
 {
     for (const auto& child : mChildren)
     {
@@ -178,7 +176,7 @@ void Quadtree<T>::TryMerge()
         totalSize += child->mElements.size();
     }
 
-    if (totalSize <= mNodeCapacity)
+    if (totalSize <= Capacity)
     {
         mElements.reserve(totalSize);
         for (auto& child : mChildren)
@@ -198,8 +196,8 @@ void Quadtree<T>::TryMerge()
     }
 }
 
-template<typename T>
-void Quadtree<T>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
+template<typename T, size_t Capacity>
+void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
 {
     for (const auto& element : mElements)
     {

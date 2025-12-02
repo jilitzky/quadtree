@@ -3,7 +3,7 @@
 #include <vector>
 #include "AABB.h"
 
-template<typename T>
+template<typename T, size_t Capacity = 4>
 class Quadtree
 {
 public:
@@ -13,7 +13,7 @@ public:
         T data;
     };
     
-    Quadtree(const AABB& bounds, int nodeCapacity);
+    Quadtree(const AABB& bounds);
     Quadtree(const Quadtree& other) = delete;
     Quadtree(Quadtree&& other) = default;
     
@@ -38,7 +38,6 @@ private:
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const;
     
     AABB mBounds;
-    int mNodeCapacity;
     bool mIsLeaf = true;
     std::vector<Element> mElements;
     std::array<std::unique_ptr<Quadtree>, 4> mChildren;

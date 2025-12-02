@@ -6,7 +6,7 @@ std::vector<Vector2> ReadPositions(std::istream& stream);
 
 int main()
 {
-    Quadtree<size_t> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
+    Quadtree<size_t, 4> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }) };
 
     std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
