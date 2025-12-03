@@ -17,6 +17,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(QuadtreeTest
     include/AABB.h
+    include/LinearQuadtree.h
+    include/Node.h
     include/Quadtree.h
     include/Quadtree.inl
     include/Vector2.h
