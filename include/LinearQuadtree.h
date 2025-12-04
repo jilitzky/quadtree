@@ -11,24 +11,24 @@ public:
     
     const AABB& GetBounds() const
     {
-        return mRoot.bounds;
+        return mNodes[0].bounds;
     }
     
     size_t GetSize() const
     {
-        return GetSize(mRoot);
+        return GetNodeSize(mNodes[0]);
     }
     
     size_t GetHeight() const
     {
-        return GetHeight(mRoot);
+        return GetNodeHeight(mNodes[0]);
     }
     
     LinearQuadtree& operator=(const LinearQuadtree&) = delete;
     LinearQuadtree& operator=(LinearQuadtree&&) = default;
     
 private:
-    size_t GetSize(const Node& node) const
+    size_t GetNodeSize(const Node& node) const
     {
         if (node.isLeaf)
         {
@@ -38,14 +38,14 @@ private:
         size_t size = 0;
         for (auto childIndex : node.children)
         {
-            // TODO: <JI> Get child from nodes list
-            //size += GetSize(child);
+            const Node& child = mNodes[childIndex];
+            size += GetNodeSize(child);
         }
         
         return size;
     }
     
-    size_t GetHeight(const Node& node) const
+    size_t GetNodeHeight(const Node& node) const
     {
         if (node.isLeaf)
         {
@@ -55,12 +55,12 @@ private:
         size_t height = 0;
         for (auto childIndex : node.children)
         {
-            // TODO: <JI> Get child from nodes list
-            //height = std::max(GetHeight(child), height);
+            const Node& child = mNodes[childIndex];
+            height = std::max(GetNodeHeight(child), height);
         }
         
         return height + 1;
     }
     
-    Node mRoot;
+    std::vector<Node> mNodes;
 };
