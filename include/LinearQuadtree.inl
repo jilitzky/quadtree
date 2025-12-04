@@ -2,9 +2,6 @@ template<typename T>
 LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t nodeCapacity)
 {
     mNodeCapacity = nodeCapacity;
-    size_t depth = 0; // TODO: What's a good heuristic for estimating the depth or number of nodes needed?
-    size_t totalNodes = (std::pow(4, depth + 1) - 1) / 3;
-    mNodes.reserve(totalNodes);
     mNodes.emplace_back(bounds);
 }
 
