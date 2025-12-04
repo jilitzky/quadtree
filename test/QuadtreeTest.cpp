@@ -7,7 +7,7 @@ class QuadtreeTest : public ::testing::Test
 {
 protected:
     Quadtree<int, 1> _tree = { AABB({ 0, 0 }, { 100, 100 }) };
-    LinearQuadtree<int, 1> _newTree = { AABB({ 0, 0 }, { 100, 100 }) };
+    LinearQuadtree<int> _newTree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
 };
 
 TEST_F(QuadtreeTest, Insert)
