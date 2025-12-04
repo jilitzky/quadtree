@@ -1,5 +1,3 @@
-#include "Quadtree.h"
-
 template<typename T, size_t Capacity>
 Quadtree<T, Capacity>::Quadtree(const AABB& bounds) : mBounds(bounds)
 {
