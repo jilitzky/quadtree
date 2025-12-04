@@ -15,6 +15,7 @@ public:
     size_t GetHeight() const;
     
     bool Insert(int data, const Vector2& position);
+    bool Remove(int data, const Vector2& position);
     
     LinearQuadtree& operator=(const LinearQuadtree&) = delete;
     LinearQuadtree& operator=(LinearQuadtree&&) = default;
@@ -25,11 +26,16 @@ private:
     int GetChildIndex(int nodeIndex, const Vector2& position) const;
     
     bool Insert(int nodeIndex, int data, const Vector2& position);
+    bool Remove(int nodeIndex, int data, const Vector2& position);
+    
     void Subdivide(int nodeIndex);
+    void TryMerge(int nodeIndex);
     
     int AllocateNode(const AABB& bounds);
+    void FreeNode(int nodeIndex);
     
     std::vector<Node<T>> mNodes;
+    int mFreeHead = -1;
 };
 
 #include "LinearQuadtree.inl"

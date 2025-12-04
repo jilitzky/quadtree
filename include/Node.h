@@ -11,9 +11,13 @@ struct Node
     };
     
     AABB bounds;
-    bool isLeaf = true;
+    union
+    {
+        std::array<int, 4> children = { -1, -1, -1, -1 };
+        int nextFree;
+    };
     std::vector<Element> elements;
-    std::array<int, 4> children = { -1, -1, -1, -1 };
+    bool isLeaf = true;
     
     Node(const AABB& bounds) : bounds(bounds) {}
 };

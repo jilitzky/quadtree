@@ -29,6 +29,12 @@ bool LinearQuadtree<T, Capacity>::Insert(int data, const Vector2& position)
 }
 
 template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Remove(int data, const Vector2& position)
+{
+    return Remove(0, data, position);
+}
+
+template<typename T, size_t Capacity>
 size_t LinearQuadtree<T, Capacity>::GetSize(int nodeIndex) const
 {
     const Node<T>& node = mNodes[nodeIndex];
@@ -113,6 +119,42 @@ bool LinearQuadtree<T, Capacity>::Insert(int nodeIndex, int data, const Vector2&
 }
 
 template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Remove(int nodeIndex, int data, const Vector2& position)
+{
+    if (!mNodes[nodeIndex].bounds.Contains(position))
+    {
+        return false;
+    }
+
+    if (mNodes[nodeIndex].isLeaf)
+    {
+        auto& elements = mNodes[nodeIndex].elements;
+        auto it = std::find_if(elements.begin(), elements.end(), [&](const auto& element)
+        {
+            return element.data == data;
+        });
+        
+        if (it != elements.end())
+        {
+            *it = elements.back();
+            elements.pop_back();
+            return true;
+        }
+        
+        return false;
+    }
+
+    int childIndex = GetChildIndex(nodeIndex, position);
+    if (Remove(mNodes[nodeIndex].children[childIndex], data, position))
+    {
+        TryMerge(nodeIndex);
+        return true;
+    }
+
+    return false;
+}
+
+template<typename T, size_t Capacity>
 void LinearQuadtree<T, Capacity>::Subdivide(int nodeIndex)
 {
     AABB bounds = mNodes[nodeIndex].bounds;
@@ -145,9 +187,72 @@ void LinearQuadtree<T, Capacity>::Subdivide(int nodeIndex)
 }
 
 template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::TryMerge(int nodeIndex)
+{
+    // TODO: <JI> childIndex sometimes means relative index and sometimes absolute
+    // I should come up with better language for it such as childDir, childOffset or childRelativeIndex
+    // and childIndex or childAbsoluteIndex for the one that slots into the nodes vector
+    for (int childIndex : mNodes[nodeIndex].children)
+    {
+        if (!mNodes[childIndex].isLeaf)
+        {
+            return;
+        }
+    }
+
+    size_t totalSize = 0;
+    for (int childIndex : mNodes[nodeIndex].children)
+    {
+        totalSize += mNodes[childIndex].elements.size();
+    }
+
+    if (totalSize <= Capacity)
+    {
+        mNodes[nodeIndex].elements.reserve(totalSize);
+        for (int childIndex : mNodes[nodeIndex].children)
+        {
+            for (auto& element : mNodes[childIndex].elements)
+            {
+                mNodes[nodeIndex].elements.push_back(std::move(element));
+            }
+        }
+
+        for (int childIndex : mNodes[nodeIndex].children)
+        {
+            FreeNode(childIndex);
+        }
+
+        mNodes[nodeIndex].children.fill(-1);
+        mNodes[nodeIndex].isLeaf = true;
+    }
+}
+
+template<typename T, size_t Capacity>
 int LinearQuadtree<T, Capacity>::AllocateNode(const AABB& bounds)
 {
-    // TODO: <JI> Implement free list
-    mNodes.emplace_back(bounds);
-    return static_cast<int32_t>(mNodes.size() - 1);
+    int index;
+
+    if (mFreeHead != -1)
+    {
+        index = mFreeHead;
+        mFreeHead = mNodes[index].nextFree;
+        mNodes[index].bounds = bounds;
+        mNodes[index].children.fill(-1);
+        mNodes[index].isLeaf = true;
+    }
+    else
+    {
+        index = static_cast<int>(mNodes.size());
+        mNodes.emplace_back(bounds);
+    }
+
+    return index;
+}
+
+template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::FreeNode(int nodeIndex)
+{
+    mNodes[nodeIndex].elements.clear();
+    mNodes[nodeIndex].nextFree = mFreeHead;
+    mFreeHead = nodeIndex;
 }

@@ -141,10 +141,10 @@ TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
 
 TEST_F(QuadtreeTest, Remove)
 {
-    _tree.Insert({ 25, 25 }, 1);
-    _tree.Insert({ 87, 87 }, 2);
-    _tree.Insert({ 56, 68 }, 3);
-    _tree.Insert({ 68, 56 }, 4);
+    _newTree.Insert(1, { 25, 25 });
+    _newTree.Insert(2, { 87, 87 });
+    _newTree.Insert(3, { 56, 68 });
+    _newTree.Insert(4, { 68, 56 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -156,10 +156,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 4);
-    ASSERT_TRUE(_tree.GetHeight() == 4);
+    ASSERT_TRUE(_newTree.GetSize() == 4);
+    ASSERT_TRUE(_newTree.GetHeight() == 4);
 
-    bool removed = _tree.Remove({ 68, 56 }, 4);
+    bool removed = _newTree.Remove(4, { 68, 56 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -172,10 +172,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 3);
-    ASSERT_TRUE(_tree.GetHeight() == 3);
+    ASSERT_TRUE(_newTree.GetSize() == 3);
+    ASSERT_TRUE(_newTree.GetHeight() == 3);
 
-    removed = _tree.Remove({ 56, 68 }, 3);
+    removed = _newTree.Remove(3, { 56, 68 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -188,10 +188,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.GetSize() == 2);
-    ASSERT_TRUE(_tree.GetHeight() == 2);
+    ASSERT_TRUE(_newTree.GetSize() == 2);
+    ASSERT_TRUE(_newTree.GetHeight() == 2);
 
-    removed = _tree.Remove({ 87, 87 }, 2);
+    removed = _newTree.Remove(2, { 87, 87 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -204,10 +204,10 @@ TEST_F(QuadtreeTest, Remove)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.GetSize() == 1);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(_newTree.GetSize() == 1);
+    ASSERT_TRUE(_newTree.GetHeight() == 1);
 
-    removed = _tree.Remove({ 25, 25 }, 1);
+    removed = _newTree.Remove(1, { 25, 25 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -220,12 +220,12 @@ TEST_F(QuadtreeTest, Remove)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.GetSize() == 0);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(_newTree.GetSize() == 0);
+    ASSERT_TRUE(_newTree.GetHeight() == 1);
 }
 
 TEST_F(QuadtreeTest, Remove_NotFound)
 {
-    bool removed = _tree.Remove({ 50, 50 }, 1);
+    bool removed = _newTree.Remove(1, { 50, 50 });
     ASSERT_FALSE(removed);
 }
