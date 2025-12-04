@@ -76,20 +76,19 @@ template<typename T, size_t Capacity>
 int LinearQuadtree<T, Capacity>::GetChildIndex(int nodeIndex, const Vector2& position) const
 {
     const Node<T>& node = mNodes[nodeIndex];
-
-    int childIndex = 0;
- 
+    
+    int offset = 0;
     Vector2 center = node.bounds.GetCenter();
     if (position.x > center.x)
     {
-        childIndex += 1;
+        offset += 1;
     }
     if (position.y < center.y)
     {
-        childIndex += 2;
+        offset += 2;
     }
     
-    return childIndex;
+    return mNodes[nodeIndex].children[offset];
 }
 
 template<typename T, size_t Capacity>
@@ -103,7 +102,7 @@ bool LinearQuadtree<T, Capacity>::Insert(int nodeIndex, int data, const Vector2&
     if (!mNodes[nodeIndex].isLeaf)
     {
         int childIndex = GetChildIndex(nodeIndex, position);
-        return Insert(mNodes[nodeIndex].children[childIndex], data, position);
+        return Insert(childIndex, data, position);
     }
 
     mNodes[nodeIndex].elements.push_back({ data, position });
@@ -145,7 +144,7 @@ bool LinearQuadtree<T, Capacity>::Remove(int nodeIndex, int data, const Vector2&
     }
 
     int childIndex = GetChildIndex(nodeIndex, position);
-    if (Remove(mNodes[nodeIndex].children[childIndex], data, position))
+    if (Remove(childIndex, data, position))
     {
         TryMerge(nodeIndex);
         return true;
@@ -181,7 +180,7 @@ void LinearQuadtree<T, Capacity>::Subdivide(int nodeIndex)
     for (const auto& element : mNodes[nodeIndex].elements)
     {
         int childIndex = GetChildIndex(nodeIndex, element.position);
-        Insert(mNodes[nodeIndex].children[childIndex], element.data, element.position);
+        Insert(childIndex, element.data, element.position);
     }
     mNodes[nodeIndex].elements.clear();
 }
@@ -189,9 +188,6 @@ void LinearQuadtree<T, Capacity>::Subdivide(int nodeIndex)
 template<typename T, size_t Capacity>
 void LinearQuadtree<T, Capacity>::TryMerge(int nodeIndex)
 {
-    // TODO: <JI> childIndex sometimes means relative index and sometimes absolute
-    // I should come up with better language for it such as childDir, childOffset or childRelativeIndex
-    // and childIndex or childAbsoluteIndex for the one that slots into the nodes vector
     for (int childIndex : mNodes[nodeIndex].children)
     {
         if (!mNodes[childIndex].isLeaf)
