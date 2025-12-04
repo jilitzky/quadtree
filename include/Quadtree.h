@@ -3,7 +3,7 @@
 #include <vector>
 #include "AABB.h"
 
-template<typename T, size_t Capacity = 4>
+template<typename T, size_t Capacity>
 class Quadtree
 {
 public:
