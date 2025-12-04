@@ -1,7 +1,10 @@
 template<typename T>
-LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t capacityPerNode)
+LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t nodeCapacity)
 {
-    mCapacityPerNode = capacityPerNode;
+    mNodeCapacity = nodeCapacity;
+    size_t depth = 0; // TODO: What's a good heuristic for estimating the depth or number of nodes needed?
+    size_t totalNodes = (std::pow(4, depth + 1) - 1) / 3;
+    mNodes.reserve(totalNodes);
     mNodes.emplace_back(bounds);
 }
 
@@ -24,13 +27,13 @@ size_t LinearQuadtree<T>::GetHeight() const
 }
 
 template<typename T>
-bool LinearQuadtree<T>::Insert(int data, const Vector2& position)
+bool LinearQuadtree<T>::Insert(T data, const Vector2& position)
 {
     return Insert(0, data, position);
 }
 
 template<typename T>
-bool LinearQuadtree<T>::Remove(int data, const Vector2& position)
+bool LinearQuadtree<T>::Remove(T data, const Vector2& position)
 {
     return Remove(0, data, position);
 }
@@ -93,7 +96,7 @@ int LinearQuadtree<T>::GetChildIndex(int nodeIndex, const Vector2& position) con
 }
 
 template<typename T>
-bool LinearQuadtree<T>::Insert(int nodeIndex, int data, const Vector2& position)
+bool LinearQuadtree<T>::Insert(int nodeIndex, T data, const Vector2& position)
 {
     if (!mNodes[nodeIndex].bounds.Contains(position))
     {
@@ -107,10 +110,8 @@ bool LinearQuadtree<T>::Insert(int nodeIndex, int data, const Vector2& position)
     }
 
     mNodes[nodeIndex].elements.push_back({ data, position });
-
-    AABB bounds = mNodes[nodeIndex].bounds;
-    bool canSubdivide = bounds.GetWidth() >= 2.f && bounds.GetHeight() >= 2.f;
-    if (mNodes[nodeIndex].elements.size() > mCapacityPerNode && canSubdivide)
+    
+    if (mNodes[nodeIndex].elements.size() > mNodeCapacity)
     {
         Subdivide(nodeIndex);
     }
@@ -119,7 +120,7 @@ bool LinearQuadtree<T>::Insert(int nodeIndex, int data, const Vector2& position)
 }
 
 template<typename T>
-bool LinearQuadtree<T>::Remove(int nodeIndex, int data, const Vector2& position)
+bool LinearQuadtree<T>::Remove(int nodeIndex, T data, const Vector2& position)
 {
     if (!mNodes[nodeIndex].bounds.Contains(position))
     {
@@ -203,7 +204,7 @@ void LinearQuadtree<T>::TryMerge(int nodeIndex)
         totalElements += mNodes[childIndex].elements.size();
     }
 
-    if (totalElements <= mCapacityPerNode)
+    if (totalElements <= mNodeCapacity)
     {
         mNodes[nodeIndex].elements.reserve(totalElements);
         for (int childIndex : mNodes[nodeIndex].children)

@@ -1,12 +1,12 @@
 #include <fstream>
 #include <iostream>
-#include "Quadtree.h"
+#include "LinearQuadtree.h"
 
 std::vector<Vector2> ReadPositions(std::istream& stream);
 
 int main()
 {
-    Quadtree<size_t, 4> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }) };
+    LinearQuadtree<size_t> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
     std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
@@ -22,18 +22,18 @@ int main()
     
     for (size_t i = 0; i < positions.size(); ++i)
     {
-        tree.Insert(positions[i], i + 1);
+        tree.Insert(i + 1, positions[i]);
     }
     
-    for (const auto& position : positions)
-    {
-        tree.FindNearest(position);
-    }
+//    for (const auto& position : positions)
+//    {
+//        tree.FindNearest(position);
+//    }
     
     size_t data = positions.size();
     for (auto it = positions.rbegin(); it != positions.rend(); ++it)
     {
-        tree.Remove(*it, data--);
+        tree.Remove(data--, *it);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
