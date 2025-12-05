@@ -44,7 +44,7 @@ size_t Quadtree<T, Capacity>::GetHeight() const
 }
 
 template<typename T, size_t Capacity>
-bool Quadtree<T, Capacity>::Insert(const Vector2& position, T data)
+bool Quadtree<T, Capacity>::Insert(T data, const Vector2& position)
 {
     if (!mBounds.Contains(position))
     {
@@ -54,7 +54,7 @@ bool Quadtree<T, Capacity>::Insert(const Vector2& position, T data)
     if (!mIsLeaf)
     {
         int index = GetChildIndex(position);
-        return mChildren[index]->Insert(position, data);
+        return mChildren[index]->Insert(data, position);
     }
 
     mElements.push_back({ position, data });
@@ -69,7 +69,7 @@ bool Quadtree<T, Capacity>::Insert(const Vector2& position, T data)
 }
 
 template<typename T, size_t Capacity>
-bool Quadtree<T, Capacity>::Remove(const Vector2& position, T data)
+bool Quadtree<T, Capacity>::Remove(T data, const Vector2& position)
 {
     if (!mBounds.Contains(position))
     {
@@ -94,7 +94,7 @@ bool Quadtree<T, Capacity>::Remove(const Vector2& position, T data)
     }
 
     int index = GetChildIndex(position);
-    if (mChildren[index]->Remove(position, data))
+    if (mChildren[index]->Remove(data, position))
     {
         TryMerge();
         return true;
@@ -150,7 +150,7 @@ void Quadtree<T, Capacity>::Subdivide()
     for (const auto& element : mElements)
     {
         int index = GetChildIndex(element.position);
-        mChildren[index]->Insert(element.position, element.data);
+        mChildren[index]->Insert(element.data, element.position);
     }
 
     mIsLeaf = false;

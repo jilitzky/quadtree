@@ -1,6 +1,7 @@
 #pragma once
 #include "AABB.h"
 #include "Node.h"
+#include "Vector2.h"
 
 template<typename T>
 class LinearQuadtree
@@ -17,6 +18,8 @@ public:
     bool Insert(T data, const Vector2& position);
     bool Remove(T data, const Vector2& position);
     
+    std::optional<Element<T>> FindNearest(const Vector2& position) const;
+    
     LinearQuadtree& operator=(const LinearQuadtree&) = delete;
     LinearQuadtree& operator=(LinearQuadtree&&) = default;
     
@@ -30,6 +33,8 @@ private:
     
     void Subdivide(int nodeIndex);
     void TryMerge(int nodeIndex);
+    
+    void FindNearest(int nodeIndex, const Vector2& position, float& bestDistanceSq, std::optional<Element<T>>& nearest) const;
     
     int AllocateNode(const AABB& bounds);
     void FreeNode(int nodeIndex);

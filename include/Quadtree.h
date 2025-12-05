@@ -2,6 +2,7 @@
 #include <optional>
 #include <vector>
 #include "AABB.h"
+#include "Vector2.h"
 
 template<typename T, size_t Capacity>
 class Quadtree
@@ -21,8 +22,8 @@ public:
     size_t GetSize() const;
     size_t GetHeight() const;
     
-    bool Insert(const Vector2& position, T data);
-    bool Remove(const Vector2& position, T data);
+    bool Insert(T data, const Vector2& position);
+    bool Remove(T data, const Vector2& position);
     
     std::optional<Element> FindNearest(const Vector2& target) const;
 

@@ -1,6 +1,9 @@
 #include <fstream>
 #include <iostream>
+#include "Quadtree.h"
 #include "LinearQuadtree.h"
+
+using Tree = LinearQuadtree<size_t>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {
@@ -33,7 +36,7 @@ bool TryReadPositions(std::vector<Vector2>& positions)
     return true;
 }
 
-bool InsertPositions(LinearQuadtree<size_t>& tree, const std::vector<Vector2>& positions)
+bool InsertPositions(Tree& tree, const std::vector<Vector2>& positions)
 {
     bool success = true;
     for (size_t i = 0; i < positions.size(); ++i)
@@ -43,15 +46,15 @@ bool InsertPositions(LinearQuadtree<size_t>& tree, const std::vector<Vector2>& p
     return success;
 }
 
-void FindNearest(LinearQuadtree<size_t>& tree, const std::vector<Vector2>& positions)
+void FindNearest(Tree& tree, const std::vector<Vector2>& positions)
 {
-//    for (const auto& position : positions)
-//    {
-//        tree.FindNearest(position);
-//    }
+    for (const auto& position : positions)
+    {
+        tree.FindNearest(position);
+    }
 }
 
-bool RemovePositions(LinearQuadtree<size_t>& tree, const std::vector<Vector2>& positions)
+bool RemovePositions(Tree& tree, const std::vector<Vector2>& positions)
 {
     bool success = true;
     size_t data = positions.size();
@@ -64,7 +67,7 @@ bool RemovePositions(LinearQuadtree<size_t>& tree, const std::vector<Vector2>& p
 
 int main()
 {
-    LinearQuadtree<size_t> tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
+    Tree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
 
     std::vector<Vector2> positions;
     if (!TryReadPositions(positions))

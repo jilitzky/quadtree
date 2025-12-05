@@ -153,6 +153,15 @@ bool LinearQuadtree<T>::Remove(int nodeIndex, T data, const Vector2& position)
 }
 
 template<typename T>
+std::optional<Element<T>> LinearQuadtree<T>::FindNearest(const Vector2& position) const
+{
+    std::optional<Element<T>> nearest = std::nullopt;
+    float bestDistanceSq = std::numeric_limits<float>::max(); // TODO: Allow a radius to be passed in as an optional parameter
+    FindNearest(0, position, bestDistanceSq, nearest);
+    return nearest;
+}
+
+template<typename T>
 void LinearQuadtree<T>::Subdivide(int nodeIndex)
 {
     AABB bounds = mNodes[nodeIndex].bounds;
@@ -219,6 +228,50 @@ void LinearQuadtree<T>::TryMerge(int nodeIndex)
 
         mNodes[nodeIndex].children.fill(-1);
         mNodes[nodeIndex].isLeaf = true;
+    }
+}
+
+template<typename T>
+void LinearQuadtree<T>::FindNearest(int nodeIndex, const Vector2& position, float& bestDistanceSq, std::optional<Element<T>>& nearest) const
+{
+    const Node<T>& node = mNodes[nodeIndex];
+    
+    for (const auto& element : node.elements)
+    {
+        float distanceSq = element.position.DistanceSquared(position);
+        if (distanceSq < bestDistanceSq)
+        {
+            bestDistanceSq = distanceSq;
+            nearest = element;
+        }
+    }
+
+    if (node.isLeaf)
+    {
+        return;
+    }
+    
+    Vector2 center = node.bounds.GetCenter();
+    int isRight = position.x >= center.x;
+    int isBottom = position.y < center.y;
+
+    std::array<int, 4> sortedIndices;
+    sortedIndices[0] = isBottom * 2 + isRight;
+    sortedIndices[1] = isBottom * 2 + (1 - isRight);
+    sortedIndices[2] = (1 - isBottom) * 2 + isRight;
+    sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
+
+    for (int sortedIndex : sortedIndices)
+    {
+        int childIndex = node.children[sortedIndex];
+        AABB childBounds = mNodes[childIndex].bounds;
+        float distanceX = std::max({childBounds.min.x - position.x, 0.0f, position.x - childBounds.max.x});
+        float distanceY = std::max({childBounds.min.y - position.y, 0.0f, position.y - childBounds.max.y});
+        float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+        if (distanceSq < bestDistanceSq)
+        {
+            FindNearest(childIndex, position, bestDistanceSq, nearest);
+        }
     }
 }
 
