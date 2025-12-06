@@ -1,7 +1,7 @@
 template<typename T>
-LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t nodeCapacity)
+LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t capacityPerNode)
 {
-    mNodeCapacity = nodeCapacity;
+    mCapacityPerNode = capacityPerNode;
     mNodes.emplace_back(bounds);
 }
 
@@ -108,7 +108,7 @@ bool LinearQuadtree<T>::Insert(int nodeIndex, T data, const Vector2& position)
 
     mNodes[nodeIndex].elements.push_back({ data, position });
     
-    if (mNodes[nodeIndex].elements.size() > mNodeCapacity)
+    if (mNodes[nodeIndex].elements.size() > mCapacityPerNode)
     {
         Subdivide(nodeIndex);
     }
@@ -210,7 +210,7 @@ void LinearQuadtree<T>::TryMerge(int nodeIndex)
         totalElements += mNodes[childIndex].elements.size();
     }
 
-    if (totalElements <= mNodeCapacity)
+    if (totalElements <= mCapacityPerNode)
     {
         mNodes[nodeIndex].elements.reserve(totalElements);
         for (int childIndex : mNodes[nodeIndex].children)

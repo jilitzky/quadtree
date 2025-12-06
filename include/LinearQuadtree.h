@@ -7,7 +7,7 @@ template<typename T>
 class LinearQuadtree
 {
 public:
-    LinearQuadtree(const AABB& bounds, size_t nodeCapacity);
+    LinearQuadtree(const AABB& bounds, size_t capacityPerNode);
     LinearQuadtree(const LinearQuadtree& other) = delete;
     LinearQuadtree(LinearQuadtree&& other) = default;
     
@@ -40,7 +40,7 @@ private:
     void FreeNode(int nodeIndex);
     
     std::vector<Node<T>> mNodes;
-    size_t mNodeCapacity;
+    size_t mCapacityPerNode;
     int mFreeHead = -1;
 };
 
