@@ -5,7 +5,8 @@ struct Vector2
     float x;
     float y;
     
-    Vector2(float x = 0.f, float y = 0.f) : x(x), y(y) {}
+    Vector2() : x(0.f), y(0.f) {}
+    Vector2(float x, float y) : x(x), y(y) {}
     
     float DistanceSquared(const Vector2& other) const
     {

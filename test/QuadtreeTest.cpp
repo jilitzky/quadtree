@@ -1,12 +1,12 @@
 #include <optional>
 #include <gtest/gtest.h>
+#include "LinearQuadtree.h"
 #include "Quadtree.h"
 
 class QuadtreeTest : public ::testing::Test
 {
 protected:
-    using TestTree = Quadtree<int, 1>;
-    TestTree _tree = { AABB({ 0, 0 }, { 100, 100 }) };
+    LinearQuadtree<int, 1> _tree = { AABB({ 0, 0 }, { 100, 100 }) };
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -24,7 +24,7 @@ TEST_F(QuadtreeTest, Insert)
     ASSERT_TRUE(_tree.GetSize() == 0);
     ASSERT_TRUE(_tree.GetHeight() == 1);
 
-    _tree.Insert({ 25, 25 }, 1);
+    _tree.Insert(1, { 25, 25 });
 
     //  ______________________
     // |                      |
@@ -39,7 +39,7 @@ TEST_F(QuadtreeTest, Insert)
     ASSERT_TRUE(_tree.GetSize() == 1);
     ASSERT_TRUE(_tree.GetHeight() == 1);
 
-    _tree.Insert({ 87, 87 }, 2);
+    _tree.Insert(2, { 87, 87 });
 
     //  __________ ___________
     // |          |        2  |
@@ -54,7 +54,7 @@ TEST_F(QuadtreeTest, Insert)
     ASSERT_TRUE(_tree.GetSize() == 2);
     ASSERT_TRUE(_tree.GetHeight() == 2);
 
-    _tree.Insert({ 56, 68 }, 3);
+    _tree.Insert(3, { 56, 68 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -69,7 +69,7 @@ TEST_F(QuadtreeTest, Insert)
     ASSERT_TRUE(_tree.GetSize() == 3);
     ASSERT_TRUE(_tree.GetHeight() == 3);
 
-    _tree.Insert({ 68, 56 }, 4);
+    _tree.Insert(4, { 68, 56 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -87,21 +87,21 @@ TEST_F(QuadtreeTest, Insert)
 
 TEST_F(QuadtreeTest, Insert_OutOfBounds)
 {
-    bool inserted = _tree.Insert({ 101, 101 }, 1);
+    bool inserted = _tree.Insert(1, { 101, 101 });
     ASSERT_FALSE(inserted);
     ASSERT_TRUE(_tree.GetSize() == 0);
 }
 
 TEST_F(QuadtreeTest, FindNearest)
 {
-    _tree.Insert({ 25, 25 }, 1);
-    _tree.Insert({ 87, 87 }, 2);
-    _tree.Insert({ 87, 68 }, 3);
-    _tree.Insert({ 56, 56 }, 4);
-    _tree.Insert({ 56, 68 }, 5);
+    _tree.Insert(1, { 25, 25 });
+    _tree.Insert(2, { 87, 87 });
+    _tree.Insert(3, { 87, 68 });
+    _tree.Insert(4, { 56, 56 });
+    _tree.Insert(5, { 56, 68 });
 
     Vector2 expected = { 68, 68 };
-    _tree.Insert(expected, 6);
+    _tree.Insert(6, expected);
 
     //  __________ ___________
     // |          |     |  2  |
@@ -113,37 +113,37 @@ TEST_F(QuadtreeTest, FindNearest)
     // |          |           |
     // |__________|___________|
 
-    std::optional<TestTree::Element> nearest = _tree.FindNearest({ 75, 75 });
+    auto nearest = _tree.FindNearest({ 75, 75 });
     ASSERT_TRUE(nearest.value().position == expected);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Single)
 {
     Vector2 expected = { 25, 25 };
-    _tree.Insert(expected, 1);
+    _tree.Insert(1,expected);
 
-    std::optional<TestTree::Element> nearest = _tree.FindNearest({ 50, 50 });
+    auto nearest = _tree.FindNearest({ 50, 50 });
     ASSERT_TRUE(nearest.value().position == expected);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Empty)
 {
-    std::optional<TestTree::Element> nearest = _tree.FindNearest({ 50, 50 });
+    auto nearest = _tree.FindNearest({ 50, 50 });
     ASSERT_FALSE(nearest.has_value());
 }
 
 TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
 {
-    std::optional<TestTree::Element> nearest = _tree.FindNearest({ 101, 101 });
+    auto nearest = _tree.FindNearest({ 101, 101 });
     ASSERT_FALSE(nearest.has_value());
 }
 
 TEST_F(QuadtreeTest, Remove)
 {
-    _tree.Insert({ 25, 25 }, 1);
-    _tree.Insert({ 87, 87 }, 2);
-    _tree.Insert({ 56, 68 }, 3);
-    _tree.Insert({ 68, 56 }, 4);
+    _tree.Insert(1, { 25, 25 });
+    _tree.Insert(2, { 87, 87 });
+    _tree.Insert(3, { 56, 68 });
+    _tree.Insert(4, { 68, 56 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -158,7 +158,7 @@ TEST_F(QuadtreeTest, Remove)
     ASSERT_TRUE(_tree.GetSize() == 4);
     ASSERT_TRUE(_tree.GetHeight() == 4);
 
-    bool removed = _tree.Remove({ 68, 56 }, 4);
+    bool removed = _tree.Remove(4, { 68, 56 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -174,7 +174,7 @@ TEST_F(QuadtreeTest, Remove)
     ASSERT_TRUE(_tree.GetSize() == 3);
     ASSERT_TRUE(_tree.GetHeight() == 3);
 
-    removed = _tree.Remove({ 56, 68 }, 3);
+    removed = _tree.Remove(3, { 56, 68 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -190,7 +190,7 @@ TEST_F(QuadtreeTest, Remove)
     ASSERT_TRUE(_tree.GetSize() == 2);
     ASSERT_TRUE(_tree.GetHeight() == 2);
 
-    removed = _tree.Remove({ 87, 87 }, 2);
+    removed = _tree.Remove(2, { 87, 87 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -206,7 +206,7 @@ TEST_F(QuadtreeTest, Remove)
     ASSERT_TRUE(_tree.GetSize() == 1);
     ASSERT_TRUE(_tree.GetHeight() == 1);
 
-    removed = _tree.Remove({ 25, 25 }, 1);
+    removed = _tree.Remove(1, { 25, 25 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -225,6 +225,6 @@ TEST_F(QuadtreeTest, Remove)
 
 TEST_F(QuadtreeTest, Remove_NotFound)
 {
-    bool removed = _tree.Remove({ 50, 50 }, 1);
+    bool removed = _tree.Remove(1, { 50, 50 });
     ASSERT_FALSE(removed);
 }

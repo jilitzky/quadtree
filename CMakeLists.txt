@@ -13,13 +13,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+file(GLOB ALL_HEADERS "include/*.h" "include/*.inl")
+
 # --- QuadtreeTest ---
 
 add_executable(QuadtreeTest
-    include/AABB.h
-    include/Quadtree.h
-    include/Quadtree.inl
-    include/Vector2.h
+    ${ALL_HEADERS}
     test/QuadtreeTest.cpp 
 )
 
@@ -35,7 +34,8 @@ target_link_libraries(QuadtreeTest PRIVATE
 
 # --- QuadtreeBenchmark ---
 
-add_executable(QuadtreeBenchmark 
+add_executable(QuadtreeBenchmark
+    ${ALL_HEADERS}
     benchmark/main.cpp 
 )
 
