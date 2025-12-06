@@ -1,42 +1,41 @@
-template<typename T>
-LinearQuadtree<T>::LinearQuadtree(const AABB& bounds, size_t capacityPerNode)
+template<typename T, size_t Capacity>
+LinearQuadtree<T, Capacity>::LinearQuadtree(const AABB& bounds)
 {
-    mCapacityPerNode = capacityPerNode;
     mNodes.emplace_back(bounds);
 }
 
-template<typename T>
-const AABB& LinearQuadtree<T>::GetBounds() const
+template<typename T, size_t Capacity>
+const AABB& LinearQuadtree<T, Capacity>::GetBounds() const
 {
     return mNodes[0].bounds;
 }
 
-template<typename T>
-size_t LinearQuadtree<T>::GetSize() const
+template<typename T, size_t Capacity>
+size_t LinearQuadtree<T, Capacity>::GetSize() const
 {
     return GetSize(0);
 }
 
-template<typename T>
-size_t LinearQuadtree<T>::GetHeight() const
+template<typename T, size_t Capacity>
+size_t LinearQuadtree<T, Capacity>::GetHeight() const
 {
     return GetHeight(0);
 }
 
-template<typename T>
-bool LinearQuadtree<T>::Insert(T data, const Vector2& position)
+template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Insert(T data, const Vector2& position)
 {
     return Insert(0, data, position);
 }
 
-template<typename T>
-bool LinearQuadtree<T>::Remove(T data, const Vector2& position)
+template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Remove(T data, const Vector2& position)
 {
     return Remove(0, data, position);
 }
 
-template<typename T>
-size_t LinearQuadtree<T>::GetSize(int nodeIndex) const
+template<typename T, size_t Capacity>
+size_t LinearQuadtree<T, Capacity>::GetSize(int nodeIndex) const
 {
     const Node<T>& node = mNodes[nodeIndex];
     
@@ -54,8 +53,8 @@ size_t LinearQuadtree<T>::GetSize(int nodeIndex) const
     return size;
 }
 
-template<typename T>
-size_t LinearQuadtree<T>::GetHeight(int nodeIndex) const
+template<typename T, size_t Capacity>
+size_t LinearQuadtree<T, Capacity>::GetHeight(int nodeIndex) const
 {
     const Node<T>& node = mNodes[nodeIndex];
     
@@ -73,8 +72,8 @@ size_t LinearQuadtree<T>::GetHeight(int nodeIndex) const
     return height + 1;
 }
 
-template<typename T>
-int LinearQuadtree<T>::GetChildIndex(int nodeIndex, const Vector2& position) const
+template<typename T, size_t Capacity>
+int LinearQuadtree<T, Capacity>::GetChildIndex(int nodeIndex, const Vector2& position) const
 {
     const Node<T>& node = mNodes[nodeIndex];
     
@@ -92,8 +91,8 @@ int LinearQuadtree<T>::GetChildIndex(int nodeIndex, const Vector2& position) con
     return mNodes[nodeIndex].children[offset];
 }
 
-template<typename T>
-bool LinearQuadtree<T>::Insert(int nodeIndex, T data, const Vector2& position)
+template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Insert(int nodeIndex, T data, const Vector2& position)
 {
     if (!mNodes[nodeIndex].bounds.Contains(position))
     {
@@ -108,7 +107,7 @@ bool LinearQuadtree<T>::Insert(int nodeIndex, T data, const Vector2& position)
 
     mNodes[nodeIndex].elements.push_back({ data, position });
     
-    if (mNodes[nodeIndex].elements.size() > mCapacityPerNode)
+    if (mNodes[nodeIndex].elements.size() > Capacity)
     {
         Subdivide(nodeIndex);
     }
@@ -116,8 +115,8 @@ bool LinearQuadtree<T>::Insert(int nodeIndex, T data, const Vector2& position)
     return true;
 }
 
-template<typename T>
-bool LinearQuadtree<T>::Remove(int nodeIndex, T data, const Vector2& position)
+template<typename T, size_t Capacity>
+bool LinearQuadtree<T, Capacity>::Remove(int nodeIndex, T data, const Vector2& position)
 {
     if (!mNodes[nodeIndex].bounds.Contains(position))
     {
@@ -152,8 +151,8 @@ bool LinearQuadtree<T>::Remove(int nodeIndex, T data, const Vector2& position)
     return false;
 }
 
-template<typename T>
-std::optional<Element<T>> LinearQuadtree<T>::FindNearest(const Vector2& position) const
+template<typename T, size_t Capacity>
+std::optional<Element<T>> LinearQuadtree<T, Capacity>::FindNearest(const Vector2& position) const
 {
     std::optional<Element<T>> nearest = std::nullopt;
     float bestDistanceSq = std::numeric_limits<float>::max(); // TODO: Allow a radius to be passed in as an optional parameter
@@ -161,8 +160,8 @@ std::optional<Element<T>> LinearQuadtree<T>::FindNearest(const Vector2& position
     return nearest;
 }
 
-template<typename T>
-void LinearQuadtree<T>::Subdivide(int nodeIndex)
+template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::Subdivide(int nodeIndex)
 {
     AABB bounds = mNodes[nodeIndex].bounds;
     Vector2 min = bounds.min;
@@ -193,8 +192,8 @@ void LinearQuadtree<T>::Subdivide(int nodeIndex)
     mNodes[nodeIndex].elements.clear();
 }
 
-template<typename T>
-void LinearQuadtree<T>::TryMerge(int nodeIndex)
+template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::TryMerge(int nodeIndex)
 {
     for (int childIndex : mNodes[nodeIndex].children)
     {
@@ -210,7 +209,7 @@ void LinearQuadtree<T>::TryMerge(int nodeIndex)
         totalElements += mNodes[childIndex].elements.size();
     }
 
-    if (totalElements <= mCapacityPerNode)
+    if (totalElements <= Capacity)
     {
         mNodes[nodeIndex].elements.reserve(totalElements);
         for (int childIndex : mNodes[nodeIndex].children)
@@ -231,8 +230,8 @@ void LinearQuadtree<T>::TryMerge(int nodeIndex)
     }
 }
 
-template<typename T>
-void LinearQuadtree<T>::FindNearest(int nodeIndex, const Vector2& position, float& bestDistanceSq, std::optional<Element<T>>& nearest) const
+template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::FindNearest(int nodeIndex, const Vector2& position, float& bestDistanceSq, std::optional<Element<T>>& nearest) const
 {
     const Node<T>& node = mNodes[nodeIndex];
     
@@ -275,8 +274,8 @@ void LinearQuadtree<T>::FindNearest(int nodeIndex, const Vector2& position, floa
     }
 }
 
-template<typename T>
-int LinearQuadtree<T>::AllocateNode(const AABB& bounds)
+template<typename T, size_t Capacity>
+int LinearQuadtree<T, Capacity>::AllocateNode(const AABB& bounds)
 {
     int index;
 
@@ -297,8 +296,8 @@ int LinearQuadtree<T>::AllocateNode(const AABB& bounds)
     return index;
 }
 
-template<typename T>
-void LinearQuadtree<T>::FreeNode(int nodeIndex)
+template<typename T, size_t Capacity>
+void LinearQuadtree<T, Capacity>::FreeNode(int nodeIndex)
 {
     mNodes[nodeIndex].elements.clear();
     mNodes[nodeIndex].nextFree = mFreeHead;

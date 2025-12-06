@@ -1,11 +1,12 @@
 #include <optional>
 #include <gtest/gtest.h>
 #include "LinearQuadtree.h"
+#include "Quadtree.h"
 
 class QuadtreeTest : public ::testing::Test
 {
 protected:
-    LinearQuadtree<int> _tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
+    LinearQuadtree<int, 1> _tree = { AABB({ 0, 0 }, { 100, 100 }) };
 };
 
 TEST_F(QuadtreeTest, Insert)

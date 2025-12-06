@@ -57,7 +57,7 @@ bool Quadtree<T, Capacity>::Insert(T data, const Vector2& position)
         return mChildren[index]->Insert(data, position);
     }
 
-    mElements.push_back({ position, data });
+    mElements.push_back({data, position});
 
     bool canSubdivide = mBounds.GetWidth() >= 2.f && mBounds.GetHeight() >= 2.f;
     if (mElements.size() > Capacity && canSubdivide)
@@ -78,9 +78,9 @@ bool Quadtree<T, Capacity>::Remove(T data, const Vector2& position)
 
     if (mIsLeaf)
     {
-        auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
+        auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element<T>& element)
         {
-            return element.position == position && element.data == data;
+            return element.data == data;
         });
         
         if (it != mElements.end())
@@ -104,9 +104,9 @@ bool Quadtree<T, Capacity>::Remove(T data, const Vector2& position)
 }
 
 template<typename T, size_t Capacity>
-std::optional<typename Quadtree<T, Capacity>::Element> Quadtree<T, Capacity>::FindNearest(const Vector2& target) const
+std::optional<Element<T>> Quadtree<T, Capacity>::FindNearest(const Vector2& target) const
 {
-    std::optional<Element> nearest = std::nullopt;
+    std::optional<Element<T>> nearest = std::nullopt;
     float bestDistanceSq = std::numeric_limits<float>::max();
     FindNearest(target, bestDistanceSq, nearest);
     return nearest;
@@ -195,7 +195,7 @@ void Quadtree<T, Capacity>::TryMerge()
 }
 
 template<typename T, size_t Capacity>
-void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
+void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element<T>>& nearest) const
 {
     for (const auto& element : mElements)
     {

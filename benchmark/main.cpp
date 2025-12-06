@@ -3,7 +3,7 @@
 #include "Quadtree.h"
 #include "LinearQuadtree.h"
 
-using Tree = LinearQuadtree<size_t>;
+using Tree = LinearQuadtree<size_t, 10>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {
@@ -67,7 +67,7 @@ bool RemovePositions(Tree& tree, const std::vector<Vector2>& positions)
 
 int main()
 {
-    Tree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }), 4 };
+    Tree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }) };
 
     std::vector<Vector2> positions;
     if (!TryReadPositions(positions))
