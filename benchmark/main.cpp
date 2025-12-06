@@ -3,7 +3,7 @@
 #include "Quadtree.h"
 #include "LinearQuadtree.h"
 
-using Tree = LinearQuadtree<size_t, 10>;
+using Tree = Quadtree<size_t, 10>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {
@@ -54,6 +54,17 @@ void FindNearest(Tree& tree, const std::vector<Vector2>& positions)
     }
 }
 
+void Query(Tree& tree, const std::vector<Vector2>& positions)
+{
+    for (size_t i = 0; i < positions.size(); i = i + 10)
+    {
+        Vector2 position = positions[i];
+        Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
+        Vector2 max = { std::max(-position.x, position.x), std::max(-position.y, position.y) };
+        tree.Query(AABB(min, max));
+    }
+}
+
 bool RemovePositions(Tree& tree, const std::vector<Vector2>& positions)
 {
     bool success = true;
@@ -85,6 +96,7 @@ int main()
     }
     
     FindNearest(tree, positions);
+    Query(tree, positions);
     
     if (!RemovePositions(tree, positions))
     {

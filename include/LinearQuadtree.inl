@@ -155,7 +155,7 @@ template<typename T, size_t Capacity>
 std::optional<Element<T>> LinearQuadtree<T, Capacity>::FindNearest(const Vector2& position) const
 {
     std::optional<Element<T>> nearest = std::nullopt;
-    float bestDistanceSq = std::numeric_limits<float>::max(); // TODO: Allow a radius to be passed in as an optional parameter
+    float bestDistanceSq = std::numeric_limits<float>::max();
     FindNearest(0, position, bestDistanceSq, nearest);
     return nearest;
 }

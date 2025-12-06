@@ -113,6 +113,14 @@ std::optional<Element<T>> Quadtree<T, Capacity>::FindNearest(const Vector2& targ
 }
 
 template<typename T, size_t Capacity>
+std::vector<Element<T>> Quadtree<T, Capacity>::Query(const AABB& bounds) const
+{
+    std::vector<Element<T>> elements;
+    Query(bounds, elements);
+    return elements;
+}
+
+template<typename T, size_t Capacity>
 int Quadtree<T, Capacity>::GetChildIndex(const Vector2& position) const
 {
     int index = 0;
@@ -233,5 +241,52 @@ void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistan
         {
             child->FindNearest(target, bestDistanceSq, nearest);
         }
+    }
+}
+
+template<typename T, size_t Capacity>
+void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element<T>>& elements) const
+{
+    if (!mBounds.Intersects(bounds))
+    {
+        return;
+    }
+
+    if (bounds.Contains(mBounds))
+    {
+        GatherElements(elements);
+        return;
+    }
+
+    if (mIsLeaf)
+    {
+        for (const auto& element : mElements)
+        {
+            if (bounds.Contains(element.position))
+            {
+                elements.push_back(element);
+            }
+        }
+        return;
+    }
+
+    for (const auto& child : mChildren)
+    {
+        child->Query(bounds, elements);
+    }
+}
+
+template<typename T, size_t Capacity>
+void Quadtree<T, Capacity>::GatherElements(std::vector<Element<T>>& elements) const
+{
+    if (mIsLeaf)
+    {
+        elements.insert(elements.end(), mElements.begin(), mElements.end());
+        return;
+    }
+    
+    for (const auto& child : mChildren)
+    {
+        child->GatherElements(elements);
     }
 }
