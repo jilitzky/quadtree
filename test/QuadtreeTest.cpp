@@ -6,7 +6,7 @@
 class QuadtreeTest : public ::testing::Test
 {
 protected:
-    LinearQuadtree<int, 1> _tree = { AABB({ 0, 0 }, { 100, 100 }) };
+    Quadtree<int, 1> _tree = { AABB({ 0, 0 }, { 100, 100 }) };
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -227,4 +227,39 @@ TEST_F(QuadtreeTest, Remove_NotFound)
 {
     bool removed = _tree.Remove(1, { 50, 50 });
     ASSERT_FALSE(removed);
+}
+
+TEST_F(QuadtreeTest, Query)
+{
+    _tree.Insert(1, { 25, 25 });
+    _tree.Insert(2, { 87, 87 });
+    _tree.Insert(3, { 56, 68 });
+    _tree.Insert(4, { 68, 56 });
+
+    AABB bounds = {{40, 38}, {75, 88}};
+    
+    //  __________ ___________
+    // |        ..|.....|. 2  |
+    // |        . |_____|.____|
+    // |        . |_3|__|.    |
+    // |________._|__|4_|.____|
+    // |        ..|.......    |
+    // |    1     |           |
+    // |          |           |
+    // |__________|___________|
+    
+    std::vector<Element<int>> elements = _tree.Query(bounds);
+    ASSERT_TRUE(elements.size() == 2);
+    
+    auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 3;
+    });
+    ASSERT_TRUE(it3 != elements.end());
+    
+    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 4;
+    });
+    ASSERT_TRUE(it4 != elements.end());
 }

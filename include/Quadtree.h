@@ -21,6 +21,7 @@ public:
     bool Remove(T data, const Vector2& position);
     
     std::optional<Element<T>> FindNearest(const Vector2& target) const;
+    std::vector<Element<T>> Query(const AABB& bounds) const;
 
     Quadtree& operator=(const Quadtree&) = delete;
     Quadtree& operator=(Quadtree&&) = default;
@@ -32,6 +33,8 @@ private:
     void TryMerge();
     
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element<T>>& nearest) const;
+    void Query(const AABB& bounds, std::vector<Element<T>>& elements) const;
+    void GatherElements(std::vector<Element<T>>& elements) const;
     
     AABB mBounds;
     bool mIsLeaf = true;
