@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include "Quadtree.h"
-#include "LinearQuadtree.h"
 
 using Tree = Quadtree<size_t, 10>;
 
@@ -36,44 +35,72 @@ bool TryReadPositions(std::vector<Vector2>& positions)
     return true;
 }
 
-bool InsertPositions(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::milliseconds Insert(Tree& tree, const std::vector<Vector2>& positions)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+    
     bool success = true;
     for (size_t i = 0; i < positions.size(); ++i)
     {
         success &= tree.Insert(i + 1, positions[i]);
     }
-    return success;
+    
+    if (!success)
+    {
+        std::cout << "ERROR: Failed to insert positions" << std::endl;
+    }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
-void FindNearest(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::milliseconds FindNearest(Tree& tree, const std::vector<Vector2>& positions)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+    
     for (const auto& position : positions)
     {
         tree.FindNearest(position);
     }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
-void Query(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::milliseconds Query(Tree& tree, const std::vector<Vector2>& positions)
 {
-    for (size_t i = 0; i < positions.size(); i = i + 10)
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    for (size_t i = 0; i < positions.size(); ++i)
     {
         Vector2 position = positions[i];
         Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
         Vector2 max = { std::max(-position.x, position.x), std::max(-position.y, position.y) };
         tree.Query(AABB(min, max));
     }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
-bool RemovePositions(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::milliseconds Remove(Tree& tree, const std::vector<Vector2>& positions)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+    
     bool success = true;
     size_t data = positions.size();
     for (auto it = positions.rbegin(); it != positions.rend(); ++it)
     {
         success &= tree.Remove(data--, *it);
     }
-    return success;
+    
+    if (!success)
+    {
+        std::cout << "ERROR: Failed to remove positions" << std::endl;
+    }
+    
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 }
 
 int main()
@@ -87,26 +114,15 @@ int main()
         return 1;
     }
     
-    auto start = std::chrono::high_resolution_clock::now();
+    auto insert = Insert(tree, positions);
+    auto findNearest = FindNearest(tree, positions);
+    auto query = Query(tree, positions);
+    auto remove = Remove(tree, positions);
     
-    if (!InsertPositions(tree, positions))
-    {
-        std::cout << "ERROR: Failed to insert positions" << std::endl;
-        return 1;
-    }
-    
-    FindNearest(tree, positions);
-    Query(tree, positions);
-    
-    if (!RemovePositions(tree, positions))
-    {
-        std::cout << "ERROR: Failed to remove positions" << std::endl;
-        return 1;
-    }
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Benchmark Time: " << duration << " ms" << std::endl;
+    std::cout << "Insert: " << insert.count() << " ms" << std::endl;
+    std::cout << "FindNearest: " << findNearest.count() << " ms" << std::endl;
+    std::cout << "Query: " << query.count() << " ms" << std::endl;
+    std::cout << "Remove: " << remove.count() << " ms" << std::endl;
     
     return 0;
 }
