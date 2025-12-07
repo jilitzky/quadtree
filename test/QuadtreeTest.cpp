@@ -1,6 +1,5 @@
 #include <optional>
 #include <gtest/gtest.h>
-#include "LinearQuadtree.h"
 #include "Quadtree.h"
 
 class QuadtreeTest : public ::testing::Test
