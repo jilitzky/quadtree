@@ -78,7 +78,7 @@ bool Quadtree<T, Capacity>::Remove(T data, const Vector2& position)
 
     if (mIsLeaf)
     {
-        auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element<T>& element)
+        auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
         {
             return element.data == data;
         });
@@ -104,18 +104,18 @@ bool Quadtree<T, Capacity>::Remove(T data, const Vector2& position)
 }
 
 template<typename T, size_t Capacity>
-std::optional<Element<T>> Quadtree<T, Capacity>::FindNearest(const Vector2& target) const
+std::optional<typename Quadtree<T, Capacity>::Element> Quadtree<T, Capacity>::FindNearest(const Vector2& target) const
 {
-    std::optional<Element<T>> nearest = std::nullopt;
+    std::optional<Element> nearest = std::nullopt;
     float bestDistanceSq = std::numeric_limits<float>::max();
     FindNearest(target, bestDistanceSq, nearest);
     return nearest;
 }
 
 template<typename T, size_t Capacity>
-std::vector<Element<T>> Quadtree<T, Capacity>::Query(const AABB& bounds) const
+std::vector<typename Quadtree<T, Capacity>::Element> Quadtree<T, Capacity>::Query(const AABB& bounds) const
 {
-    std::vector<Element<T>> elements;
+    std::vector<Element> elements;
     Query(bounds, elements);
     return elements;
 }
@@ -203,7 +203,7 @@ void Quadtree<T, Capacity>::TryMerge()
 }
 
 template<typename T, size_t Capacity>
-void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element<T>>& nearest) const
+void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
 {
     for (const auto& element : mElements)
     {
@@ -245,7 +245,7 @@ void Quadtree<T, Capacity>::FindNearest(const Vector2& target, float& bestDistan
 }
 
 template<typename T, size_t Capacity>
-void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element<T>>& elements) const
+void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element>& elements) const
 {
     if (!mBounds.Intersects(bounds))
     {
@@ -277,7 +277,7 @@ void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element<T>>& e
 }
 
 template<typename T, size_t Capacity>
-void Quadtree<T, Capacity>::GatherElements(std::vector<Element<T>>& elements) const
+void Quadtree<T, Capacity>::GatherElements(std::vector<Element>& elements) const
 {
     if (mIsLeaf)
     {

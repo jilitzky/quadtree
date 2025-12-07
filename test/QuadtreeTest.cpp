@@ -247,7 +247,7 @@ TEST_F(QuadtreeTest, Query)
     // |          |           |
     // |__________|___________|
     
-    std::vector<Element<int>> elements = _tree.Query(bounds);
+    auto elements = _tree.Query(bounds);
     ASSERT_TRUE(elements.size() == 2);
     
     auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
