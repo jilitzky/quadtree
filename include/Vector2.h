@@ -1,37 +1,37 @@
 #pragma once
 
-/// A two-dimensional vector often used for points, directions, and displacement.
+/// A two-dimensional vector used to represent positions, directions and offsets.
 struct Vector2
 {
-    /// The vector's x-component.
+    /// Value along the X-axis.
     float x;
     
-    /// The vector's y-component.
+    /// Value along the Y-axis.
     float y;
     
     /// Default constructor that initializes the vector to (0, 0).
     Vector2() : x(0.f), y(0.f) {}
 
-    /// Constructor that initializes the vector to the given components.
-    /// @param x Initial value for the x-component.
-    /// @param y Initial value for the y-component.
+    /// Constructor that initializes the vector to the given values.
+    /// @param x Initial value for x.
+    /// @param y Initial value for y.
     Vector2(float x, float y) : x(x), y(y) {}
     
     /// Calculates the magnitude of the vector.
-    /// @return The magnitude of the vector.
+    /// @return The length of the vector.
     float Length() const
     {
         return std::sqrt(LengthSquared());
     }
     
-    /// Calculates the squared magnitude of the vector avoiding the expensive square root operation.
+    /// Calculates the squared magnitude of the vector, avoiding the expensive square root operation needed for magnitude.
     /// @return The squared length of the vector.
     float LengthSquared() const
     {
         return (x * x) + (y * y);
     }
     
-    /// Returns the normalized (unit) version of this vector.
+    /// Calculates the normalized (unit) version of this vector.
     /// @return A new vector with a length of one, preserving direction. Returns (0, 0) if the original length was zero.
     Vector2 Normalize() const
     {
@@ -44,7 +44,7 @@ struct Vector2
     }
     
     /// Calculates the squared distance between this vector and the other vector.
-    /// @param other The vector to measure the distance to.
+    /// @param other The vector to measure the squared distance to.
     /// @return The squared distance between the two vectors.
     float DistanceSquared(const Vector2& other) const
     {
@@ -103,7 +103,7 @@ struct Vector2
     
     /// Multiplies this vector by a scalar and returns a new vector.
     /// @param scalar The value to multiply each component by.
-    /// @return A new vector scaled by the scalar.
+    /// @return A new vector multiplied by the scalar.
     Vector2 operator*(float scalar) const
     {
         return Vector2(x * scalar, y * scalar);
@@ -111,7 +111,7 @@ struct Vector2
     
     /// Divides this vector by a scalar and returns a new vector.
     /// @param scalar The value to divide each component by.
-    /// @return A new vector scaled by the inverse of the scalar.
+    /// @return A new vector divided by the scalar.
     Vector2 operator/(float scalar) const
     {
         return Vector2(x / scalar, y / scalar);
@@ -119,7 +119,7 @@ struct Vector2
     
     /// Adds another vector to this one and returns the modified vector.
     /// @param other The vector to add.
-    /// @return A reference to the modified current vector.
+    /// @return A reference to the modified vector.
     Vector2& operator+=(const Vector2 other)
     {
         x += other.x;
@@ -129,7 +129,7 @@ struct Vector2
     
     /// Subtracts another vector from this one and returns the modified vector.
     /// @param other The vector to subtract.
-    /// @return A reference to the modified current vector.
+    /// @return A reference to the modified vector.
     Vector2& operator-=(const Vector2 other)
     {
         x -= other.x;
