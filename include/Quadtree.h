@@ -175,8 +175,8 @@ private:
     int GetChildIndex(const Vector2& position) const
     {
         int index = 0;
-     
-        // TODO: Write a comment here about ordering (Top-Left, Top-Right, Bottom-Left, Bottom-Right.)
+        
+        // Use a Z-order curve to map the children into a one-dimensional sequence.
         Vector2 center = mBounds.GetCenter();
         if (position.x > center.x)
         {
@@ -279,7 +279,7 @@ private:
         int isRight = target.x >= center.x;
         int isBottom = target.y < center.y;
 
-        // TODO: Explain how we bias the search
+        // Bias the search toward the quadrant that contains the target.
         std::array<int, 4> sortedIndices;
         sortedIndices[0] = isBottom * 2 + isRight;
         sortedIndices[1] = isBottom * 2 + (1 - isRight);
