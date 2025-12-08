@@ -254,7 +254,7 @@ void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element>& elem
 
     if (bounds.Contains(mBounds))
     {
-        GatherElements(elements);
+        GatherAllElements(elements);
         return;
     }
 
@@ -277,7 +277,7 @@ void Quadtree<T, Capacity>::Query(const AABB& bounds, std::vector<Element>& elem
 }
 
 template<typename T, size_t Capacity>
-void Quadtree<T, Capacity>::GatherElements(std::vector<Element>& elements) const
+void Quadtree<T, Capacity>::GatherAllElements(std::vector<Element>& elements) const
 {
     if (mIsLeaf)
     {
@@ -287,6 +287,6 @@ void Quadtree<T, Capacity>::GatherElements(std::vector<Element>& elements) const
     
     for (const auto& child : mChildren)
     {
-        child->GatherElements(elements);
+        child->GatherAllElements(elements);
     }
 }
