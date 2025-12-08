@@ -3,7 +3,10 @@
 /// A two-dimensional vector often used for points, directions, and displacement.
 struct Vector2
 {
+    /// The vector's x-component.
     float x;
+    
+    /// The vector's y-component.
     float y;
     
     /// Default constructor that initializes the vector to (0, 0).
