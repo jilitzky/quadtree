@@ -153,12 +153,12 @@ public:
     }
     
     /// Get a list of all elements contained by the given bounds.
-    /// @param bounds The bounding box defining the search region.
+    /// @param queryBounds The bounding box defining the search region.
     /// @return The list of elements found within the query bounds.
-    std::vector<Element> Query(const AABB& bounds) const
+    std::vector<Element> Query(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
-        Query(bounds, elements);
+        Query(queryBounds, elements);
         return elements;
     }
     
@@ -176,6 +176,7 @@ private:
     {
         int index = 0;
      
+        // TODO: Write a comment here about ordering (Top-Left, Top-Right, Bottom-Left, Bottom-Right.)
         Vector2 center = mBounds.GetCenter();
         if (position.x > center.x)
         {
@@ -196,10 +197,10 @@ private:
         Vector2 max = mBounds.max;
         Vector2 center = mBounds.GetCenter();
 
-        AABB topLeft(Vector2(min.x, center.y), Vector2(center.x, max.y));
-        AABB topRight(Vector2(center.x, center.y), Vector2(max.x, max.y));
-        AABB bottomLeft(Vector2(min.x, min.y), Vector2(center.x, center.y));
-        AABB bottomRight(Vector2(center.x, min.y), Vector2(max.x, center.y));
+        AABB topLeft({min.x, center.y}, {center.x, max.y});
+        AABB topRight(center, {max.x, max.y});
+        AABB bottomLeft({min.x, min.y}, center);
+        AABB bottomRight({center.x, min.y}, {max.x, center.y});
 
         mChildren[0] = std::make_unique<Quadtree>(topLeft);
         mChildren[1] = std::make_unique<Quadtree>(topRight);
@@ -227,15 +228,15 @@ private:
             }
         }
 
-        size_t totalSize = 0;
+        size_t totalElements = 0;
         for (const auto& child : mChildren)
         {
-            totalSize += child->mElements.size();
+            totalElements += child->mElements.size();
         }
 
-        if (totalSize <= Capacity)
+        if (totalElements <= Capacity)
         {
-            mElements.reserve(totalSize);
+            mElements.reserve(totalElements);
             for (auto& child : mChildren)
             {
                 for (auto& element : child->mElements)
@@ -278,6 +279,7 @@ private:
         int isRight = target.x >= center.x;
         int isBottom = target.y < center.y;
 
+        // TODO: Explain how we bias the search
         std::array<int, 4> sortedIndices;
         sortedIndices[0] = isBottom * 2 + isRight;
         sortedIndices[1] = isBottom * 2 + (1 - isRight);
@@ -288,9 +290,9 @@ private:
         {
             const auto& child = mChildren[index];
             AABB childBounds = child->mBounds;
-            float dx = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
-            float dy = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
-            float childDistanceSq = (dx * dx) + (dy * dy);
+            float distanceX = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
+            float distanceY = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
+            float childDistanceSq = (distanceX * distanceX) + (distanceY * distanceY);
             if (childDistanceSq < bestDistanceSq)
             {
                 child->FindNearest(target, bestDistanceSq, nearest);
@@ -299,16 +301,16 @@ private:
     }
     
     /// Recursive helper for the spatial query.
-    /// @param bounds The bounding box for the search.
+    /// @param queryBounds The bounding box for the search.
     /// @param elements The list where elements are accumulated.
-    void Query(const AABB& bounds, std::vector<Element>& elements) const
+    void Query(const AABB& queryBounds, std::vector<Element>& elements) const
     {
-        if (!mBounds.Intersects(bounds))
+        if (!mBounds.Intersects(queryBounds))
         {
             return;
         }
 
-        if (bounds.Contains(mBounds))
+        if (queryBounds.Contains(mBounds))
         {
             GatherAllElements(elements);
             return;
@@ -318,7 +320,7 @@ private:
         {
             for (const auto& element : mElements)
             {
-                if (bounds.Contains(element.position))
+                if (queryBounds.Contains(element.position))
                 {
                     elements.push_back(element);
                 }
@@ -328,7 +330,7 @@ private:
 
         for (const auto& child : mChildren)
         {
-            child->Query(bounds, elements);
+            child->Query(queryBounds, elements);
         }
     }
     
