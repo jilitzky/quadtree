@@ -59,8 +59,7 @@ bool Quadtree<T, Capacity>::Insert(T data, const Vector2& position)
 
     mElements.push_back({data, position});
 
-    bool canSubdivide = mBounds.GetWidth() >= 2.f && mBounds.GetHeight() >= 2.f;
-    if (mElements.size() > Capacity && canSubdivide)
+    if (mElements.size() > Capacity)
     {
         Subdivide();
     }
