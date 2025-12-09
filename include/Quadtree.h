@@ -1,4 +1,3 @@
-#pragma once
 #include <optional>
 #include <vector>
 #include "AABB.h"
@@ -141,18 +140,19 @@ public:
         return false;
     }
     
-    /// Finds the closest element to the given target position.
+    /// Finds the closest element to the given target position within a maximum radius.
     /// @param target The position to search around.
+    /// @param maxRadius The maximum distance from the target to consider.
     /// @return The closest element if found, or empty.
-    std::optional<Element> FindNearest(const Vector2& target) const
+    std::optional<Element> FindNearest(const Vector2& target, float maxRadius = std::numeric_limits<float>::max()) const
     {
         std::optional<Element> nearest = std::nullopt;
-        float bestDistanceSq = std::numeric_limits<float>::max();
+        float bestDistanceSq = maxRadius * maxRadius;
         FindNearest(target, bestDistanceSq, nearest);
         return nearest;
     }
     
-    /// Get a list of all elements contained by the given bounds.
+    /// Gathers a list of all elements contained by the given bounds.
     /// @param queryBounds The bounding box defining the search region.
     /// @return The list of elements found within the query bounds.
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
