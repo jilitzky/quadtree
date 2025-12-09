@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #include <fstream>
 #include <iostream>
 #include "Quadtree.h"

@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #pragma once
 
 #include "Vector2.h"

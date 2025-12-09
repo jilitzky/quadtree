@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #pragma once
 
 #include <optional>

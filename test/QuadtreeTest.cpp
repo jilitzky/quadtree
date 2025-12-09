@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #include <optional>
 #include <gtest/gtest.h>
 #include "Quadtree.h"

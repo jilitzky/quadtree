@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #pragma once
 
 /// A two-dimensional vector used to represent positions, directions and offsets.
