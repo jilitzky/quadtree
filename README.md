@@ -5,7 +5,7 @@
 
 **A modern C++ implementation of a quadtree spatial partition.**
 
-This library provides a fast, lightweight and generic Quadtree data structure for efficient 2D spatial partitioning and querying.
+Provides a fast, lightweight and generic Quadtree data structure for efficient 2D spatial partitioning and querying.
 
 ## Table of Contents
 - [Features](#features)
