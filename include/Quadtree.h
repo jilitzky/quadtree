@@ -276,7 +276,7 @@ private:
         }
         
         Vector2 center = mBounds.GetCenter();
-        int isRight = target.x >= center.x;
+        int isRight = target.x > center.x;
         int isBottom = target.y < center.y;
 
         // Bias the search toward the quadrant that contains the target.
@@ -289,7 +289,7 @@ private:
         for (int index : sortedIndices)
         {
             const auto& child = mChildren[index];
-            AABB childBounds = child->mBounds;
+            const AABB& childBounds = child->mBounds;
             float distanceX = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
             float distanceY = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
             float childDistanceSq = (distanceX * distanceX) + (distanceY * distanceY);
