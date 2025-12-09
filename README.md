@@ -5,7 +5,7 @@
 
 **A modern C++ implementation of a quadtree spatial partition.**
 
-This library provides a fast, lightweight and generic Quadtree data structure for efficient 2D spatial partitioning and querying.
+Provides a fast, lightweight and generic Quadtree data structure for efficient 2D spatial partitioning and querying.
 
 ## Table of Contents
 - [Features](#features)
@@ -22,12 +22,12 @@ This library provides a fast, lightweight and generic Quadtree data structure fo
 * **Header-only:** Easy to drop into any project.
 
 ## Installation
-Simply copy the `include/` directory to your project or add it to your include path.
+Simply copy the contents of the `include/` directory to your project's include path.
 
 ## Usage
 ### Find Nearest
 ```cpp
-// Initialize with <Type, NodeCapacity>
+// Initialize a Quadtree that stores up to 1 int per node
 Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
 
 tree.Insert(1, { 25, 25 });
@@ -51,7 +51,7 @@ auto nearest = tree.FindNearest({ 75, 75 }); // Nearest is 6.
 ```
 ### Spatial Query
 ```cpp
-// Initialize with <Type, NodeCapacity>
+// Initialize a Quadtree that stores up to 1 int per node
 Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
 
 tree.Insert(1, { 25, 25 });
@@ -74,7 +74,7 @@ auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
 ```
 
 ## Performance
-Benchmarks were run using a capacity of 16 elements per node, averaging 10,000 operations on an Apple M2 Pro.
+Benchmark was run averaging 10,000 operations with a `NodeCapacity` of 16 on an Apple M2 Pro.
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
 | Insertion     | 328 ns     |
