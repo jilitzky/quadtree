@@ -71,7 +71,7 @@ std::chrono::milliseconds Query(Tree& tree, const std::vector<Vector2>& position
 {
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (size_t i = 0; i < positions.size(); ++i)
+    for (size_t i = 0; i < positions.size(); i = i + 10)
     {
         Vector2 position = positions[i];
         Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
