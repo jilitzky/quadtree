@@ -1,3 +1,5 @@
+#pragma once
+
 #include <optional>
 #include <vector>
 #include "AABB.h"
@@ -260,18 +262,25 @@ private:
     /// @param nearest The closest element if found, or empty.
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
     {
-        for (const auto& element : mElements)
+        float distanceX = std::max({mBounds.min.x - target.x, 0.0f, target.x - mBounds.max.x});
+        float distanceY = std::max({mBounds.min.y - target.y, 0.0f, target.y - mBounds.max.y});
+        float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+        if (distanceSq > bestDistanceSq)
         {
-            float distanceSq = element.position.DistanceSquared(target);
-            if (distanceSq < bestDistanceSq)
-            {
-                bestDistanceSq = distanceSq;
-                nearest = element;
-            }
+            return;
         }
-
+        
         if (mIsLeaf)
         {
+            for (const auto& element : mElements)
+            {
+                float distanceSq = element.position.DistanceSquared(target);
+                if (distanceSq < bestDistanceSq)
+                {
+                    bestDistanceSq = distanceSq;
+                    nearest = element;
+                }
+            }
             return;
         }
         
@@ -285,18 +294,10 @@ private:
         sortedIndices[1] = isBottom * 2 + (1 - isRight);
         sortedIndices[2] = (1 - isBottom) * 2 + isRight;
         sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
-
+        
         for (int index : sortedIndices)
         {
-            const auto& child = mChildren[index];
-            const AABB& childBounds = child->mBounds;
-            float distanceX = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
-            float distanceY = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
-            float childDistanceSq = (distanceX * distanceX) + (distanceY * distanceY);
-            if (childDistanceSq < bestDistanceSq)
-            {
-                child->FindNearest(target, bestDistanceSq, nearest);
-            }
+            mChildren[index]->FindNearest(target, bestDistanceSq, nearest);
         }
     }
     

@@ -79,7 +79,7 @@ Benchmark was run averaging 10,000 operations with a `NodeCapacity` of 16 on an 
 | ------------- | ---------- |
 | Insertion     | 328 ns     |
 | Removal       | 401 ns     |
-| Find Nearest  | 1481 ns    |
+| Find Nearest  | 1445 ns    |
 | Spatial Query | 68179 ns   |
 
 ## License
