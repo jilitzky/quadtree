@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Quadtree.h"
 
-using Tree = Quadtree<size_t, 10>;
+using Tree = Quadtree<size_t, 16>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {
@@ -35,7 +35,7 @@ bool TryReadPositions(std::vector<Vector2>& positions)
     return true;
 }
 
-std::chrono::milliseconds Insert(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vector2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -51,10 +51,10 @@ std::chrono::milliseconds Insert(Tree& tree, const std::vector<Vector2>& positio
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::milliseconds FindNearest(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vector2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -64,26 +64,26 @@ std::chrono::milliseconds FindNearest(Tree& tree, const std::vector<Vector2>& po
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::milliseconds Query(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds SpatialQuery(Tree& tree, const std::vector<Vector2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
-    for (size_t i = 0; i < positions.size(); i = i + 10)
+    for (size_t i = 0; i < positions.size(); i = ++i)
     {
         Vector2 position = positions[i];
         Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
         Vector2 max = { std::max(-position.x, position.x), std::max(-position.y, position.y) };
-        tree.Query(AABB(min, max));
+        tree.SpatialQuery(AABB(min, max));
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::milliseconds Remove(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vector2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -100,7 +100,7 @@ std::chrono::milliseconds Remove(Tree& tree, const std::vector<Vector2>& positio
     }
     
     auto end = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
 int main()
@@ -114,15 +114,16 @@ int main()
         return 1;
     }
     
-    auto insert = Insert(tree, positions);
+    auto insertion = Insertion(tree, positions);
     auto findNearest = FindNearest(tree, positions);
-    auto query = Query(tree, positions);
-    auto remove = Remove(tree, positions);
+    auto spatialQuery = SpatialQuery(tree, positions);
+    auto removal = Removal(tree, positions);
     
-    std::cout << "Insert: " << insert.count() << " ms" << std::endl;
-    std::cout << "FindNearest: " << findNearest.count() << " ms" << std::endl;
-    std::cout << "Query: " << query.count() << " ms" << std::endl;
-    std::cout << "Remove: " << remove.count() << " ms" << std::endl;
+    size_t numPositions = positions.size();
+    std::cout << "Insertion: " << insertion.count() / numPositions << " ns" << std::endl;
+    std::cout << "Removal: " << removal.count() / numPositions << " ns" << std::endl;
+    std::cout << "Find Nearest: " << findNearest.count() / numPositions << " ns" << std::endl;
+    std::cout << "Spatial Query: " << spatialQuery.count() / numPositions << " ns" << std::endl;
     
     return 0;
 }

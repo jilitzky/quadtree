@@ -98,9 +98,7 @@ TEST_F(QuadtreeTest, FindNearest)
     _tree.Insert(3, { 87, 68 });
     _tree.Insert(4, { 56, 56 });
     _tree.Insert(5, { 56, 68 });
-
-    Vector2 expected = { 68, 68 };
-    _tree.Insert(6, expected);
+    _tree.Insert(6, { 68, 68 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -113,7 +111,7 @@ TEST_F(QuadtreeTest, FindNearest)
     // |__________|___________|
 
     auto nearest = _tree.FindNearest({ 75, 75 });
-    ASSERT_TRUE(nearest.value().position == expected);
+    ASSERT_TRUE(nearest.value().data == 6);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Single)
@@ -228,14 +226,12 @@ TEST_F(QuadtreeTest, Remove_NotFound)
     ASSERT_FALSE(removed);
 }
 
-TEST_F(QuadtreeTest, Query)
+TEST_F(QuadtreeTest, SpatialQuery)
 {
     _tree.Insert(1, { 25, 25 });
     _tree.Insert(2, { 87, 87 });
     _tree.Insert(3, { 56, 68 });
     _tree.Insert(4, { 68, 56 });
-
-    AABB bounds = {{40, 38}, {75, 88}};
     
     //  __________ ___________
     // |        ..|.....|. 2  |
@@ -247,7 +243,8 @@ TEST_F(QuadtreeTest, Query)
     // |          |           |
     // |__________|___________|
     
-    auto elements = _tree.Query(bounds);
+    AABB queryBounds = {{40, 38}, {75, 88}};
+    auto elements = _tree.SpatialQuery(queryBounds);
     ASSERT_TRUE(elements.size() == 2);
     
     auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)

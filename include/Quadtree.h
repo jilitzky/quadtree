@@ -6,8 +6,8 @@
 
 /// A data structure that partitions a two-dimensional space into quadrants and provides efficient spatial queries.
 /// @tparam T The type of data representing elements in the tree.
-/// @tparam Capacity The maximum number of elements that a node can store before subdividing.
-template<typename T, size_t Capacity>
+/// @tparam NodeCapacity The maximum number of elements that a node can store before subdividing.
+template<typename T, size_t NodeCapacity = 8>
 class Quadtree
 {
 public:
@@ -95,7 +95,7 @@ public:
 
         mElements.push_back({data, position});
 
-        if (mElements.size() > Capacity)
+        if (mElements.size() > NodeCapacity)
         {
             Subdivide();
         }
@@ -155,10 +155,10 @@ public:
     /// Get a list of all elements contained by the given bounds.
     /// @param queryBounds The bounding box defining the search region.
     /// @return The list of elements found within the query bounds.
-    std::vector<Element> Query(const AABB& queryBounds) const
+    std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
-        Query(queryBounds, elements);
+        SpatialQuery(queryBounds, elements);
         return elements;
     }
     
@@ -234,7 +234,7 @@ private:
             totalElements += child->mElements.size();
         }
 
-        if (totalElements <= Capacity)
+        if (totalElements <= NodeCapacity)
         {
             mElements.reserve(totalElements);
             for (auto& child : mChildren)
@@ -303,7 +303,7 @@ private:
     /// Recursive helper for the spatial query.
     /// @param queryBounds The bounding box for the search.
     /// @param elements The list where elements are accumulated.
-    void Query(const AABB& queryBounds, std::vector<Element>& elements) const
+    void SpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
     {
         if (!mBounds.Intersects(queryBounds))
         {
@@ -330,7 +330,7 @@ private:
 
         for (const auto& child : mChildren)
         {
-            child->Query(queryBounds, elements);
+            child->SpatialQuery(queryBounds, elements);
         }
     }
     
