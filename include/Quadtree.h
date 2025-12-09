@@ -4,14 +4,14 @@
 #include "AABB.h"
 #include "Vector2.h"
 
-/// A data structure that partitions 2D space into quadrants and provides efficient spatial queries.
-/// @tparam T The type of data payload representing elements in the tree.
-/// @tparam Capacity The maximum number of elements that can be stored per node before subdividing.
+/// A data structure that partitions a two-dimensional space into quadrants and provides efficient spatial queries.
+/// @tparam T The type of data representing elements in the tree.
+/// @tparam Capacity The maximum number of elements that a node can store before subdividing.
 template<typename T, size_t Capacity>
 class Quadtree
 {
 public:
-    /// Represents an item stored in the Quadtree.
+    /// Represents an item stored in the tree.
     struct Element
     {
         /// The data payload for this element.
@@ -21,26 +21,26 @@ public:
         Vector2 position;
     };
 
-    /// Constructor that initializes the Quadtree to the given bounding box.
+    /// Constructor that initializes the Quadtree node to the given bounding box.
     /// @param bounds The bounding box that defines the area covered by this node.
     Quadtree(const AABB& bounds) : mBounds(bounds)
     {
     }
     
-    /// Copy constructor is deleted to prevent accidental copy operations.
+    /// Copy constructor is deleted to avoid accidental copies.
     Quadtree(const Quadtree& other) = delete;
     
-    /// Move constructor to allow for efficient transfer of ownership from a temporary object.
+    /// Move constructor is defaulted to allow efficient transfer of ownership.
     Quadtree(Quadtree&& other) = default;
     
     /// Returns the bounding box representing this node.
-    /// @return A constant reference to the bounding box.
+    /// @return A constant reference to the area covered by the node.
     const AABB& GetBounds() const
     {
        return mBounds;
     }
     
-    /// Calculates and returns the total number of elements in this node and all its children.
+    /// Calculates the total number of elements in this node and all its children.
     /// @return The total number of elements in this node.
     size_t GetSize() const
     {
@@ -58,8 +58,8 @@ public:
         return size;
     }
 
-    /// Calculates and returns the depth of the deepest branch, originating from this node.
-    /// @return The height of this node from the bottom of the tree.
+    /// Calculates the height of this node from its deepest branch.
+    /// @return The height of this node.
     size_t GetHeight() const
     {
         if (mIsLeaf)
@@ -76,10 +76,10 @@ public:
         return height + 1;
     }
     
-    /// Inserts a new element with the data payload at a given position.
-    /// @param data The payload to store.
+    /// Inserts a new element with the given data at a given position.
+    /// @param data The data representing the element.
     /// @param position The position where the element is.
-    /// @return True if the element was successfully added.
+    /// @return True if the element was successfully inserted.
     bool Insert(T data, const Vector2& position)
     {
         if (!mBounds.Contains(position))
@@ -103,7 +103,7 @@ public:
         return true;
     }
     
-    /// Removes an element matching the given data at a specified position
+    /// Removes an element matching the given data at a specified position.
     /// @param data The data of the element to remove.
     /// @param position The position where the element is.
     /// @return True if the element was successfully removed.
@@ -141,9 +141,9 @@ public:
         return false;
     }
     
-    /// Finds the closest element to the specified position.
+    /// Finds the closest element to the given target position.
     /// @param target The position to search around.
-    /// @return The closest element if found, or empty
+    /// @return The closest element if found, or empty.
     std::optional<Element> FindNearest(const Vector2& target) const
     {
         std::optional<Element> nearest = std::nullopt;
@@ -162,14 +162,14 @@ public:
         return elements;
     }
     
-    /// Copy assignment is deleted to guard against accidental copies.
+    /// Copy assignment is deleted to avoid accidental copies.
     Quadtree& operator=(const Quadtree&) = delete;
 
-    /// Move assignment is allowed.
+    /// Move assignment is defaulted to allow efficient transfer of ownership.
     Quadtree& operator=(Quadtree&&) = default;
     
 private:
-    /// Determines the index to the children array based on where the given position belongs.
+    /// Determines the index to the children array based on where the position belongs to.
     /// @param position The position to check.
     /// @return The index to the corresponding child.
     int GetChildIndex(const Vector2& position) const
@@ -359,6 +359,6 @@ private:
     /// Elements stored by this node when it's a leaf.
     std::vector<Element> mElements;
     
-    /// Array containing the four child quadrants: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
+    /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
     std::array<std::unique_ptr<Quadtree>, 4> mChildren;
 };
