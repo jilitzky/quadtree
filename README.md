@@ -83,4 +83,4 @@ Benchmark was run averaging 10,000 operations with a `NodeCapacity` of 16 on an 
 | Spatial Query | 68179 ns   |
 
 ## License
-Distributed under the MIT License.
+Distributed under the MIT License. See LICENSE for more information.
