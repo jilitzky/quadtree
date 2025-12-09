@@ -1,4 +1,5 @@
 #pragma once
+
 #include <optional>
 #include <vector>
 #include "AABB.h"
@@ -141,18 +142,19 @@ public:
         return false;
     }
     
-    /// Finds the closest element to the given target position.
+    /// Finds the closest element to the given target position within a maximum radius.
     /// @param target The position to search around.
+    /// @param maxRadius The maximum distance from the target to consider.
     /// @return The closest element if found, or empty.
-    std::optional<Element> FindNearest(const Vector2& target) const
+    std::optional<Element> FindNearest(const Vector2& target, float maxRadius = std::numeric_limits<float>::max()) const
     {
         std::optional<Element> nearest = std::nullopt;
-        float bestDistanceSq = std::numeric_limits<float>::max();
+        float bestDistanceSq = maxRadius * maxRadius;
         FindNearest(target, bestDistanceSq, nearest);
         return nearest;
     }
     
-    /// Get a list of all elements contained by the given bounds.
+    /// Gathers a list of all elements contained by the given bounds.
     /// @param queryBounds The bounding box defining the search region.
     /// @return The list of elements found within the query bounds.
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
@@ -260,18 +262,25 @@ private:
     /// @param nearest The closest element if found, or empty.
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
     {
-        for (const auto& element : mElements)
+        float distanceX = std::max({mBounds.min.x - target.x, 0.0f, target.x - mBounds.max.x});
+        float distanceY = std::max({mBounds.min.y - target.y, 0.0f, target.y - mBounds.max.y});
+        float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+        if (distanceSq > bestDistanceSq)
         {
-            float distanceSq = element.position.DistanceSquared(target);
-            if (distanceSq < bestDistanceSq)
-            {
-                bestDistanceSq = distanceSq;
-                nearest = element;
-            }
+            return;
         }
-
+        
         if (mIsLeaf)
         {
+            for (const auto& element : mElements)
+            {
+                float distanceSq = element.position.DistanceSquared(target);
+                if (distanceSq < bestDistanceSq)
+                {
+                    bestDistanceSq = distanceSq;
+                    nearest = element;
+                }
+            }
             return;
         }
         
@@ -285,18 +294,10 @@ private:
         sortedIndices[1] = isBottom * 2 + (1 - isRight);
         sortedIndices[2] = (1 - isBottom) * 2 + isRight;
         sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
-
+        
         for (int index : sortedIndices)
         {
-            const auto& child = mChildren[index];
-            const AABB& childBounds = child->mBounds;
-            float distanceX = std::max({childBounds.min.x - target.x, 0.0f, target.x - childBounds.max.x});
-            float distanceY = std::max({childBounds.min.y - target.y, 0.0f, target.y - childBounds.max.y});
-            float childDistanceSq = (distanceX * distanceX) + (distanceY * distanceY);
-            if (childDistanceSq < bestDistanceSq)
-            {
-                child->FindNearest(target, bestDistanceSq, nearest);
-            }
+            mChildren[index]->FindNearest(target, bestDistanceSq, nearest);
         }
     }
     

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Vector2.h"
 
 /// An Axis-Aligned Bounding Box (AABB) defined by its minimum and maximum points.
