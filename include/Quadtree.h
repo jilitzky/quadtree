@@ -126,7 +126,7 @@ public:
             
             if (it != mElements.end())
             {
-                *it = mElements.back();
+                *it = std::move(mElements.back());
                 mElements.pop_back();
                 return true;
             }
