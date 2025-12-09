@@ -1,10 +1,80 @@
-# quadtree
-A modern C++ implementation of a quadtree spatial partition.
-## Methods
-- **GetBounds:** Returns the bounds of the tree
-- **GetSize:** Returns the number of elements in the tree
-- **GetHeight:** Returns the height of the tree
-- **Insert:** Inserts a new element into the tree
-- **Remove:** Removes an existing element from the tree
-- **FindNearest:** Finds the nearest element to a given position
-- **Query:** Gathers all elements within the given bounds
+# Quadtree
+
+![Language](https://img.shields.io/badge/language-C%2B%2B17-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+**A modern C++ implementation of a quadtree spatial partition.**
+
+This library provides a fast, lightweight, and generic Quadtree data structure for efficient 2D spatial partitioning and querying. It is designed with modern C++ standards (C++17) to ensure type safety, performance and ease of integration.
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Performance](#performance)
+- [License](#license)
+
+## Features
+* **Modern C++ Design:** Written using C++17 standards.
+* **Generic:** Templated types allow you to store any custom data structure or pointer.
+* **Dynamic:** Efficient insertion, removal, and automatic subdivision/merging of nodes.
+* **Spatial Queries:** Fast range queries (retrieve all objects within a boundary) and nearest-neighbor lookups.
+* **Header-only:** Easy to drop into any project without complex build configurations.
+
+## Installation
+Simply copy the `include/` directory to your project or add it to your include path.
+
+## Usage
+**Find Nearest**
+```
+Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
+tree.Insert(1, { 25, 25 });
+tree.Insert(2, { 87, 87 });
+tree.Insert(3, { 87, 68 });
+tree.Insert(4, { 56, 56 });
+tree.Insert(5, { 56, 68 });
+tree.Insert(6, { 68, 68 });
+
+//  __________ ___________
+// |          |     |  2  |
+// |          |_____|x____|
+// |          |_5|_6|  3  |
+// |__________|_4|__|_____|
+// |          |           |
+// |    1     |           |
+// |          |           |
+// |__________|___________|
+
+auto nearest = _tree.FindNearest({ 75, 75 }); // Nearest is 6.
+```
+**Spatial Query**
+```
+Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
+tree.Insert(1, { 25, 25 });
+tree.Insert(2, { 87, 87 });
+tree.Insert(3, { 56, 68 });
+tree.Insert(4, { 68, 56 });
+
+//  __________ ___________
+// |        ..|.....|. 2  |
+// |        . |_____|.____|
+// |        . |_3|__|.    |
+// |________._|__|4_|.____|
+// |        ..|.......    |
+// |    1     |           |
+// |          |           |
+// |__________|___________|
+
+AABB queryBounds = {{40, 38}, {75, 88}};
+auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
+```
+
+## Performance
+Using a capacity of 16 elements per node and averaging the performance of 10,000 operations for each category on an Apple M2 Pro.
+* **Insertion**: 328 ns
+* **Find Nearest**: 1481 ns
+* **Spatial Query**: 68179 ns
+* **Removal**: 401 ns
+
+## License
+Distributed under the MIT License.
