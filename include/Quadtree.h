@@ -178,20 +178,13 @@ private:
     /// @return The index to the corresponding child.
     int GetChildIndex(const Vector2& position) const
     {
-        int index = 0;
-        
         // Use a Z-order curve to map the children into a one-dimensional sequence.
+        // 0: Left-Top
+        // 1: Right-Top
+        // 2: Left-Bottom
+        // 3: Right-Bottom
         Vector2 center = mBounds.GetCenter();
-        if (position.x > center.x)
-        {
-            index += 1;
-        }
-        if (position.y < center.y)
-        {
-            index += 2;
-        }
-        
-        return index;
+        return (position.x > center.x) + ((position.y < center.y) * 2);
     }
     
     /// Divides this node into a branch by passing its elements into its children.
