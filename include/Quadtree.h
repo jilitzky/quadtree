@@ -163,7 +163,7 @@ private:
         if (!mIsLeaf)
         {
             int index = GetChildIndex(position);
-            return mChildren[index]->Insert(data, position);
+            return mChildren[index]->InsertInternal(data, position);
         }
 
         mElements.push_back({data, position});
@@ -200,7 +200,7 @@ private:
         }
 
         int index = GetChildIndex(position);
-        if (mChildren[index]->Remove(data, position))
+        if (mChildren[index]->RemoveInternal(data, position))
         {
             TryMerge();
             return true;
@@ -226,10 +226,10 @@ private:
         mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
         mChildren[3] = std::make_unique<Quadtree>(bottomRight);
 
-        for (const auto& element : mElements)
+        for (auto& element : mElements)
         {
             int index = GetChildIndex(element.position);
-            mChildren[index]->Insert(element.data, element.position);
+            mChildren[index]->InsertInternal(std::move(element.data), element.position);
         }
 
         mIsLeaf = false;
