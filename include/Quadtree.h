@@ -1,3 +1,5 @@
+/// Copyright (c) 2025 Jose Ilitzky
+
 #pragma once
 
 #include <optional>
@@ -77,7 +79,7 @@ public:
         return height + 1;
     }
     
-    /// Inserts a new element with the given data at a given position.
+    /// Inserts a new element with the given data and position.
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully inserted.
@@ -88,24 +90,11 @@ public:
             return false;
         }
 
-        if (!mIsLeaf)
-        {
-            int index = GetChildIndex(position);
-            return mChildren[index]->Insert(data, position);
-        }
-
-        mElements.push_back({data, position});
-
-        if (mElements.size() > NodeCapacity)
-        {
-            Subdivide();
-        }
-
-        return true;
+        return InsertInternal(data, position);
     }
     
-    /// Removes an element matching the given data at a specified position.
-    /// @param data The data of the element to remove.
+    /// Removes an element matching the given data and position.
+    /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully removed.
     bool Remove(T data, const Vector2& position)
@@ -115,31 +104,7 @@ public:
             return false;
         }
 
-        if (mIsLeaf)
-        {
-            auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
-            {
-                return element.data == data;
-            });
-            
-            if (it != mElements.end())
-            {
-                *it = mElements.back();
-                mElements.pop_back();
-                return true;
-            }
-            
-            return false;
-        }
-
-        int index = GetChildIndex(position);
-        if (mChildren[index]->Remove(data, position))
-        {
-            TryMerge();
-            return true;
-        }
-
-        return false;
+        return RemoveInternal(data, position);
     }
     
     /// Finds the closest element to the given target position within a maximum radius.
@@ -160,7 +125,11 @@ public:
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
-        SpatialQuery(queryBounds, elements);
+        if (mBounds.Intersects(queryBounds))
+        {
+            SpatialQuery(queryBounds, elements);
+        }
+        
         return elements;
     }
     
@@ -176,20 +145,68 @@ private:
     /// @return The index to the corresponding child.
     int GetChildIndex(const Vector2& position) const
     {
-        int index = 0;
-        
         // Use a Z-order curve to map the children into a one-dimensional sequence.
+        // 0: Left-Top
+        // 1: Right-Top
+        // 2: Left-Bottom
+        // 3: Right-Bottom
         Vector2 center = mBounds.GetCenter();
-        if (position.x > center.x)
+        return (position.x > center.x) + ((position.y < center.y) * 2);
+    }
+    
+    /// Inserts a new element with the given data and position without a boundary check.
+    /// @param data The data representing the element.
+    /// @param position The position where the element is.
+    /// @return True if the element was successfully inserted.
+    bool InsertInternal(T data, const Vector2& position)
+    {
+        if (!mIsLeaf)
         {
-            index += 1;
+            int index = GetChildIndex(position);
+            return mChildren[index]->InsertInternal(data, position);
         }
-        if (position.y < center.y)
+
+        mElements.push_back({data, position});
+
+        if (mElements.size() > NodeCapacity)
         {
-            index += 2;
+            Subdivide();
         }
-        
-        return index;
+
+        return true;
+    }
+    
+    /// Removes an element matching the given data and position without a boundary check.
+    /// @param data The data representing the element.
+    /// @param position The position where the element is.
+    /// @return True if the element was successfully removed.
+    bool RemoveInternal(T data, const Vector2& position)
+    {
+        if (mIsLeaf)
+        {
+            auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
+            {
+                return element.data == data && element.position == position;
+            });
+            
+            if (it != mElements.end())
+            {
+                *it = std::move(mElements.back());
+                mElements.pop_back();
+                return true;
+            }
+            
+            return false;
+        }
+
+        int index = GetChildIndex(position);
+        if (mChildren[index]->RemoveInternal(data, position))
+        {
+            TryMerge();
+            return true;
+        }
+
+        return false;
     }
     
     /// Divides this node into a branch by passing its elements into its children.
@@ -209,10 +226,10 @@ private:
         mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
         mChildren[3] = std::make_unique<Quadtree>(bottomRight);
 
-        for (const auto& element : mElements)
+        for (auto& element : mElements)
         {
             int index = GetChildIndex(element.position);
-            mChildren[index]->Insert(element.data, element.position);
+            mChildren[index]->InsertInternal(std::move(element.data), element.position);
         }
 
         mIsLeaf = false;
@@ -262,14 +279,6 @@ private:
     /// @param nearest The closest element if found, or empty.
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
     {
-        float distanceX = std::max({mBounds.min.x - target.x, 0.0f, target.x - mBounds.max.x});
-        float distanceY = std::max({mBounds.min.y - target.y, 0.0f, target.y - mBounds.max.y});
-        float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
-        if (distanceSq > bestDistanceSq)
-        {
-            return;
-        }
-        
         if (mIsLeaf)
         {
             for (const auto& element : mElements)
@@ -297,7 +306,14 @@ private:
         
         for (int index : sortedIndices)
         {
-            mChildren[index]->FindNearest(target, bestDistanceSq, nearest);
+            const auto& child = mChildren[index];
+            float distanceX = std::max({child->mBounds.min.x - target.x, 0.0f, target.x - child->mBounds.max.x});
+            float distanceY = std::max({child->mBounds.min.y - target.y, 0.0f, target.y - child->mBounds.max.y});
+            float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+            if (distanceSq < bestDistanceSq)
+            {
+                child->FindNearest(target, bestDistanceSq, nearest);
+            }
         }
     }
     
@@ -306,11 +322,6 @@ private:
     /// @param elements The list where elements are accumulated.
     void SpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
     {
-        if (!mBounds.Intersects(queryBounds))
-        {
-            return;
-        }
-
         if (queryBounds.Contains(mBounds))
         {
             GatherAllElements(elements);
@@ -331,7 +342,10 @@ private:
 
         for (const auto& child : mChildren)
         {
-            child->SpatialQuery(queryBounds, elements);
+            if (child->mBounds.Intersects(queryBounds))
+            {
+                child->SpatialQuery(queryBounds, elements);
+            }
         }
     }
     
