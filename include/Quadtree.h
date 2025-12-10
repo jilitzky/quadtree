@@ -279,14 +279,6 @@ private:
     /// @param nearest The closest element if found, or empty.
     void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
     {
-        float distanceX = std::max({mBounds.min.x - target.x, 0.0f, target.x - mBounds.max.x});
-        float distanceY = std::max({mBounds.min.y - target.y, 0.0f, target.y - mBounds.max.y});
-        float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
-        if (distanceSq > bestDistanceSq)
-        {
-            return;
-        }
-        
         if (mIsLeaf)
         {
             for (const auto& element : mElements)
@@ -314,7 +306,14 @@ private:
         
         for (int index : sortedIndices)
         {
-            mChildren[index]->FindNearest(target, bestDistanceSq, nearest);
+            const auto& child = mChildren[index];
+            float distanceX = std::max({child->mBounds.min.x - target.x, 0.0f, target.x - child->mBounds.max.x});
+            float distanceY = std::max({child->mBounds.min.y - target.y, 0.0f, target.y - child->mBounds.max.y});
+            float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+            if (distanceSq < bestDistanceSq)
+            {
+                child->FindNearest(target, bestDistanceSq, nearest);
+            }
         }
     }
     
