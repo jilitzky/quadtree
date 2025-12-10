@@ -79,7 +79,7 @@ public:
         return height + 1;
     }
     
-    /// Inserts a new element with the given data at a given position.
+    /// Inserts a new element with the given data and position.
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully inserted.
@@ -90,24 +90,11 @@ public:
             return false;
         }
 
-        if (!mIsLeaf)
-        {
-            int index = GetChildIndex(position);
-            return mChildren[index]->Insert(data, position);
-        }
-
-        mElements.push_back({data, position});
-
-        if (mElements.size() > NodeCapacity)
-        {
-            Subdivide();
-        }
-
-        return true;
+        return InsertInternal(data, position);
     }
     
-    /// Removes an element matching the given data at a specified position.
-    /// @param data The data of the element to remove.
+    /// Removes an element matching the given data and position.
+    /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully removed.
     bool Remove(T data, const Vector2& position)
@@ -117,31 +104,7 @@ public:
             return false;
         }
 
-        if (mIsLeaf)
-        {
-            auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
-            {
-                return element.data == data;
-            });
-            
-            if (it != mElements.end())
-            {
-                *it = std::move(mElements.back());
-                mElements.pop_back();
-                return true;
-            }
-            
-            return false;
-        }
-
-        int index = GetChildIndex(position);
-        if (mChildren[index]->Remove(data, position))
-        {
-            TryMerge();
-            return true;
-        }
-
-        return false;
+        return RemoveInternal(data, position);
     }
     
     /// Finds the closest element to the given target position within a maximum radius.
@@ -185,6 +148,61 @@ private:
         // 3: Right-Bottom
         Vector2 center = mBounds.GetCenter();
         return (position.x > center.x) + ((position.y < center.y) * 2);
+    }
+    
+    /// Inserts a new element with the given data and position without a boundary check.
+    /// @param data The data representing the element.
+    /// @param position The position where the element is.
+    /// @return True if the element was successfully inserted.
+    bool InsertInternal(T data, const Vector2& position)
+    {
+        if (!mIsLeaf)
+        {
+            int index = GetChildIndex(position);
+            return mChildren[index]->Insert(data, position);
+        }
+
+        mElements.push_back({data, position});
+
+        if (mElements.size() > NodeCapacity)
+        {
+            Subdivide();
+        }
+
+        return true;
+    }
+    
+    /// Removes an element matching the given data and position without a boundary check.
+    /// @param data The data representing the element.
+    /// @param position The position where the element is.
+    /// @return True if the element was successfully removed.
+    bool RemoveInternal(T data, const Vector2& position)
+    {
+        if (mIsLeaf)
+        {
+            auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
+            {
+                return element.data == data && element.position == position;
+            });
+            
+            if (it != mElements.end())
+            {
+                *it = std::move(mElements.back());
+                mElements.pop_back();
+                return true;
+            }
+            
+            return false;
+        }
+
+        int index = GetChildIndex(position);
+        if (mChildren[index]->Remove(data, position))
+        {
+            TryMerge();
+            return true;
+        }
+
+        return false;
     }
     
     /// Divides this node into a branch by passing its elements into its children.
