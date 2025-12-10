@@ -125,7 +125,11 @@ public:
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
-        SpatialQuery(queryBounds, elements);
+        if (mBounds.Intersects(queryBounds))
+        {
+            SpatialQuery(queryBounds, elements);
+        }
+        
         return elements;
     }
     
@@ -319,11 +323,6 @@ private:
     /// @param elements The list where elements are accumulated.
     void SpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
     {
-        if (!mBounds.Intersects(queryBounds))
-        {
-            return;
-        }
-
         if (queryBounds.Contains(mBounds))
         {
             GatherAllElements(elements);
@@ -344,7 +343,10 @@ private:
 
         for (const auto& child : mChildren)
         {
-            child->SpatialQuery(queryBounds, elements);
+            if (child->mBounds.Intersects(queryBounds))
+            {
+                child->SpatialQuery(queryBounds, elements);
+            }
         }
     }
     
