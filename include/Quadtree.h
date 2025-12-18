@@ -42,24 +42,6 @@ public:
     {
        return mBounds;
     }
-    
-    /// Calculates the total number of elements in this node and all its children.
-    /// @return The total number of elements in this node.
-    size_t GetSize() const
-    {
-        if (mIsLeaf)
-        {
-            return mElements.size();
-        }
-        
-        size_t size = 0;
-        for (const auto& child : mChildren)
-        {
-            size += child->GetSize();
-        }
-        
-        return size;
-    }
 
     /// Calculates the height of this node from its deepest branch.
     /// @return The height of this node.
@@ -79,6 +61,33 @@ public:
         return height + 1;
     }
     
+    /// Gets all elements contained by the tree.
+    /// @return A collection with all the elements.
+    std::vector<T> GetAllElements() const
+    {
+        std::vector<T> elements;
+        DoGetAllElements(elements);
+        return elements;
+    }
+    
+    /// Counts the total number of elements in this node and all its children.
+    /// @return The total number of elements in this node.
+    size_t CountElements() const
+    {
+        if (mIsLeaf)
+        {
+            return mElements.size();
+        }
+        
+        size_t size = 0;
+        for (const auto& child : mChildren)
+        {
+            size += child->CountElements();
+        }
+        
+        return size;
+    }
+    
     /// Inserts a new element with the given data and position.
     /// @param data The data representing the element.
     /// @param position The position where the element is.
@@ -90,7 +99,7 @@ public:
             return false;
         }
 
-        return InsertInternal(data, position);
+        return DoInsert(data, position);
     }
     
     /// Removes an element matching the given data and position.
@@ -104,7 +113,7 @@ public:
             return false;
         }
 
-        return RemoveInternal(data, position);
+        return DoRemove(data, position);
     }
     
     /// Finds the closest element to the given target position within a maximum radius.
@@ -115,19 +124,19 @@ public:
     {
         std::optional<Element> nearest = std::nullopt;
         float bestDistanceSq = maxRadius * maxRadius;
-        FindNearest(target, bestDistanceSq, nearest);
+        DoFindNearest(target, bestDistanceSq, nearest);
         return nearest;
     }
     
-    /// Gathers a list of all elements contained by the given bounds.
+    /// Gathers a collection of all elements contained by the given bounds.
     /// @param queryBounds The bounding box defining the search region.
-    /// @return The list of elements found within the query bounds.
+    /// @return The collection of elements found within the query bounds.
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
         if (mBounds.Intersects(queryBounds))
         {
-            SpatialQuery(queryBounds, elements);
+            DoSpatialQuery(queryBounds, elements);
         }
         
         return elements;
@@ -140,30 +149,32 @@ public:
     Quadtree& operator=(Quadtree&&) = default;
     
 private:
-    /// Determines the index to the children array based on where the position belongs to.
-    /// @param position The position to check.
-    /// @return The index to the corresponding child.
-    int GetChildIndex(const Vector2& position) const
+    /// Recursively collect all elements in this node and its children.
+    /// @param elements The collection where elements are accumulated.
+    void DoGetAllElements(std::vector<Element>& elements) const
     {
-        // Use a Z-order curve to map the children into a one-dimensional sequence.
-        // 0: Left-Top
-        // 1: Right-Top
-        // 2: Left-Bottom
-        // 3: Right-Bottom
-        Vector2 center = mBounds.GetCenter();
-        return (position.x > center.x) + ((position.y < center.y) * 2);
+        if (mIsLeaf)
+        {
+            elements.insert(elements.end(), mElements.begin(), mElements.end());
+            return;
+        }
+        
+        for (const auto& child : mChildren)
+        {
+            child->DoGetAllElements(elements);
+        }
     }
     
     /// Inserts a new element with the given data and position without a boundary check.
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully inserted.
-    bool InsertInternal(T data, const Vector2& position)
+    bool DoInsert(T data, const Vector2& position)
     {
         if (!mIsLeaf)
         {
             int index = GetChildIndex(position);
-            return mChildren[index]->InsertInternal(data, position);
+            return mChildren[index]->DoInsert(data, position);
         }
 
         mElements.push_back({data, position});
@@ -180,7 +191,7 @@ private:
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully removed.
-    bool RemoveInternal(T data, const Vector2& position)
+    bool DoRemove(T data, const Vector2& position)
     {
         if (mIsLeaf)
         {
@@ -200,7 +211,7 @@ private:
         }
 
         int index = GetChildIndex(position);
-        if (mChildren[index]->RemoveInternal(data, position))
+        if (mChildren[index]->DoRemove(data, position))
         {
             TryMerge();
             return true;
@@ -209,75 +220,11 @@ private:
         return false;
     }
     
-    /// Divides this node into a branch by passing its elements into its children.
-    void Subdivide()
-    {
-        Vector2 min = mBounds.min;
-        Vector2 max = mBounds.max;
-        Vector2 center = mBounds.GetCenter();
-
-        AABB topLeft({min.x, center.y}, {center.x, max.y});
-        AABB topRight(center, {max.x, max.y});
-        AABB bottomLeft({min.x, min.y}, center);
-        AABB bottomRight({center.x, min.y}, {max.x, center.y});
-
-        mChildren[0] = std::make_unique<Quadtree>(topLeft);
-        mChildren[1] = std::make_unique<Quadtree>(topRight);
-        mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
-        mChildren[3] = std::make_unique<Quadtree>(bottomRight);
-
-        for (auto& element : mElements)
-        {
-            int index = GetChildIndex(element.position);
-            mChildren[index]->InsertInternal(std::move(element.data), element.position);
-        }
-
-        mIsLeaf = false;
-        mElements.clear();
-    }
-
-    /// Attempt to merge the children back into this node if their elements fit within this node's capacity.
-    void TryMerge()
-    {
-        for (const auto& child : mChildren)
-        {
-            if (!child->mIsLeaf)
-            {
-                return;
-            }
-        }
-
-        size_t totalElements = 0;
-        for (const auto& child : mChildren)
-        {
-            totalElements += child->mElements.size();
-        }
-
-        if (totalElements <= NodeCapacity)
-        {
-            mElements.reserve(totalElements);
-            for (auto& child : mChildren)
-            {
-                for (auto& element : child->mElements)
-                {
-                    mElements.push_back(std::move(element));
-                }
-            }
-
-            for (auto& child : mChildren)
-            {
-                child.reset();
-            }
-
-            mIsLeaf = true;
-        }
-    }
-
     /// Recursive helper for finding the nearest element.
     /// @param target The search position.
     /// @param bestDistanceSq The best squared distance found so far.
     /// @param nearest The closest element if found, or empty.
-    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
+    void DoFindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
     {
         if (mIsLeaf)
         {
@@ -312,19 +259,19 @@ private:
             float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
             if (distanceSq < bestDistanceSq)
             {
-                child->FindNearest(target, bestDistanceSq, nearest);
+                child->DoFindNearest(target, bestDistanceSq, nearest);
             }
         }
     }
     
     /// Recursive helper for the spatial query.
     /// @param queryBounds The bounding box for the search.
-    /// @param elements The list where elements are accumulated.
-    void SpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
+    /// @param elements The collection where elements are accumulated.
+    void DoSpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
     {
         if (queryBounds.Contains(mBounds))
         {
-            GatherAllElements(elements);
+            DoGetAllElements(elements);
             return;
         }
 
@@ -344,24 +291,86 @@ private:
         {
             if (child->mBounds.Intersects(queryBounds))
             {
-                child->SpatialQuery(queryBounds, elements);
+                child->DoSpatialQuery(queryBounds, elements);
             }
         }
     }
     
-    /// Recursively collect all elements in this node and its children.
-    /// @param elements The list where elements are accumulated.
-    void GatherAllElements(std::vector<Element>& elements) const
+    /// Determines the index to the children array based on where the position belongs to.
+    /// @param position The position to check.
+    /// @return The index to the corresponding child.
+    int GetChildIndex(const Vector2& position) const
     {
-        if (mIsLeaf)
+        // Use a Z-order curve to map the children into a one-dimensional sequence.
+        // 0: Left-Top
+        // 1: Right-Top
+        // 2: Left-Bottom
+        // 3: Right-Bottom
+        Vector2 center = mBounds.GetCenter();
+        return (position.x > center.x) + ((position.y < center.y) * 2);
+    }
+    
+    /// Divides this node into a branch by passing its elements into its children.
+    void Subdivide()
+    {
+        Vector2 min = mBounds.min;
+        Vector2 max = mBounds.max;
+        Vector2 center = mBounds.GetCenter();
+
+        AABB topLeft({min.x, center.y}, {center.x, max.y});
+        AABB topRight(center, {max.x, max.y});
+        AABB bottomLeft({min.x, min.y}, center);
+        AABB bottomRight({center.x, min.y}, {max.x, center.y});
+
+        mChildren[0] = std::make_unique<Quadtree>(topLeft);
+        mChildren[1] = std::make_unique<Quadtree>(topRight);
+        mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
+        mChildren[3] = std::make_unique<Quadtree>(bottomRight);
+
+        for (auto& element : mElements)
         {
-            elements.insert(elements.end(), mElements.begin(), mElements.end());
-            return;
+            int index = GetChildIndex(element.position);
+            mChildren[index]->DoInsert(std::move(element.data), element.position);
         }
-        
+
+        mIsLeaf = false;
+        mElements.clear();
+    }
+
+    /// Attempts to merge the children back into this node if their elements fit within this node's capacity.
+    void TryMerge()
+    {
         for (const auto& child : mChildren)
         {
-            child->GatherAllElements(elements);
+            if (!child->mIsLeaf)
+            {
+                return;
+            }
+        }
+
+        size_t totalElements = 0;
+        for (const auto& child : mChildren)
+        {
+            totalElements += child->mElements.size();
+        }
+
+        if (totalElements <= NodeCapacity)
+        {
+            mElements.reserve(totalElements);
+            for (auto& child : mChildren)
+            {
+                for (auto& element : child->mElements)
+                {
+                    mElements.push_back(std::move(element));
+                }
+            }
+
+            for (auto& child : mChildren)
+            {
+                child.reset();
+            }
+
+            mIsLeaf = true;
         }
     }
     
