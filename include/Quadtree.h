@@ -128,9 +128,9 @@ public:
         return nearest;
     }
     
-    /// Gathers a list of all elements contained by the given bounds.
+    /// Gathers a collection of all elements contained by the given bounds.
     /// @param queryBounds The bounding box defining the search region.
-    /// @return The list of elements found within the query bounds.
+    /// @return The collection of elements found within the query bounds.
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
         std::vector<Element> elements;
@@ -266,7 +266,7 @@ private:
     
     /// Recursive helper for the spatial query.
     /// @param queryBounds The bounding box for the search.
-    /// @param elements The list where elements are accumulated.
+    /// @param elements The collection where elements are accumulated.
     void DoSpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
     {
         if (queryBounds.Contains(mBounds))
@@ -337,7 +337,7 @@ private:
         mElements.clear();
     }
 
-    /// Attempt to merge the children back into this node if their elements fit within this node's capacity.
+    /// Attempts to merge the children back into this node if their elements fit within this node's capacity.
     void TryMerge()
     {
         for (const auto& child : mChildren)
