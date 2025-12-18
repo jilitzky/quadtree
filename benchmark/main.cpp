@@ -4,7 +4,7 @@
 #include <iostream>
 #include "Quadtree.h"
 
-using Tree = Quadtree<size_t, 16>;
+using Tree = Quadtree<size_t>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {
@@ -107,7 +107,9 @@ std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vector2>& positio
 
 int main()
 {
-    Tree tree = { AABB({ -1000, -1000 }, { 1000, 1000 }) };
+    AABB bounds = {{ -1000, -1000 }, { 1000, 1000 }};
+    size_t nodeCapacity = 16;
+    Tree tree = { bounds, nodeCapacity };
 
     std::vector<Vector2> positions;
     if (!TryReadPositions(positions))
