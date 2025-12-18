@@ -9,24 +9,24 @@
 
 /// A data structure that partitions a two-dimensional space into quadrants and provides efficient spatial queries.
 /// @tparam T The type of data representing elements in the tree.
-/// @tparam NodeCapacity The maximum number of elements that a node can store before subdividing.
-template<typename T, size_t NodeCapacity = 8>
+template<typename T>
 class Quadtree
 {
 public:
     /// Represents an item stored in the tree.
     struct Element
     {
-        /// The data payload for this element.
+        /// The data representing the element.
         T data;
         
         /// The position linked to the data.
         Vector2 position;
     };
 
-    /// Constructor that initializes the Quadtree node to the given bounding box.
-    /// @param bounds The bounding box that defines the area covered by this node.
-    Quadtree(const AABB& bounds) : mBounds(bounds)
+    /// Construct a Quadtree that covers the given bounds.
+    /// @param bounds The area covered by the tree.
+    /// @param nodeCapacity The maximum number of elements that a node within the tree can store before subdividing.
+    Quadtree(const AABB& bounds, size_t nodeCapacity) : mRoot(bounds), mNodeCapacity(nodeCapacity)
     {
     }
     
@@ -36,56 +36,34 @@ public:
     /// Move constructor is defaulted to allow efficient transfer of ownership.
     Quadtree(Quadtree&& other) = default;
     
-    /// Returns the bounding box representing this node.
-    /// @return A constant reference to the area covered by the node.
+    /// Returns the bounding box representing the area covered by the tree.
+    /// @return A constant reference to the bounding box.
     const AABB& GetBounds() const
     {
-       return mBounds;
+       return mRoot.bounds;
     }
 
-    /// Calculates the height of this node from its deepest branch.
-    /// @return The height of this node.
+    /// Calculates the height of the tree from its deepest branch.
+    /// @return The height of the tree.
     size_t GetHeight() const
     {
-        if (mIsLeaf)
-        {
-            return 1;
-        }
-        
-        size_t height = 0;
-        for (const auto& child : mChildren)
-        {
-            height = std::max(child->GetHeight(), height);
-        }
-        
-        return height + 1;
+        return mRoot.GetHeight();
     }
     
     /// Gets all elements contained by the tree.
     /// @return A collection with all the elements.
     std::vector<T> GetAllElements() const
     {
-        std::vector<T> elements;
-        DoGetAllElements(elements);
-        return elements;
+        std::vector<T> allElements;
+        mRoot.GetAllElements(allElements);
+        return allElements;
     }
     
-    /// Counts the total number of elements in this node and all its children.
-    /// @return The total number of elements in this node.
+    /// Counts the total number of elements in the tree.
+    /// @return The total number of elements.
     size_t CountElements() const
     {
-        if (mIsLeaf)
-        {
-            return mElements.size();
-        }
-        
-        size_t size = 0;
-        for (const auto& child : mChildren)
-        {
-            size += child->CountElements();
-        }
-        
-        return size;
+        return mRoot.CountElements();
     }
     
     /// Inserts a new element with the given data and position.
@@ -94,12 +72,12 @@ public:
     /// @return True if the element was successfully inserted.
     bool Insert(T data, const Vector2& position)
     {
-        if (!mBounds.Contains(position))
+        if (!GetBounds().Contains(position))
         {
             return false;
         }
 
-        return DoInsert(data, position);
+        return mRoot.Insert(data, position, mNodeCapacity);
     }
     
     /// Removes an element matching the given data and position.
@@ -108,12 +86,12 @@ public:
     /// @return True if the element was successfully removed.
     bool Remove(T data, const Vector2& position)
     {
-        if (!mBounds.Contains(position))
+        if (!GetBounds().Contains(position))
         {
             return false;
         }
 
-        return DoRemove(data, position);
+        return mRoot.Remove(data, position, mNodeCapacity);
     }
     
     /// Finds the closest element to the given target position within a maximum radius.
@@ -124,22 +102,22 @@ public:
     {
         std::optional<Element> nearest = std::nullopt;
         float bestDistanceSq = maxRadius * maxRadius;
-        DoFindNearest(target, bestDistanceSq, nearest);
+        mRoot.FindNearest(target, bestDistanceSq, nearest);
         return nearest;
     }
     
-    /// Gathers a collection of all elements contained by the given bounds.
-    /// @param queryBounds The bounding box defining the search region.
-    /// @return The collection of elements found within the query bounds.
+    /// Gathers elements found within the given bounds.
+    /// @param queryBounds The search area.
+    /// @return The collection of elements found within the search area.
     std::vector<Element> SpatialQuery(const AABB& queryBounds) const
     {
-        std::vector<Element> elements;
-        if (mBounds.Intersects(queryBounds))
+        std::vector<Element> foundElements;
+        if (GetBounds().Intersects(queryBounds))
         {
-            DoSpatialQuery(queryBounds, elements);
+            mRoot.SpatialQuery(queryBounds, foundElements);
         }
         
-        return elements;
+        return foundElements;
     }
     
     /// Copy assignment is deleted to avoid accidental copies.
@@ -149,240 +127,294 @@ public:
     Quadtree& operator=(Quadtree&&) = default;
     
 private:
-    /// Recursively collect all elements in this node and its children.
-    /// @param elements The collection where elements are accumulated.
-    void DoGetAllElements(std::vector<Element>& elements) const
+    /// Represents a node in the Quadtree that may be a leaf or a branch.
+    struct Node
     {
-        if (mIsLeaf)
+        /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
+        std::array<std::unique_ptr<Node>, 4> children;
+        
+        /// Defines the area covered by this node.
+        AABB bounds;
+        
+        /// Indicates if this node is an endpoint and can store elements or if it's a branch with children.
+        bool isLeaf = true;
+        
+        /// Elements stored by this node when it's a leaf.
+        std::vector<Element> elements;
+        
+        /// Construct a node with the given bounds
+        /// @param bounds The area covered by the node.
+        Node(const AABB& bounds) : bounds(bounds)
         {
-            elements.insert(elements.end(), mElements.begin(), mElements.end());
-            return;
         }
         
-        for (const auto& child : mChildren)
+        /// Calculates the height of this node from its deepest branch.
+        /// @return The height of this node.
+        size_t GetHeight() const
         {
-            child->DoGetAllElements(elements);
-        }
-    }
-    
-    /// Inserts a new element with the given data and position without a boundary check.
-    /// @param data The data representing the element.
-    /// @param position The position where the element is.
-    /// @return True if the element was successfully inserted.
-    bool DoInsert(T data, const Vector2& position)
-    {
-        if (!mIsLeaf)
-        {
-            int index = GetChildIndex(position);
-            return mChildren[index]->DoInsert(data, position);
-        }
-
-        mElements.push_back({data, position});
-
-        if (mElements.size() > NodeCapacity)
-        {
-            Subdivide();
-        }
-
-        return true;
-    }
-    
-    /// Removes an element matching the given data and position without a boundary check.
-    /// @param data The data representing the element.
-    /// @param position The position where the element is.
-    /// @return True if the element was successfully removed.
-    bool DoRemove(T data, const Vector2& position)
-    {
-        if (mIsLeaf)
-        {
-            auto it = std::find_if(mElements.begin(), mElements.end(), [&](const Element& element)
+            if (isLeaf)
             {
-                return element.data == data && element.position == position;
-            });
-            
-            if (it != mElements.end())
-            {
-                *it = std::move(mElements.back());
-                mElements.pop_back();
-                return true;
+                return 1;
             }
             
-            return false;
-        }
-
-        int index = GetChildIndex(position);
-        if (mChildren[index]->DoRemove(data, position))
-        {
-            TryMerge();
-            return true;
-        }
-
-        return false;
-    }
-    
-    /// Recursive helper for finding the nearest element.
-    /// @param target The search position.
-    /// @param bestDistanceSq The best squared distance found so far.
-    /// @param nearest The closest element if found, or empty.
-    void DoFindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
-    {
-        if (mIsLeaf)
-        {
-            for (const auto& element : mElements)
+            size_t height = 0;
+            for (const auto& child : children)
             {
-                float distanceSq = element.position.DistanceSquared(target);
-                if (distanceSq < bestDistanceSq)
-                {
-                    bestDistanceSq = distanceSq;
-                    nearest = element;
-                }
+                height = std::max(child->GetHeight(), height);
             }
-            return;
+            
+            return height + 1;
         }
         
-        Vector2 center = mBounds.GetCenter();
-        int isRight = target.x > center.x;
-        int isBottom = target.y < center.y;
-
-        // Bias the search toward the quadrant that contains the target.
-        std::array<int, 4> sortedIndices;
-        sortedIndices[0] = isBottom * 2 + isRight;
-        sortedIndices[1] = isBottom * 2 + (1 - isRight);
-        sortedIndices[2] = (1 - isBottom) * 2 + isRight;
-        sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
-        
-        for (int index : sortedIndices)
+        /// Recursively collect all elements in this node and its children.
+        /// @param allElements The collection where elements are accumulated.
+        void GetAllElements(std::vector<Element>& allElements) const
         {
-            const auto& child = mChildren[index];
-            float distanceX = std::max({child->mBounds.min.x - target.x, 0.0f, target.x - child->mBounds.max.x});
-            float distanceY = std::max({child->mBounds.min.y - target.y, 0.0f, target.y - child->mBounds.max.y});
-            float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
-            if (distanceSq < bestDistanceSq)
+            if (isLeaf)
             {
-                child->DoFindNearest(target, bestDistanceSq, nearest);
-            }
-        }
-    }
-    
-    /// Recursive helper for the spatial query.
-    /// @param queryBounds The bounding box for the search.
-    /// @param elements The collection where elements are accumulated.
-    void DoSpatialQuery(const AABB& queryBounds, std::vector<Element>& elements) const
-    {
-        if (queryBounds.Contains(mBounds))
-        {
-            DoGetAllElements(elements);
-            return;
-        }
-
-        if (mIsLeaf)
-        {
-            for (const auto& element : mElements)
-            {
-                if (queryBounds.Contains(element.position))
-                {
-                    elements.push_back(element);
-                }
-            }
-            return;
-        }
-
-        for (const auto& child : mChildren)
-        {
-            if (child->mBounds.Intersects(queryBounds))
-            {
-                child->DoSpatialQuery(queryBounds, elements);
-            }
-        }
-    }
-    
-    /// Determines the index to the children array based on where the position belongs to.
-    /// @param position The position to check.
-    /// @return The index to the corresponding child.
-    int GetChildIndex(const Vector2& position) const
-    {
-        // Use a Z-order curve to map the children into a one-dimensional sequence.
-        // 0: Left-Top
-        // 1: Right-Top
-        // 2: Left-Bottom
-        // 3: Right-Bottom
-        Vector2 center = mBounds.GetCenter();
-        return (position.x > center.x) + ((position.y < center.y) * 2);
-    }
-    
-    /// Divides this node into a branch by passing its elements into its children.
-    void Subdivide()
-    {
-        Vector2 min = mBounds.min;
-        Vector2 max = mBounds.max;
-        Vector2 center = mBounds.GetCenter();
-
-        AABB topLeft({min.x, center.y}, {center.x, max.y});
-        AABB topRight(center, {max.x, max.y});
-        AABB bottomLeft({min.x, min.y}, center);
-        AABB bottomRight({center.x, min.y}, {max.x, center.y});
-
-        mChildren[0] = std::make_unique<Quadtree>(topLeft);
-        mChildren[1] = std::make_unique<Quadtree>(topRight);
-        mChildren[2] = std::make_unique<Quadtree>(bottomLeft);
-        mChildren[3] = std::make_unique<Quadtree>(bottomRight);
-
-        for (auto& element : mElements)
-        {
-            int index = GetChildIndex(element.position);
-            mChildren[index]->DoInsert(std::move(element.data), element.position);
-        }
-
-        mIsLeaf = false;
-        mElements.clear();
-    }
-
-    /// Attempts to merge the children back into this node if their elements fit within this node's capacity.
-    void TryMerge()
-    {
-        for (const auto& child : mChildren)
-        {
-            if (!child->mIsLeaf)
-            {
+                allElements.insert(allElements.end(), elements.begin(), elements.end());
                 return;
             }
-        }
-
-        size_t totalElements = 0;
-        for (const auto& child : mChildren)
-        {
-            totalElements += child->mElements.size();
-        }
-
-        if (totalElements <= NodeCapacity)
-        {
-            mElements.reserve(totalElements);
-            for (auto& child : mChildren)
+            
+            for (const auto& child : children)
             {
-                for (auto& element : child->mElements)
+                child->GetAllElements(allElements);
+            }
+        }
+        
+        /// Counts the total number of elements in this node and all its children.
+        /// @return The total number of elements.
+        size_t CountElements() const
+        {
+            if (isLeaf)
+            {
+                return elements.size();
+            }
+            
+            size_t size = 0;
+            for (const auto& child : children)
+            {
+                size += child->CountElements();
+            }
+            
+            return size;
+        }
+        
+        /// Inserts a new element with the given data and position.
+        /// @param data The data representing the element.
+        /// @param position The position where the element is.
+        /// @param capacity The maximum number of elements to hold before subdividing.
+        /// @return True if the element was successfully inserted.
+        bool Insert(T data, const Vector2& position, size_t capacity)
+        {
+            if (!isLeaf)
+            {
+                int index = GetChildIndex(position);
+                return children[index]->Insert(data, position, capacity);
+            }
+
+            elements.push_back({data, position});
+
+            if (elements.size() > capacity)
+            {
+                Subdivide(capacity);
+            }
+
+            return true;
+        }
+        
+        /// Removes an element matching the given data and position.
+        /// @param data The data representing the element.
+        /// @param position The position where the element is.
+        /// @param capacity The maximum number of elements a node can hold.
+        /// @return True if the element was successfully removed.
+        bool Remove(T data, const Vector2& position, size_t capacity)
+        {
+            if (isLeaf)
+            {
+                auto it = std::find_if(elements.begin(), elements.end(), [&](const Element& element)
                 {
-                    mElements.push_back(std::move(element));
+                    return element.data == data && element.position == position;
+                });
+                
+                if (it != elements.end())
+                {
+                    *it = std::move(elements.back());
+                    elements.pop_back();
+                    return true;
+                }
+                
+                return false;
+            }
+
+            int index = GetChildIndex(position);
+            if (children[index]->Remove(data, position, capacity))
+            {
+                TryMerge(capacity);
+                return true;
+            }
+
+            return false;
+        }
+        
+        /// Recursive helper for finding the nearest element.
+        /// @param target The search position.
+        /// @param bestDistanceSq The best squared distance found so far.
+        /// @param nearest The closest element if found, or empty.
+        void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<Element>& nearest) const
+        {
+            if (isLeaf)
+            {
+                for (const auto& element : elements)
+                {
+                    float distanceSq = element.position.DistanceSquared(target);
+                    if (distanceSq < bestDistanceSq)
+                    {
+                        bestDistanceSq = distanceSq;
+                        nearest = element;
+                    }
+                }
+                return;
+            }
+            
+            Vector2 center = bounds.GetCenter();
+            int isRight = target.x > center.x;
+            int isBottom = target.y < center.y;
+
+            // Bias the search toward the quadrant that contains the target.
+            std::array<int, 4> sortedIndices;
+            sortedIndices[0] = isBottom * 2 + isRight;
+            sortedIndices[1] = isBottom * 2 + (1 - isRight);
+            sortedIndices[2] = (1 - isBottom) * 2 + isRight;
+            sortedIndices[3] = (1 - isBottom) * 2 + (1 - isRight);
+            
+            for (int index : sortedIndices)
+            {
+                const auto& child = children[index];
+                float distanceX = std::max({child->bounds.min.x - target.x, 0.0f, target.x - child->bounds.max.x});
+                float distanceY = std::max({child->bounds.min.y - target.y, 0.0f, target.y - child->bounds.max.y});
+                float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
+                if (distanceSq < bestDistanceSq)
+                {
+                    child->FindNearest(target, bestDistanceSq, nearest);
+                }
+            }
+        }
+        
+        /// Recursive helper for the spatial query.
+        /// @param queryBounds The search area.
+        /// @param foundElements The collection of elements found by the query.
+        void SpatialQuery(const AABB& queryBounds, std::vector<Element>& foundElements) const
+        {
+            if (queryBounds.Contains(bounds))
+            {
+                GetAllElements(foundElements);
+                return;
+            }
+
+            if (isLeaf)
+            {
+                for (const auto& element : elements)
+                {
+                    if (queryBounds.Contains(element.position))
+                    {
+                        foundElements.push_back(element);
+                    }
+                }
+                return;
+            }
+
+            for (const auto& child : children)
+            {
+                if (child->bounds.Intersects(queryBounds))
+                {
+                    child->SpatialQuery(queryBounds, foundElements);
+                }
+            }
+        }
+        
+    private:
+        /// Determines the index to the children array based on where the position belongs to.
+        /// @param position The position to check.
+        /// @return The index to the corresponding child.
+        int GetChildIndex(const Vector2& position) const
+        {
+            // Use a Z-order curve to map the children into a one-dimensional sequence.
+            // 0: Left-Top
+            // 1: Right-Top
+            // 2: Left-Bottom
+            // 3: Right-Bottom
+            Vector2 center = bounds.GetCenter();
+            return (position.x > center.x) + ((position.y < center.y) * 2);
+        }
+        
+        /// Divides this node into a branch by passing its elements into its children.
+        /// @param capacity The maximum number of elements a node can hold.
+        void Subdivide(size_t capacity)
+        {
+            Vector2 min = bounds.min;
+            Vector2 max = bounds.max;
+            Vector2 center = bounds.GetCenter();
+
+            AABB topLeft({min.x, center.y}, {center.x, max.y});
+            AABB topRight(center, {max.x, max.y});
+            AABB bottomLeft({min.x, min.y}, center);
+            AABB bottomRight({center.x, min.y}, {max.x, center.y});
+
+            children[0] = std::make_unique<Node>(topLeft);
+            children[1] = std::make_unique<Node>(topRight);
+            children[2] = std::make_unique<Node>(bottomLeft);
+            children[3] = std::make_unique<Node>(bottomRight);
+
+            for (auto& element : elements)
+            {
+                int index = GetChildIndex(element.position);
+                children[index]->Insert(std::move(element.data), element.position, capacity);
+            }
+
+            isLeaf = false;
+            elements.clear();
+        }
+
+        /// Attempts to merge the children back into this node if their elements fit within this node's capacity.
+        /// @param capacity The maximum number of elements a node can hold.
+        void TryMerge(size_t capacity)
+        {
+            for (const auto& child : children)
+            {
+                if (!child->isLeaf)
+                {
+                    return;
                 }
             }
 
-            for (auto& child : mChildren)
+            size_t elementCount = 0;
+            for (const auto& child : children)
             {
-                child.reset();
+                elementCount += child->elements.size();
             }
 
-            mIsLeaf = true;
+            if (elementCount <= capacity)
+            {
+                elements.reserve(elementCount);
+                for (auto& child : children)
+                {
+                    for (auto& element : child->elements)
+                    {
+                        elements.push_back(std::move(element));
+                    }
+                }
+
+                for (auto& child : children)
+                {
+                    child.reset();
+                }
+
+                isLeaf = true;
+            }
         }
-    }
+    };
     
-    /// Defines the area covered by this node.
-    AABB mBounds;
-    
-    /// Indicates if this node is an endpoint and can store elements or if it's a branch with children.
-    bool mIsLeaf = true;
-    
-    /// Elements stored by this node when it's a leaf.
-    std::vector<Element> mElements;
-    
-    /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
-    std::array<std::unique_ptr<Quadtree>, 4> mChildren;
+    Node mRoot;
+    size_t mNodeCapacity;
 };

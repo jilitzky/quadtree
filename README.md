@@ -27,8 +27,9 @@ Simply copy the contents of the `include/` directory to your project's include p
 ## Usage
 ### Find Nearest
 ```cpp
-// Initialize a Quadtree that stores up to 1 int per node
-Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
+AABB bounds = {{ 0, 0 }, { 100, 100 }};
+size_t nodeCapacity = 1;
+Quadtree<int> tree = { bounds, nodeCapacity };
 
 tree.Insert(1, { 25, 25 });
 tree.Insert(2, { 87, 87 });
@@ -51,8 +52,9 @@ auto nearest = tree.FindNearest({ 75, 75 }); // Nearest is 6.
 ```
 ### Spatial Query
 ```cpp
-// Initialize a Quadtree that stores up to 1 int per node
-Quadtree<int, 1> tree = { AABB({ 0, 0 }, { 100, 100 }) };
+AABB bounds = {{ 0, 0 }, { 100, 100 }};
+size_t nodeCapacity = 1;
+Quadtree<int> tree = { bounds, nodeCapacity };
 
 tree.Insert(1, { 25, 25 });
 tree.Insert(2, { 87, 87 });
@@ -77,10 +79,10 @@ auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
 Benchmark was run averaging 10,000 operations with a `NodeCapacity` of 16 on an Apple M2 Pro.
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 328 ns     |
-| Removal       | 401 ns     |
-| Find Nearest  | 1445 ns    |
-| Spatial Query | 68179 ns   |
+| Insertion     | 306 ns     |
+| Removal       | 377 ns     |
+| Find Nearest  | 1472 ns    |
+| Spatial Query | 69411 ns   |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
