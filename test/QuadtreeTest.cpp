@@ -86,6 +86,13 @@ TEST_F(QuadtreeTest, Insert)
     ASSERT_TRUE(_tree.GetHeight() == 4);
 }
 
+TEST_F(QuadtreeTest, Insert_SamePosition)
+{
+    _tree.Insert(1, { 50, 50 });
+    _tree.Insert(2, { 50, 50 });
+    ASSERT_TRUE(_tree.CountElements() == 2);
+}
+
 TEST_F(QuadtreeTest, Insert_OutOfBounds)
 {
     bool inserted = _tree.Insert(1, { 101, 101 });

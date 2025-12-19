@@ -26,7 +26,8 @@ public:
     /// Construct a Quadtree that covers the given bounds.
     /// @param bounds The area covered by the tree.
     /// @param nodeCapacity The maximum number of elements that a node within the tree can store before subdividing.
-    Quadtree(const AABB& bounds, size_t nodeCapacity) : mRoot(bounds), mNodeCapacity(nodeCapacity)
+    /// @param maxDepth The maximum depth the tree can have from its root to the furthest leaf.
+    Quadtree(const AABB& bounds, size_t nodeCapacity = 8, int maxDepth = 4) : mRoot(bounds, 0), mNodeCapacity(nodeCapacity), mMaxDepth(maxDepth)
     {
     }
     
@@ -77,7 +78,7 @@ public:
             return false;
         }
 
-        return mRoot.Insert(data, position, mNodeCapacity);
+        return mRoot.Insert(data, position, mNodeCapacity, mMaxDepth);
     }
     
     /// Removes an element matching the given data and position.
@@ -136,6 +137,9 @@ private:
         /// Defines the area covered by this node.
         AABB bounds;
         
+        /// How many levels down the node is from the root.
+        int depth;
+        
         /// Indicates if this node is an endpoint and can store elements or if it's a branch with children.
         bool isLeaf = true;
         
@@ -144,7 +148,8 @@ private:
         
         /// Construct a node with the given bounds
         /// @param bounds The area covered by the node.
-        Node(const AABB& bounds) : bounds(bounds)
+        /// @param depth How many levels down the node is from the root.
+        Node(const AABB& bounds, int depth) : bounds(bounds), depth(depth)
         {
         }
         
@@ -204,20 +209,21 @@ private:
         /// @param data The data representing the element.
         /// @param position The position where the element is.
         /// @param capacity The maximum number of elements to hold before subdividing.
+        /// @param maxDepth The maximum depth a node can be from the root.
         /// @return True if the element was successfully inserted.
-        bool Insert(T data, const Vector2& position, size_t capacity)
+        bool Insert(T data, const Vector2& position, size_t capacity, int maxDepth)
         {
             if (!isLeaf)
             {
                 int index = GetChildIndex(position);
-                return children[index]->Insert(data, position, capacity);
+                return children[index]->Insert(data, position, capacity, maxDepth);
             }
 
             elements.push_back({data, position});
 
-            if (elements.size() > capacity)
+            if (elements.size() > capacity && depth < maxDepth)
             {
-                Subdivide(capacity);
+                Subdivide(capacity, maxDepth);
             }
 
             return true;
@@ -350,7 +356,8 @@ private:
         
         /// Divides this node into a branch by passing its elements into its children.
         /// @param capacity The maximum number of elements a node can hold.
-        void Subdivide(size_t capacity)
+        /// @param maxDepth The maximum depth a node can be from the root.
+        void Subdivide(size_t capacity, int maxDepth)
         {
             Vector2 min = bounds.min;
             Vector2 max = bounds.max;
@@ -361,15 +368,16 @@ private:
             AABB bottomLeft({min.x, min.y}, center);
             AABB bottomRight({center.x, min.y}, {max.x, center.y});
 
-            children[0] = std::make_unique<Node>(topLeft);
-            children[1] = std::make_unique<Node>(topRight);
-            children[2] = std::make_unique<Node>(bottomLeft);
-            children[3] = std::make_unique<Node>(bottomRight);
+            int childDepth = depth + 1;
+            children[0] = std::make_unique<Node>(topLeft, childDepth);
+            children[1] = std::make_unique<Node>(topRight, childDepth);
+            children[2] = std::make_unique<Node>(bottomLeft, childDepth);
+            children[3] = std::make_unique<Node>(bottomRight, childDepth);
 
             for (auto& element : elements)
             {
                 int index = GetChildIndex(element.position);
-                children[index]->Insert(std::move(element.data), element.position, capacity);
+                children[index]->Insert(std::move(element.data), element.position, capacity, maxDepth);
             }
 
             isLeaf = false;
@@ -415,6 +423,12 @@ private:
         }
     };
     
+    /// Represents the tree's root node.
     Node mRoot;
+    
+    /// The maximum number of elements a node is allowed to have before attempting to subdivide.
     size_t mNodeCapacity;
+    
+    /// How many additional levels the tree can have (the root is at depth 0).
+    int mMaxDepth;
 };
