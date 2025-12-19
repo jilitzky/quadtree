@@ -76,13 +76,13 @@ auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
 ```
 
 ## Performance
-Benchmark was run averaging 10,000 operations with a `NodeCapacity` of 16 on an Apple M2 Pro.
+Benchmark was run averaging 10,000 operations on an Apple M2 Pro.
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 306 ns     |
-| Removal       | 377 ns     |
-| Find Nearest  | 1472 ns    |
-| Spatial Query | 69411 ns   |
+| Insertion     | 192 ns     |
+| Removal       | 393 ns     |
+| Find Nearest  | 1430 ns    |
+| Spatial Query | 46373 ns   |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.

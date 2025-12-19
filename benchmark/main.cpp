@@ -108,8 +108,9 @@ std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vector2>& positio
 int main()
 {
     AABB bounds = {{ -1000, -1000 }, { 1000, 1000 }};
-    size_t nodeCapacity = 16;
-    Tree tree = { bounds, nodeCapacity };
+    size_t nodeCapacity = 8;
+    int maxDepth = 4;
+    Tree tree = { bounds, nodeCapacity, maxDepth };
 
     std::vector<Vector2> positions;
     if (!TryReadPositions(positions))
