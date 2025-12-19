@@ -76,7 +76,7 @@ auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
 ```
 
 ## Performance
-Benchmark was run averaging 10,000 operations on an Apple M2 Pro.
+Benchmark was run averaging 10,000 calls per operation on an Apple M2 Pro.
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
 | Insertion     | 192 ns     |
