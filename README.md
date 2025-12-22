@@ -50,7 +50,7 @@ tree.Insert(6, { 68, 68 });
 
 auto nearest = tree.FindNearest({ 75, 75 }); // Nearest is 6.
 ```
-### Spatial Query
+### Find All
 ```cpp
 AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
@@ -71,18 +71,18 @@ tree.Insert(4, { 68, 56 });
 // |          |           |
 // |__________|___________|
 
-AABB queryBounds = {{40, 38}, {75, 88}};
-auto elements = tree.SpatialQuery(queryBounds); // Elements contains 3 and 4.
+AABB region = {{40, 38}, {75, 88}};
+auto elements = tree.FindAll(region); // Elements contains 3 and 4.
 ```
 
 ## Performance
 Benchmark was run averaging 10,000 calls per operation on an Apple M2 Pro.
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 192 ns     |
-| Removal       | 393 ns     |
-| Find Nearest  | 1430 ns    |
-| Spatial Query | 46373 ns   |
+| Insertion     | 188 ns     |
+| Removal       | 420 ns     |
+| Find Nearest  | 1436 ns    |
+| Find All      | 46723 ns   |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.

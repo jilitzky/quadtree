@@ -99,15 +99,15 @@ public:
         return nearest;
     }
     
-    /// Gathers elements found within the given bounds.
-    /// @param queryBounds The search area.
-    /// @return The collection of elements found within the search area.
-    std::vector<QuadtreeElement<T>> SpatialQuery(const AABB& queryBounds) const
+    /// Gathers elements found within the given region.
+    /// @param region The search area.
+    /// @return The collection of elements found within the region.
+    std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
     {
         std::vector<QuadtreeElement<T>> foundElements;
-        if (GetBounds().Intersects(queryBounds))
+        if (GetBounds().Intersects(region))
         {
-            mRoot.SpatialQuery(queryBounds, foundElements);
+            mRoot.FindAll(region, foundElements);
         }
         
         return foundElements;

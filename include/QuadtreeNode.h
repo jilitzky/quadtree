@@ -189,12 +189,12 @@ struct QuadtreeNode
         }
     }
     
-    /// Recursive helper for the spatial query.
-    /// @param queryBounds The search area.
-    /// @param foundElements The collection of elements found by the query.
-    void SpatialQuery(const AABB& queryBounds, std::vector<QuadtreeElement<T>>& foundElements) const
+    /// Recursive helper for finding all elements within a region.
+    /// @param region The search area.
+    /// @param foundElements The collection of elements found by the search.
+    void FindAll(const AABB& region, std::vector<QuadtreeElement<T>>& foundElements) const
     {
-        if (queryBounds.Contains(bounds))
+        if (region.Contains(bounds))
         {
             GetAllElements(foundElements);
             return;
@@ -204,7 +204,7 @@ struct QuadtreeNode
         {
             for (const auto& element : elements)
             {
-                if (queryBounds.Contains(element.position))
+                if (region.Contains(element.position))
                 {
                     foundElements.push_back(element);
                 }
@@ -214,9 +214,9 @@ struct QuadtreeNode
 
         for (const auto& child : children)
         {
-            if (child->bounds.Intersects(queryBounds))
+            if (child->bounds.Intersects(region))
             {
-                child->SpatialQuery(queryBounds, foundElements);
+                child->FindAll(region, foundElements);
             }
         }
     }

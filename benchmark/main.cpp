@@ -69,7 +69,7 @@ std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vector2>& pos
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds SpatialQuery(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vector2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -78,7 +78,7 @@ std::chrono::nanoseconds SpatialQuery(Tree& tree, const std::vector<Vector2>& po
         Vector2 position = positions[i];
         Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
         Vector2 max = { std::max(-position.x, position.x), std::max(-position.y, position.y) };
-        tree.SpatialQuery(AABB(min, max));
+        tree.FindAll(AABB(min, max));
     }
     
     auto end = std::chrono::high_resolution_clock::now();
@@ -121,14 +121,14 @@ int main()
     
     auto insertion = Insertion(tree, positions);
     auto findNearest = FindNearest(tree, positions);
-    auto spatialQuery = SpatialQuery(tree, positions);
+    auto findAll = FindAll(tree, positions);
     auto removal = Removal(tree, positions);
     
     size_t numPositions = positions.size();
     std::cout << "Insertion: " << insertion.count() / numPositions << " ns" << std::endl;
     std::cout << "Removal: " << removal.count() / numPositions << " ns" << std::endl;
     std::cout << "Find Nearest: " << findNearest.count() / numPositions << " ns" << std::endl;
-    std::cout << "Spatial Query: " << spatialQuery.count() / numPositions << " ns" << std::endl;
+    std::cout << "Find All: " << findAll.count() / numPositions << " ns" << std::endl;
     
     return 0;
 }

@@ -140,8 +140,43 @@ TEST_F(QuadtreeTest, FindNearest_Empty)
 
 TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
 {
+    // TODO: Review this test case. Should it still find the closest element within the tree?
     auto nearest = _tree.FindNearest({ 101, 101 });
     ASSERT_FALSE(nearest.has_value());
+}
+
+TEST_F(QuadtreeTest, FindAll)
+{
+    _tree.Insert(1, { 25, 25 });
+    _tree.Insert(2, { 87, 87 });
+    _tree.Insert(3, { 56, 68 });
+    _tree.Insert(4, { 68, 56 });
+    
+    //  __________ ___________
+    // |        ..|.....|. 2  |
+    // |        . |_____|.____|
+    // |        . |_3|__|.    |
+    // |________._|__|4_|.____|
+    // |        ..|.......    |
+    // |    1     |           |
+    // |          |           |
+    // |__________|___________|
+    
+    AABB region = {{40, 38}, {75, 88}};
+    auto elements = _tree.FindAll(region);
+    ASSERT_TRUE(elements.size() == 2);
+    
+    auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 3;
+    });
+    ASSERT_TRUE(it3 != elements.end());
+    
+    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 4;
+    });
+    ASSERT_TRUE(it4 != elements.end());
 }
 
 TEST_F(QuadtreeTest, Remove)
@@ -233,38 +268,4 @@ TEST_F(QuadtreeTest, Remove_NotFound)
 {
     bool removed = _tree.Remove(1, { 50, 50 });
     ASSERT_FALSE(removed);
-}
-
-TEST_F(QuadtreeTest, SpatialQuery)
-{
-    _tree.Insert(1, { 25, 25 });
-    _tree.Insert(2, { 87, 87 });
-    _tree.Insert(3, { 56, 68 });
-    _tree.Insert(4, { 68, 56 });
-    
-    //  __________ ___________
-    // |        ..|.....|. 2  |
-    // |        . |_____|.____|
-    // |        . |_3|__|.    |
-    // |________._|__|4_|.____|
-    // |        ..|.......    |
-    // |    1     |           |
-    // |          |           |
-    // |__________|___________|
-    
-    AABB queryBounds = {{40, 38}, {75, 88}};
-    auto elements = _tree.SpatialQuery(queryBounds);
-    ASSERT_TRUE(elements.size() == 2);
-    
-    auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 3;
-    });
-    ASSERT_TRUE(it3 != elements.end());
-    
-    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 4;
-    });
-    ASSERT_TRUE(it4 != elements.end());
 }
