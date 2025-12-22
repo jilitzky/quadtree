@@ -43,15 +43,6 @@ public:
         return mRoot.GetHeight();
     }
     
-    /// Gets all elements contained by the tree.
-    /// @return A collection with all the elements.
-    std::vector<T> GetAllElements() const
-    {
-        std::vector<T> allElements;
-        mRoot.GetAllElements(allElements);
-        return allElements;
-    }
-    
     /// Counts the total number of elements in the tree.
     /// @return The total number of elements.
     size_t CountElements() const
@@ -99,15 +90,15 @@ public:
         return nearest;
     }
     
-    /// Gathers elements found within the given bounds.
-    /// @param queryBounds The search area.
-    /// @return The collection of elements found within the search area.
-    std::vector<QuadtreeElement<T>> SpatialQuery(const AABB& queryBounds) const
+    /// Gathers elements found within the given region.
+    /// @param region The search area.
+    /// @return The collection of elements found within the region.
+    std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
     {
         std::vector<QuadtreeElement<T>> foundElements;
-        if (GetBounds().Intersects(queryBounds))
+        if (GetBounds().Intersects(region))
         {
-            mRoot.SpatialQuery(queryBounds, foundElements);
+            mRoot.FindAll(region, foundElements);
         }
         
         return foundElements;

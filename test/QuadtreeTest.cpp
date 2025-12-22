@@ -100,50 +100,6 @@ TEST_F(QuadtreeTest, Insert_OutOfBounds)
     ASSERT_TRUE(_tree.CountElements() == 0);
 }
 
-TEST_F(QuadtreeTest, FindNearest)
-{
-    _tree.Insert(1, { 25, 25 });
-    _tree.Insert(2, { 87, 87 });
-    _tree.Insert(3, { 87, 68 });
-    _tree.Insert(4, { 56, 56 });
-    _tree.Insert(5, { 56, 68 });
-    _tree.Insert(6, { 68, 68 });
-
-    //  __________ ___________
-    // |          |     |  2  |
-    // |          |_____|x____|
-    // |          |_5|_6|  3  |
-    // |__________|_4|__|_____|
-    // |          |           |
-    // |    1     |           |
-    // |          |           |
-    // |__________|___________|
-
-    auto nearest = _tree.FindNearest({ 75, 75 });
-    ASSERT_TRUE(nearest.value().data == 6);
-}
-
-TEST_F(QuadtreeTest, FindNearest_Single)
-{
-    Vector2 expected = { 25, 25 };
-    _tree.Insert(1,expected);
-
-    auto nearest = _tree.FindNearest({ 50, 50 });
-    ASSERT_TRUE(nearest.value().position == expected);
-}
-
-TEST_F(QuadtreeTest, FindNearest_Empty)
-{
-    auto nearest = _tree.FindNearest({ 50, 50 });
-    ASSERT_FALSE(nearest.has_value());
-}
-
-TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
-{
-    auto nearest = _tree.FindNearest({ 101, 101 });
-    ASSERT_FALSE(nearest.has_value());
-}
-
 TEST_F(QuadtreeTest, Remove)
 {
     _tree.Insert(1, { 25, 25 });
@@ -235,7 +191,7 @@ TEST_F(QuadtreeTest, Remove_NotFound)
     ASSERT_FALSE(removed);
 }
 
-TEST_F(QuadtreeTest, SpatialQuery)
+TEST_F(QuadtreeTest, FindAll)
 {
     _tree.Insert(1, { 25, 25 });
     _tree.Insert(2, { 87, 87 });
@@ -252,8 +208,8 @@ TEST_F(QuadtreeTest, SpatialQuery)
     // |          |           |
     // |__________|___________|
     
-    AABB queryBounds = {{40, 38}, {75, 88}};
-    auto elements = _tree.SpatialQuery(queryBounds);
+    AABB region = {{40, 38}, {75, 88}};
+    auto elements = _tree.FindAll(region);
     ASSERT_TRUE(elements.size() == 2);
     
     auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
@@ -267,4 +223,47 @@ TEST_F(QuadtreeTest, SpatialQuery)
         return element.data == 4;
     });
     ASSERT_TRUE(it4 != elements.end());
+}
+
+TEST_F(QuadtreeTest, FindNearest)
+{
+    _tree.Insert(1, { 25, 25 });
+    _tree.Insert(2, { 87, 87 });
+    _tree.Insert(3, { 87, 68 });
+    _tree.Insert(4, { 56, 56 });
+    _tree.Insert(5, { 56, 68 });
+    _tree.Insert(6, { 68, 68 });
+
+    //  __________ ___________
+    // |          |     |  2  |
+    // |          |_____|x____|
+    // |          |_5|_6|  3  |
+    // |__________|_4|__|_____|
+    // |          |           |
+    // |    1     |           |
+    // |          |           |
+    // |__________|___________|
+
+    auto nearest = _tree.FindNearest({ 75, 75 });
+    ASSERT_TRUE(nearest.value().data == 6);
+}
+
+TEST_F(QuadtreeTest, FindNearest_Single)
+{
+    _tree.Insert(1, { 25, 25 });
+    auto nearest = _tree.FindNearest({ 50, 50 });
+    ASSERT_TRUE(nearest.value().data == 1);
+}
+
+TEST_F(QuadtreeTest, FindNearest_Empty)
+{
+    auto nearest = _tree.FindNearest({ 50, 50 });
+    ASSERT_FALSE(nearest.has_value());
+}
+
+TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
+{
+    _tree.Insert(1, { 25, 25 });
+    auto nearest = _tree.FindNearest({ 101, 101 });
+    ASSERT_TRUE(nearest.has_value());
 }
