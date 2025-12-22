@@ -53,22 +53,6 @@ struct QuadtreeNode
         return height + 1;
     }
     
-    /// Recursively collect all elements in this node and its children.
-    /// @param allElements The collection where elements are accumulated.
-    void GetAllElements(std::vector<QuadtreeElement<T>>& allElements) const
-    {
-        if (isLeaf)
-        {
-            allElements.insert(allElements.end(), elements.begin(), elements.end());
-            return;
-        }
-        
-        for (const auto& child : children)
-        {
-            child->GetAllElements(allElements);
-        }
-    }
-    
     /// Counts the total number of elements in this node and all its children.
     /// @return The total number of elements.
     size_t CountElements() const
@@ -234,6 +218,22 @@ private:
         // 3: Right-Bottom
         Vector2 center = bounds.GetCenter();
         return (position.x >= center.x) + ((position.y < center.y) * 2);
+    }
+    
+    /// Recursively collect all elements in this node and its children.
+    /// @param allElements The collection where elements are accumulated.
+    void GetAllElements(std::vector<QuadtreeElement<T>>& allElements) const
+    {
+        if (isLeaf)
+        {
+            allElements.insert(allElements.end(), elements.begin(), elements.end());
+            return;
+        }
+        
+        for (const auto& child : children)
+        {
+            child->GetAllElements(allElements);
+        }
     }
     
     /// Divides this node into a branch by passing its elements into its children.

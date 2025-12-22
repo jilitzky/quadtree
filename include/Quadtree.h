@@ -43,15 +43,6 @@ public:
         return mRoot.GetHeight();
     }
     
-    /// Gets all elements contained by the tree.
-    /// @return A collection with all the elements.
-    std::vector<T> GetAllElements() const
-    {
-        std::vector<T> allElements;
-        mRoot.GetAllElements(allElements);
-        return allElements;
-    }
-    
     /// Counts the total number of elements in the tree.
     /// @return The total number of elements.
     size_t CountElements() const
