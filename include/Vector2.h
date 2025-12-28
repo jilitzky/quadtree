@@ -74,31 +74,33 @@ struct Vector2
         return (x * other.y) - (y * other.x);
     }
     
-    /// Calculates the signed angle in radians between this vector and the other.
+    /// Calculates the signed angle in degrees between this vector and the other.
     /// @param other The other vector used in the angle calculation.
-    /// @return The signed angle in radians between the two vectors.
+    /// @return The signed angle in degrees between the two vectors.
     float SignedAngle(const Vector2& other) const
     {
         float cross = Cross(other);
         float dot = Dot(other);
-        return std::atan2(cross, dot);
+        float radians = std::atan2(cross, dot);
+        return radians * kRadiansToDegrees;
     }
     
-    /// Calculates the absolute angle in radians between this vector and the other.
+    /// Calculates the absolute angle in degrees between this vector and the other.
     /// @param other The other vector used in the angle calculation.
-    /// @return The absolute angle in radians between the two vectors.
+    /// @return The absolute angle in degrees between the two vectors.
     float Angle(const Vector2& other) const
     {
         return std::abs(SignedAngle(other));
     }
     
-    /// Rotates the vector by a given angle in radians.
-    /// @param angle The angle in radians to rotate by.
+    /// Rotates the vector by a given angle in degrees.
+    /// @param degrees The angle in degrees  to rotate by.
     /// @return A new vector rotated by the given angle.
-    Vector2 Rotate(float angle) const
+    Vector2 Rotate(float degrees) const
     {
-        float cosAngle = std::cos(angle);
-        float sinAngle = std::sin(angle);
+        float radians = degrees * kDegreesToRadians;
+        float cosAngle = std::cos(radians);
+        float sinAngle = std::sin(radians);
         return { x * cosAngle - y * sinAngle, x * sinAngle + y * cosAngle };
     }
     
@@ -169,4 +171,9 @@ struct Vector2
         y -= other.y;
         return *this;
     }
+    
+private:
+    static constexpr float kPI = 3.14159265f;
+    static constexpr float kDegreesToRadians = kPI / 180.f;
+    static constexpr float kRadiansToDegrees = 180.f / kPI;
 };
