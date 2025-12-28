@@ -27,7 +27,7 @@ Simply copy the contents of the `include/` directory to your project's include p
 ## Usage
 ### Find Nearest
 ```cpp
-// Create a Quadtree that covers an area of 100x100 and can hold up to 1 element per node.
+// Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
 Quadtree<int> tree = { bounds, nodeCapacity };
@@ -55,7 +55,7 @@ auto nearest = tree.FindNearest({ 75, 75 }); // The nearest element is 6
 ```
 ### Find All
 ```cpp
-// Create a Quadtree that covers an area of 100x100 and can hold up to 1 element per node.
+// Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
 Quadtree<int> tree = { bounds, nodeCapacity };
@@ -82,7 +82,13 @@ auto elements = tree.FindAll(region); // The found elements are 3 and 4
 ```
 
 ## Performance
-Benchmark was run averaging 10,000 calls per operation on an Apple M2 Pro.
+### Benchmark
+1. Create a Quadtree that covers an area of 2000 x 2000.
+2. Configure its nodes to hold up to 8 elements before subdividing.
+3. Allow the tree to have a max depth of 4 (0 being the root level).
+4. Read a pre-generated file with 10,000 positions.
+5. Measure inserting an element at every position, run find queries and then remove all elements.
+### Results (Apple M2 Pro)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
 | Insertion     | 187 ns     |
