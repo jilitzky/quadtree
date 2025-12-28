@@ -18,7 +18,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 * **Modern Design:** Written in C++17.
 * **Generic:** The templated data type allows you to store any custom structure or pointer.
 * **Dynamic:** Efficient insertion, removal and automatic subdivision/merging of nodes.
-* **Performant:** Fast searches for nearest neighbour and all elements contained within a region.
+* **Performant:** Fast searches for nearest neighbour and to find all elements contained within a region.
 * **Header-only:** Easy to drop into any project.
 
 ## Installation
