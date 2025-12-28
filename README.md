@@ -27,10 +27,12 @@ Simply copy the contents of the `include/` directory to your project's include p
 ## Usage
 ### Find Nearest
 ```cpp
+// Create a Quadtree that covers an area of 100x100 and can hold up to 1 element per node.
 AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
 Quadtree<int> tree = { bounds, nodeCapacity };
 
+// Insert a few elements into it.
 tree.Insert(1, { 25, 25 });
 tree.Insert(2, { 87, 87 });
 tree.Insert(3, { 87, 68 });
@@ -48,14 +50,17 @@ tree.Insert(6, { 68, 68 });
 // |          |           |
 // |__________|___________|
 
-auto nearest = tree.FindNearest({ 75, 75 }); // Nearest is 6.
+// Find the closest element to the "x" mark.
+auto nearest = tree.FindNearest({ 75, 75 }); // The nearest element is 6
 ```
 ### Find All
 ```cpp
+// Create a Quadtree that covers an area of 100x100 and can hold up to 1 element per node.
 AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
 Quadtree<int> tree = { bounds, nodeCapacity };
 
+// Insert a few elements into it.
 tree.Insert(1, { 25, 25 });
 tree.Insert(2, { 87, 87 });
 tree.Insert(3, { 56, 68 });
@@ -71,8 +76,9 @@ tree.Insert(4, { 68, 56 });
 // |          |           |
 // |__________|___________|
 
+// Draw a region around some of the elements.
 AABB region = {{40, 38}, {75, 88}};
-auto elements = tree.FindAll(region); // Elements contains 3 and 4.
+auto elements = tree.FindAll(region); // The found elements are 3 and 4
 ```
 
 ## Performance
