@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cmath>
+
 /// A two-dimensional vector used to represent positions, directions and offsets.
 struct Vector2
 {
@@ -38,9 +41,9 @@ struct Vector2
     Vector2 Normalize() const
     {
         float length = Length();
-        if (length == 0.0f)
+        if (length == 0.f)
         {
-            return Vector2(0.0f, 0.0f);
+            return Vector2(0.f, 0.f);
         }
         return *this / length;
     }
@@ -69,6 +72,29 @@ struct Vector2
     float Cross(const Vector2& other) const
     {
         return (x * other.y) - (y * other.x);
+    }
+    
+    /// Calculates the angle in radians between this vector and the other.
+    /// @param other The other vector used in the angle calculation.
+    /// @return The angle in radians between the two vectors.
+    float AngleBetween(const Vector2& other) const
+    {
+        // TODO: Consider implementing this with atan2 instead to improve robustness
+        float dot = Dot(other);
+        float lengthProduct = Length() * other.Length();
+        float theta = dot / lengthProduct;
+        theta = std::clamp(theta, -1.f, 1.f);
+        return std::acos(theta);
+    }
+    
+    /// Rotates the vector by a given angle in radians.
+    /// @param angle The angle in radians to rotate by.
+    /// @return A new vector rotated by the given angle.
+    Vector2 Rotate(float angle) const
+    {
+        float cosAngle = std::cos(angle);
+        float sinAngle = std::sin(angle);
+        return { x * cosAngle - y * sinAngle, x * sinAngle + y * cosAngle };
     }
     
     /// Checks if this vector is equal to the other vector.
