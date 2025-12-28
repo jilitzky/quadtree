@@ -74,17 +74,22 @@ struct Vector2
         return (x * other.y) - (y * other.x);
     }
     
-    /// Calculates the angle in radians between this vector and the other.
+    /// Calculates the signed angle in radians between this vector and the other.
     /// @param other The other vector used in the angle calculation.
-    /// @return The angle in radians between the two vectors.
-    float AngleBetween(const Vector2& other) const
+    /// @return The signed angle in radians between the two vectors.
+    float SignedAngle(const Vector2& other) const
     {
-        // TODO: Consider implementing this with atan2 instead to improve robustness
+        float cross = Cross(other);
         float dot = Dot(other);
-        float lengthProduct = Length() * other.Length();
-        float theta = dot / lengthProduct;
-        theta = std::clamp(theta, -1.f, 1.f);
-        return std::acos(theta);
+        return std::atan2(cross, dot);
+    }
+    
+    /// Calculates the absolute angle in radians between this vector and the other.
+    /// @param other The other vector used in the angle calculation.
+    /// @return The absolute angle in radians between the two vectors.
+    float Angle(const Vector2& other) const
+    {
+        return std::abs(SignedAngle(other));
     }
     
     /// Rotates the vector by a given angle in radians.
