@@ -2,12 +2,25 @@
 
 #include <optional>
 #include <gtest/gtest.h>
+#include <vector>
 #include "Quadtree.h"
 
 class QuadtreeTest : public ::testing::Test
 {
 protected:
     Quadtree<int> tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
+    
+    bool ContainsData(const std::vector<QuadtreeElement<int>>& elements, int data)
+    {
+        for (const auto& element : elements)
+        {
+            if (element.data == data)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -213,24 +226,9 @@ TEST_F(QuadtreeTest, FindAll)
     AABB region = {{40, 38}, {75, 88}};
     auto elements = tree.FindAll(region);
     ASSERT_TRUE(elements.size() == 3);
-    
-    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 4;
-    });
-    ASSERT_TRUE(it4 != elements.end());
-    
-    auto it5 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 5;
-    });
-    ASSERT_TRUE(it5 != elements.end());
-    
-    auto it6 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 6;
-    });
-    ASSERT_TRUE(it6 != elements.end());
+    ASSERT_TRUE(ContainsData(elements, 4));
+    ASSERT_TRUE(ContainsData(elements, 5));
+    ASSERT_TRUE(ContainsData(elements, 6));
 }
 
 TEST_F(QuadtreeTest, FindAll_Condition)
@@ -256,18 +254,8 @@ TEST_F(QuadtreeTest, FindAll_Condition)
     auto isEven = [](const auto& element) { return element.data % 2 == 0; };
     auto elements = tree.FindAll(region, isEven);
     ASSERT_TRUE(elements.size() == 2);
-    
-    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 4;
-    });
-    ASSERT_TRUE(it4 != elements.end());
-    
-    auto it6 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 6;
-    });
-    ASSERT_TRUE(it6 != elements.end());
+    ASSERT_TRUE(ContainsData(elements, 4));
+    ASSERT_TRUE(ContainsData(elements, 6));
 }
 
 TEST_F(QuadtreeTest, FindNearest)
