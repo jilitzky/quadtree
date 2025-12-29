@@ -3,10 +3,17 @@
 #pragma once
 
 #include <optional>
+#include <type_traits>
 #include <vector>
 #include "AABB.h"
 #include "QuadtreeElement.h"
 #include "Vector2.h"
+
+template<typename T>
+struct NoCondition
+{
+    constexpr bool operator()(const QuadtreeElement<T>&) const { return true; }
+};
 
 /// Represents a node in the Quadtree that may be a leaf or a branch.
 /// @tparam T The type of data representing elements in the node.
@@ -235,11 +242,18 @@ private:
     {
         if (isLeaf)
         {
-            for (const auto& element : elements)
+            if constexpr (std::is_same_v<Condition, NoCondition<T>>)
             {
-                if (condition(element))
+                allElements.insert(allElements.end(), elements.begin(), elements.end());
+            }
+            else
+            {
+                for (const auto& element : elements)
                 {
-                    allElements.push_back(element);
+                    if (condition(element))
+                    {
+                        allElements.push_back(element);
+                    }
                 }
             }
             return;

@@ -99,8 +99,7 @@ public:
     /// @return The closest element if found, or empty.
     std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, float maxRadius = std::numeric_limits<float>::max()) const
     {
-        auto condition = [](const auto& element) { return true; };
-        return FindNearest(target, condition, maxRadius);
+        return FindNearest(target, NoCondition<T>{}, maxRadius);
     }
     
     /// Gathers elements found within the region that meet a condition.
@@ -125,8 +124,7 @@ public:
     /// @return The collection of elements found within the region.
     std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
     {
-        auto condition = [](const auto& element) { return true; };
-        return FindAll(region, condition);
+        return FindAll(region, NoCondition<T>{});
     }
     
     /// Copy assignment is deleted to avoid accidental copies.
