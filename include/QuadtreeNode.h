@@ -9,17 +9,20 @@
 #include "QuadtreeElement.h"
 #include "Vector2.h"
 
-template<typename T>
-struct NoFilter
-{
-    constexpr bool operator()(const QuadtreeElement<T>&) const { return true; }
-};
-
 /// Represents a node in the Quadtree that may be a leaf or a branch.
 /// @tparam T The type of data representing elements in the node.
 template<typename T>
 struct QuadtreeNode
 {
+    /// Used to get all qualifying elements during searches.
+    struct NoFilter
+    {
+        constexpr bool operator()(const QuadtreeElement<T>&) const
+        {
+            return true;
+        }
+    };
+    
     /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
     std::array<std::unique_ptr<QuadtreeNode>, 4> children;
     
@@ -242,7 +245,7 @@ private:
     {
         if (isLeaf)
         {
-            if constexpr (std::is_same_v<Filter, NoFilter<T>>)
+            if constexpr (std::is_same_v<Filter, NoFilter>)
             {
                 allElements.insert(allElements.end(), elements.begin(), elements.end());
             }

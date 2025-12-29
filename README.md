@@ -95,10 +95,10 @@ auto elements = tree.FindAll(region, isEven); // elements contains 4 and 6
 ### Results (Apple M2 Pro)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 187 ns     |
-| Removal       | 403 ns     |
-| Find Nearest  | 1450 ns    |
-| Find All      | 46502 ns   |
+| Insertion     | 188 ns     |
+| Find Nearest  | 1435 ns    |
+| Find All      | 46374 ns   |
+| Removal       | 391 ns     |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
