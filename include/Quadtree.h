@@ -78,18 +78,18 @@ public:
         return mRoot.Remove(data, position, mNodeCapacity);
     }
     
-    /// Finds the closest element to the target position that meets a condition.
-    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
+    /// Finds the closest element to the target position that passes a filter.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param target The position to search around.
-    /// @param condition The condition to meet for an element to qualify.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param maxRadius The maximum distance from the target to consider.
     /// @return The closest element if found, or empty.
-    template<typename Condition>
-    std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, Condition condition, float maxRadius = std::numeric_limits<float>::max()) const
+    template<typename Filter>
+    std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, Filter filter, float maxRadius = std::numeric_limits<float>::max()) const
     {
         std::optional<QuadtreeElement<T>> nearest = std::nullopt;
         float bestDistanceSq = maxRadius * maxRadius;
-        mRoot.FindNearest(target, condition, bestDistanceSq, nearest);
+        mRoot.FindNearest(target, filter, bestDistanceSq, nearest);
         return nearest;
     }
     
@@ -99,21 +99,21 @@ public:
     /// @return The closest element if found, or empty.
     std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, float maxRadius = std::numeric_limits<float>::max()) const
     {
-        return FindNearest(target, NoCondition<T>{}, maxRadius);
+        return FindNearest(target, NoFilter<T>{}, maxRadius);
     }
     
-    /// Gathers elements found within the region that meet a condition.
-    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
+    /// Gathers elements found within the region that pass a filter.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param region The search area.
-    /// @param condition The condition to meet for an element to qualify.
+    /// @param filter The filter to pass for an element to qualify.
     /// @return The collection of elements found within the region.
-    template<typename Condition>
-    std::vector<QuadtreeElement<T>> FindAll(const AABB& region, Condition condition) const
+    template<typename Filter>
+    std::vector<QuadtreeElement<T>> FindAll(const AABB& region, Filter filter) const
     {
         std::vector<QuadtreeElement<T>> foundElements;
         if (GetBounds().Intersects(region))
         {
-            mRoot.FindAll(region, condition, foundElements);
+            mRoot.FindAll(region, filter, foundElements);
         }
         
         return foundElements;
@@ -124,7 +124,7 @@ public:
     /// @return The collection of elements found within the region.
     std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
     {
-        return FindAll(region, NoCondition<T>{});
+        return FindAll(region, NoFilter<T>{});
     }
     
     /// Copy assignment is deleted to avoid accidental copies.

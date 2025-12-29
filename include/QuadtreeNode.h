@@ -10,7 +10,7 @@
 #include "Vector2.h"
 
 template<typename T>
-struct NoCondition
+struct NoFilter
 {
     constexpr bool operator()(const QuadtreeElement<T>&) const { return true; }
 };
@@ -137,20 +137,20 @@ struct QuadtreeNode
     }
     
     /// Recursive helper for finding the nearest element.
-    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param target The search position.
-    /// @param condition The condition to meet for an element to qualify.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param bestDistanceSq The best squared distance found so far.
     /// @param nearest The closest element if found, or empty.
-    template<typename Condition>
-    void FindNearest(const Vector2& target, Condition condition, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
+    template<typename Filter>
+    void FindNearest(const Vector2& target, Filter filter, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
     {
         if (isLeaf)
         {
             for (const auto& element : elements)
             {
                 float distanceSq = element.position.DistanceSquared(target);
-                if (distanceSq < bestDistanceSq && condition(element))
+                if (distanceSq < bestDistanceSq && filter(element))
                 {
                     bestDistanceSq = distanceSq;
                     nearest = element;
@@ -178,22 +178,22 @@ struct QuadtreeNode
             float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
             if (distanceSq < bestDistanceSq)
             {
-                child->FindNearest(target, condition, bestDistanceSq, nearest);
+                child->FindNearest(target, filter, bestDistanceSq, nearest);
             }
         }
     }
     
     /// Recursive helper for finding all elements within a region.
-    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param region The search area.
-    /// @param condition The condition to meet for an element to qualify.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param foundElements The collection of elements found by the search.
-    template<typename Condition>
-    void FindAll(const AABB& region, Condition condition, std::vector<QuadtreeElement<T>>& foundElements) const
+    template<typename Filter>
+    void FindAll(const AABB& region, Filter filter, std::vector<QuadtreeElement<T>>& foundElements) const
     {
         if (region.Contains(bounds))
         {
-            GetAllElements(condition, foundElements);
+            GetAllElements(filter, foundElements);
             return;
         }
 
@@ -201,7 +201,7 @@ struct QuadtreeNode
         {
             for (const auto& element : elements)
             {
-                if (region.Contains(element.position) && condition(element))
+                if (region.Contains(element.position) && filter(element))
                 {
                     foundElements.push_back(element);
                 }
@@ -213,7 +213,7 @@ struct QuadtreeNode
         {
             if (child->bounds.Intersects(region))
             {
-                child->FindAll(region, condition, foundElements);
+                child->FindAll(region, filter, foundElements);
             }
         }
     }
@@ -234,15 +234,15 @@ private:
     }
     
     /// Recursively collect all elements in this node and its children.
-    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
-    /// @param condition The condition to meet for an element to qualify.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param allElements The collection where elements are accumulated.
-    template<typename Condition>
-    void GetAllElements(Condition condition, std::vector<QuadtreeElement<T>>& allElements) const
+    template<typename Filter>
+    void GetAllElements(Filter filter, std::vector<QuadtreeElement<T>>& allElements) const
     {
         if (isLeaf)
         {
-            if constexpr (std::is_same_v<Condition, NoCondition<T>>)
+            if constexpr (std::is_same_v<Filter, NoFilter<T>>)
             {
                 allElements.insert(allElements.end(), elements.begin(), elements.end());
             }
@@ -250,7 +250,7 @@ private:
             {
                 for (const auto& element : elements)
                 {
-                    if (condition(element))
+                    if (filter(element))
                     {
                         allElements.push_back(element);
                     }
@@ -261,7 +261,7 @@ private:
         
         for (const auto& child : children)
         {
-            child->GetAllElements(condition, allElements);
+            child->GetAllElements(filter, allElements);
         }
     }
     
