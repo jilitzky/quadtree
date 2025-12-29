@@ -130,17 +130,20 @@ struct QuadtreeNode
     }
     
     /// Recursive helper for finding the nearest element.
+    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
     /// @param target The search position.
+    /// @param condition The condition to meet for an element to qualify.
     /// @param bestDistanceSq The best squared distance found so far.
     /// @param nearest The closest element if found, or empty.
-    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
+    template<typename Condition>
+    void FindNearest(const Vector2& target, Condition condition, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
     {
         if (isLeaf)
         {
             for (const auto& element : elements)
             {
                 float distanceSq = element.position.DistanceSquared(target);
-                if (distanceSq < bestDistanceSq)
+                if (distanceSq < bestDistanceSq && condition(element))
                 {
                     bestDistanceSq = distanceSq;
                     nearest = element;
@@ -168,15 +171,18 @@ struct QuadtreeNode
             float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
             if (distanceSq < bestDistanceSq)
             {
-                child->FindNearest(target, bestDistanceSq, nearest);
+                child->FindNearest(target, condition, bestDistanceSq, nearest);
             }
         }
     }
     
     /// Recursive helper for finding all elements within a region.
+    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
     /// @param region The search area.
+    /// @param condition The condition to meet for an element to qualify.
     /// @param foundElements The collection of elements found by the search.
-    void FindAll(const AABB& region, std::vector<QuadtreeElement<T>>& foundElements) const
+    template<typename Condition>
+    void FindAll(const AABB& region, Condition condition, std::vector<QuadtreeElement<T>>& foundElements) const
     {
         if (region.Contains(bounds))
         {
@@ -188,7 +194,7 @@ struct QuadtreeNode
         {
             for (const auto& element : elements)
             {
-                if (region.Contains(element.position))
+                if (region.Contains(element.position) && condition(element))
                 {
                     foundElements.push_back(element);
                 }
@@ -200,7 +206,7 @@ struct QuadtreeNode
         {
             if (child->bounds.Intersects(region))
             {
-                child->FindAll(region, foundElements);
+                child->FindAll(region, condition, foundElements);
             }
         }
     }
