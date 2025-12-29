@@ -186,7 +186,7 @@ struct QuadtreeNode
     {
         if (region.Contains(bounds))
         {
-            GetAllElements(foundElements);
+            GetAllElements(condition, foundElements);
             return;
         }
 
@@ -227,18 +227,27 @@ private:
     }
     
     /// Recursively collect all elements in this node and its children.
+    /// @tparam Condition A function that takes in an element and returns true if it qualifies for the search.
+    /// @param condition The condition to meet for an element to qualify.
     /// @param allElements The collection where elements are accumulated.
-    void GetAllElements(std::vector<QuadtreeElement<T>>& allElements) const
+    template<typename Condition>
+    void GetAllElements(Condition condition, std::vector<QuadtreeElement<T>>& allElements) const
     {
         if (isLeaf)
         {
-            allElements.insert(allElements.end(), elements.begin(), elements.end());
+            for (const auto& element : elements)
+            {
+                if (condition(element))
+                {
+                    allElements.push_back(element);
+                }
+            }
             return;
         }
         
         for (const auto& child : children)
         {
-            child->GetAllElements(allElements);
+            child->GetAllElements(condition, allElements);
         }
     }
     

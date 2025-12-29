@@ -7,7 +7,7 @@
 class QuadtreeTest : public ::testing::Test
 {
 protected:
-    Quadtree<int> _tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
+    Quadtree<int> tree = { AABB({ 0, 0 }, { 100, 100 }), 1 };
 };
 
 TEST_F(QuadtreeTest, Insert)
@@ -22,10 +22,10 @@ TEST_F(QuadtreeTest, Insert)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.CountElements() == 0);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(tree.CountElements() == 0);
+    ASSERT_TRUE(tree.GetHeight() == 1);
 
-    _tree.Insert(1, { 25, 25 });
+    tree.Insert(1, { 25, 25 });
 
     //  ______________________
     // |                      |
@@ -37,10 +37,10 @@ TEST_F(QuadtreeTest, Insert)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.CountElements() == 1);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(tree.CountElements() == 1);
+    ASSERT_TRUE(tree.GetHeight() == 1);
 
-    _tree.Insert(2, { 87, 87 });
+    tree.Insert(2, { 87, 87 });
 
     //  __________ ___________
     // |          |        2  |
@@ -52,10 +52,10 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 2);
-    ASSERT_TRUE(_tree.GetHeight() == 2);
+    ASSERT_TRUE(tree.CountElements() == 2);
+    ASSERT_TRUE(tree.GetHeight() == 2);
 
-    _tree.Insert(3, { 56, 68 });
+    tree.Insert(3, { 56, 68 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -67,10 +67,10 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 3);
-    ASSERT_TRUE(_tree.GetHeight() == 3);
+    ASSERT_TRUE(tree.CountElements() == 3);
+    ASSERT_TRUE(tree.GetHeight() == 3);
 
-    _tree.Insert(4, { 68, 56 });
+    tree.Insert(4, { 68, 56 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -82,30 +82,30 @@ TEST_F(QuadtreeTest, Insert)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 4);
-    ASSERT_TRUE(_tree.GetHeight() == 4);
+    ASSERT_TRUE(tree.CountElements() == 4);
+    ASSERT_TRUE(tree.GetHeight() == 4);
 }
 
 TEST_F(QuadtreeTest, Insert_SamePosition)
 {
-    _tree.Insert(1, { 50, 50 });
-    _tree.Insert(2, { 50, 50 });
-    ASSERT_TRUE(_tree.CountElements() == 2);
+    tree.Insert(1, { 50, 50 });
+    tree.Insert(2, { 50, 50 });
+    ASSERT_TRUE(tree.CountElements() == 2);
 }
 
 TEST_F(QuadtreeTest, Insert_OutOfBounds)
 {
-    bool inserted = _tree.Insert(1, { 101, 101 });
+    bool inserted = tree.Insert(1, { 101, 101 });
     ASSERT_FALSE(inserted);
-    ASSERT_TRUE(_tree.CountElements() == 0);
+    ASSERT_TRUE(tree.CountElements() == 0);
 }
 
 TEST_F(QuadtreeTest, Remove)
 {
-    _tree.Insert(1, { 25, 25 });
-    _tree.Insert(2, { 87, 87 });
-    _tree.Insert(3, { 56, 68 });
-    _tree.Insert(4, { 68, 56 });
+    tree.Insert(1, { 25, 25 });
+    tree.Insert(2, { 87, 87 });
+    tree.Insert(3, { 56, 68 });
+    tree.Insert(4, { 68, 56 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -117,10 +117,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 4);
-    ASSERT_TRUE(_tree.GetHeight() == 4);
+    ASSERT_TRUE(tree.CountElements() == 4);
+    ASSERT_TRUE(tree.GetHeight() == 4);
 
-    bool removed = _tree.Remove(4, { 68, 56 });
+    bool removed = tree.Remove(4, { 68, 56 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -133,10 +133,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 3);
-    ASSERT_TRUE(_tree.GetHeight() == 3);
+    ASSERT_TRUE(tree.CountElements() == 3);
+    ASSERT_TRUE(tree.GetHeight() == 3);
 
-    removed = _tree.Remove(3, { 56, 68 });
+    removed = tree.Remove(3, { 56, 68 });
     ASSERT_TRUE(removed);
 
     //  __________ ___________
@@ -149,10 +149,10 @@ TEST_F(QuadtreeTest, Remove)
     // |          |           |
     // |__________|___________|
 
-    ASSERT_TRUE(_tree.CountElements() == 2);
-    ASSERT_TRUE(_tree.GetHeight() == 2);
+    ASSERT_TRUE(tree.CountElements() == 2);
+    ASSERT_TRUE(tree.GetHeight() == 2);
 
-    removed = _tree.Remove(2, { 87, 87 });
+    removed = tree.Remove(2, { 87, 87 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -165,10 +165,10 @@ TEST_F(QuadtreeTest, Remove)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.CountElements() == 1);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(tree.CountElements() == 1);
+    ASSERT_TRUE(tree.GetHeight() == 1);
 
-    removed = _tree.Remove(1, { 25, 25 });
+    removed = tree.Remove(1, { 25, 25 });
     ASSERT_TRUE(removed);
 
     //  ______________________
@@ -181,58 +181,103 @@ TEST_F(QuadtreeTest, Remove)
     // |                      |
     // |______________________|
 
-    ASSERT_TRUE(_tree.CountElements() == 0);
-    ASSERT_TRUE(_tree.GetHeight() == 1);
+    ASSERT_TRUE(tree.CountElements() == 0);
+    ASSERT_TRUE(tree.GetHeight() == 1);
 }
 
 TEST_F(QuadtreeTest, Remove_NotFound)
 {
-    bool removed = _tree.Remove(1, { 50, 50 });
+    bool removed = tree.Remove(1, { 50, 50 });
     ASSERT_FALSE(removed);
 }
 
 TEST_F(QuadtreeTest, FindAll)
 {
-    _tree.Insert(1, { 25, 25 });
-    _tree.Insert(2, { 87, 87 });
-    _tree.Insert(3, { 56, 68 });
-    _tree.Insert(4, { 68, 56 });
-    
+    tree.Insert(1, { 25, 25 });
+    tree.Insert(2, { 87, 87 });
+    tree.Insert(3, { 87, 68 });
+    tree.Insert(4, { 56, 56 });
+    tree.Insert(5, { 56, 68 });
+    tree.Insert(6, { 68, 68 });
+
     //  __________ ___________
     // |        ..|.....|. 2  |
     // |        . |_____|.____|
-    // |        . |_3|__|.    |
-    // |________._|__|4_|.____|
+    // |        . |_5|_6|. 3  |
+    // |________._|_4|__|.____|
     // |        ..|.......    |
     // |    1     |           |
     // |          |           |
     // |__________|___________|
-    
+
     AABB region = {{40, 38}, {75, 88}};
-    auto elements = _tree.FindAll(region);
-    ASSERT_TRUE(elements.size() == 2);
-    
-    auto it3 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
-    {
-        return element.data == 3;
-    });
-    ASSERT_TRUE(it3 != elements.end());
+    auto elements = tree.FindAll(region);
+    ASSERT_TRUE(elements.size() == 3);
     
     auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
     {
         return element.data == 4;
     });
     ASSERT_TRUE(it4 != elements.end());
+    
+    auto it5 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 5;
+    });
+    ASSERT_TRUE(it5 != elements.end());
+    
+    auto it6 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 6;
+    });
+    ASSERT_TRUE(it6 != elements.end());
+}
+
+TEST_F(QuadtreeTest, FindAll_Condition)
+{
+    tree.Insert(1, { 25, 25 });
+    tree.Insert(2, { 87, 87 });
+    tree.Insert(3, { 87, 68 });
+    tree.Insert(4, { 56, 56 });
+    tree.Insert(5, { 56, 68 });
+    tree.Insert(6, { 68, 68 });
+
+    //  __________ ___________
+    // |        ..|.....|. 2  |
+    // |        . |_____|.____|
+    // |        . |_5|_6|. 3  |
+    // |________._|_4|__|.____|
+    // |        ..|.......    |
+    // |    1     |           |
+    // |          |           |
+    // |__________|___________|
+
+    AABB region = {{40, 38}, {75, 88}};
+    auto isEven = [](const auto& element) { return element.data % 2 == 0; };
+    auto elements = tree.FindAll(region, isEven);
+    ASSERT_TRUE(elements.size() == 2);
+    
+    auto it4 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 4;
+    });
+    ASSERT_TRUE(it4 != elements.end());
+    
+    auto it6 = std::find_if(elements.begin(), elements.end(), [](const auto& element)
+    {
+        return element.data == 6;
+    });
+    ASSERT_TRUE(it6 != elements.end());
 }
 
 TEST_F(QuadtreeTest, FindNearest)
 {
-    _tree.Insert(1, { 25, 25 });
-    _tree.Insert(2, { 87, 87 });
-    _tree.Insert(3, { 87, 68 });
-    _tree.Insert(4, { 56, 56 });
-    _tree.Insert(5, { 56, 68 });
-    _tree.Insert(6, { 68, 68 });
+    tree.Insert(1, { 25, 25 });
+    tree.Insert(2, { 87, 87 });
+    tree.Insert(3, { 87, 68 });
+    tree.Insert(4, { 56, 56 });
+    tree.Insert(5, { 56, 68 });
+    tree.Insert(6, { 68, 68 });
 
     //  __________ ___________
     // |          |     |  2  |
@@ -244,26 +289,50 @@ TEST_F(QuadtreeTest, FindNearest)
     // |          |           |
     // |__________|___________|
 
-    auto nearest = _tree.FindNearest({ 75, 75 });
+    auto nearest = tree.FindNearest({ 75, 75 });
     ASSERT_TRUE(nearest.value().data == 6);
+}
+
+TEST_F(QuadtreeTest, FindNearest_Condition)
+{
+    tree.Insert(1, { 25, 25 });
+    tree.Insert(2, { 87, 87 });
+    tree.Insert(3, { 87, 68 });
+    tree.Insert(4, { 56, 56 });
+    tree.Insert(5, { 56, 68 });
+    tree.Insert(6, { 68, 68 });
+
+    //  __________ ___________
+    // |          |     |  2  |
+    // |          |_____|x____|
+    // |          |_5|_6|  3  |
+    // |__________|_4|__|_____|
+    // |          |           |
+    // |    1     |           |
+    // |          |           |
+    // |__________|___________|
+
+    auto isOdd = [](const auto& element) { return element.data % 2 == 1; };
+    auto nearest = tree.FindNearest({ 75, 75 }, isOdd);
+    ASSERT_TRUE(nearest.value().data == 3);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Single)
 {
-    _tree.Insert(1, { 25, 25 });
-    auto nearest = _tree.FindNearest({ 50, 50 });
+    tree.Insert(1, { 25, 25 });
+    auto nearest = tree.FindNearest({ 50, 50 });
     ASSERT_TRUE(nearest.value().data == 1);
 }
 
 TEST_F(QuadtreeTest, FindNearest_Empty)
 {
-    auto nearest = _tree.FindNearest({ 50, 50 });
+    auto nearest = tree.FindNearest({ 50, 50 });
     ASSERT_FALSE(nearest.has_value());
 }
 
 TEST_F(QuadtreeTest, FindNearest_OutOfBounds)
 {
-    _tree.Insert(1, { 25, 25 });
-    auto nearest = _tree.FindNearest({ 101, 101 });
+    tree.Insert(1, { 25, 25 });
+    auto nearest = tree.FindNearest({ 101, 101 });
     ASSERT_TRUE(nearest.has_value());
 }
