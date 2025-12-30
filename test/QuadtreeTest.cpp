@@ -1,8 +1,8 @@
 /// Copyright (c) 2025 Jose Ilitzky
 
 #include <optional>
-#include <gtest/gtest.h>
 #include <vector>
+#include <gtest/gtest.h>
 #include "Quadtree.h"
 
 class QuadtreeTest : public ::testing::Test
