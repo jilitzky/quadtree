@@ -103,7 +103,7 @@ public:
         return FindNearest(target, noFilter, maxRadius);
     }
     
-    /// Gathers elements found within the region that pass a filter.
+    /// Finds elements within the region that pass a filter.
     /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param region The search area.
     /// @param filter The filter to pass for an element to qualify.
@@ -120,7 +120,7 @@ public:
         return foundElements;
     }
     
-    /// Gathers elements found within the region.
+    /// Finds elements within the region.
     /// @param region The search area.
     /// @return The collection of elements found within the region.
     std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
