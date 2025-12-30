@@ -3,6 +3,7 @@
 #pragma once
 
 #include <optional>
+#include <type_traits>
 #include <vector>
 #include "AABB.h"
 #include "QuadtreeElement.h"
@@ -13,6 +14,15 @@
 template<typename T>
 struct QuadtreeNode
 {
+    /// Used to consider all possible elements during searches.
+    struct NoFilter
+    {
+        constexpr bool operator()(const QuadtreeElement<T>&) const
+        {
+            return true;
+        }
+    };
+    
     /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
     std::array<std::unique_ptr<QuadtreeNode>, 4> children;
     
@@ -130,17 +140,20 @@ struct QuadtreeNode
     }
     
     /// Recursive helper for finding the nearest element.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param target The search position.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param bestDistanceSq The best squared distance found so far.
     /// @param nearest The closest element if found, or empty.
-    void FindNearest(const Vector2& target, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
+    template<typename Filter>
+    void FindNearest(const Vector2& target, Filter filter, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
     {
         if (isLeaf)
         {
             for (const auto& element : elements)
             {
                 float distanceSq = element.position.DistanceSquared(target);
-                if (distanceSq < bestDistanceSq)
+                if (distanceSq < bestDistanceSq && filter(element))
                 {
                     bestDistanceSq = distanceSq;
                     nearest = element;
@@ -168,19 +181,22 @@ struct QuadtreeNode
             float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
             if (distanceSq < bestDistanceSq)
             {
-                child->FindNearest(target, bestDistanceSq, nearest);
+                child->FindNearest(target, filter, bestDistanceSq, nearest);
             }
         }
     }
     
     /// Recursive helper for finding all elements within a region.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
     /// @param region The search area.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param foundElements The collection of elements found by the search.
-    void FindAll(const AABB& region, std::vector<QuadtreeElement<T>>& foundElements) const
+    template<typename Filter>
+    void FindAll(const AABB& region, Filter filter, std::vector<QuadtreeElement<T>>& foundElements) const
     {
         if (region.Contains(bounds))
         {
-            GetAllElements(foundElements);
+            GetAllElements(filter, foundElements);
             return;
         }
 
@@ -188,7 +204,7 @@ struct QuadtreeNode
         {
             for (const auto& element : elements)
             {
-                if (region.Contains(element.position))
+                if (region.Contains(element.position) && filter(element))
                 {
                     foundElements.push_back(element);
                 }
@@ -200,7 +216,7 @@ struct QuadtreeNode
         {
             if (child->bounds.Intersects(region))
             {
-                child->FindAll(region, foundElements);
+                child->FindAll(region, filter, foundElements);
             }
         }
     }
@@ -221,18 +237,34 @@ private:
     }
     
     /// Recursively collect all elements in this node and its children.
+    /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
+    /// @param filter The filter to pass for an element to qualify.
     /// @param allElements The collection where elements are accumulated.
-    void GetAllElements(std::vector<QuadtreeElement<T>>& allElements) const
+    template<typename Filter>
+    void GetAllElements(Filter filter, std::vector<QuadtreeElement<T>>& allElements) const
     {
         if (isLeaf)
         {
-            allElements.insert(allElements.end(), elements.begin(), elements.end());
+            if constexpr (std::is_same_v<Filter, NoFilter>)
+            {
+                allElements.insert(allElements.end(), elements.begin(), elements.end());
+            }
+            else
+            {
+                for (const auto& element : elements)
+                {
+                    if (filter(element))
+                    {
+                        allElements.push_back(element);
+                    }
+                }
+            }
             return;
         }
         
         for (const auto& child : children)
         {
-            child->GetAllElements(allElements);
+            child->GetAllElements(filter, allElements);
         }
     }
     

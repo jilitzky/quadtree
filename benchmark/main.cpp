@@ -126,9 +126,9 @@ int main()
     
     size_t numPositions = positions.size();
     std::cout << "Insertion: " << insertion.count() / numPositions << " ns" << std::endl;
-    std::cout << "Removal: " << removal.count() / numPositions << " ns" << std::endl;
     std::cout << "Find Nearest: " << findNearest.count() / numPositions << " ns" << std::endl;
     std::cout << "Find All: " << findAll.count() / numPositions << " ns" << std::endl;
+    std::cout << "Removal: " << removal.count() / numPositions << " ns" << std::endl;
     
     return 0;
 }

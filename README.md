@@ -50,8 +50,9 @@ tree.Insert(6, { 68, 68 });
 // |          |           |
 // |__________|___________|
 
-// Find the closest element to the "x" mark.
-auto nearest = tree.FindNearest({ 75, 75 }); // The nearest element is 6
+// Find the nearest odd element to the "x" mark.
+auto isOdd = [](const auto& element) { return element.data % 2 == 1; };
+auto nearest = tree.FindNearest({ 75, 75 }, isOdd); // nearest is 3
 ```
 ### Find All
 ```cpp
@@ -63,22 +64,25 @@ Quadtree<int> tree = { bounds, nodeCapacity };
 // Insert a few elements into it.
 tree.Insert(1, { 25, 25 });
 tree.Insert(2, { 87, 87 });
-tree.Insert(3, { 56, 68 });
-tree.Insert(4, { 68, 56 });
+tree.Insert(3, { 87, 68 });
+tree.Insert(4, { 56, 56 });
+tree.Insert(5, { 56, 68 });
+tree.Insert(6, { 68, 68 });
 
 //  __________ ___________
 // |        ..|.....|. 2  |
 // |        . |_____|.____|
-// |        . |_3|__|.    |
-// |________._|__|4_|.____|
+// |        . |_5|_6|. 3  |
+// |________._|_4|__|.____|
 // |        ..|.......    |
 // |    1     |           |
 // |          |           |
 // |__________|___________|
 
-// Draw a region around some of the elements.
+// Find all even elements inside the region.
 AABB region = {{40, 38}, {75, 88}};
-auto elements = tree.FindAll(region); // The found elements are 3 and 4
+auto isEven = [](const auto& element) { return element.data % 2 == 0; };
+auto elements = tree.FindAll(region, isEven); // elements contains 4 and 6
 ```
 
 ## Performance
@@ -91,10 +95,10 @@ auto elements = tree.FindAll(region); // The found elements are 3 and 4
 ### Results (Apple M2 Pro)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 187 ns     |
-| Removal       | 403 ns     |
-| Find Nearest  | 1450 ns    |
-| Find All      | 46502 ns   |
+| Insertion     | 188 ns     |
+| Find Nearest  | 1435 ns    |
+| Find All      | 46374 ns   |
+| Removal       | 391 ns     |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
