@@ -14,7 +14,7 @@
 template<typename T>
 struct QuadtreeNode
 {
-    /// Used to get all qualifying elements during searches.
+    /// Used to consider all possible elements during searches.
     struct NoFilter
     {
         constexpr bool operator()(const QuadtreeElement<T>&) const
