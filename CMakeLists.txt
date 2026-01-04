@@ -13,7 +13,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-file(GLOB ALL_HEADERS "include/*.h" "include/*.inl")
+file(GLOB ALL_HEADERS "include/*.h")
 
 # --- QuadtreeTest ---
 
@@ -26,6 +26,7 @@ target_compile_features(QuadtreeTest PRIVATE cxx_std_17)
 
 target_include_directories(QuadtreeTest PRIVATE
     include
+    external
 )
 
 target_link_libraries(QuadtreeTest PRIVATE 
@@ -43,6 +44,7 @@ target_compile_features(QuadtreeBenchmark PRIVATE cxx_std_17)
 
 target_include_directories(QuadtreeBenchmark PRIVATE
     include
+    external
 )
 
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
