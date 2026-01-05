@@ -5,7 +5,6 @@
 #include <optional>
 #include <type_traits>
 #include <vector>
-#include "AABB.h"
 #include "Vector2.h"
 
 /// Represents an item stored in the tree.
@@ -34,6 +33,75 @@ namespace QuadtreeDetail
         }
     };
 
+    /// An Axis-Aligned Bounding Box (AABB) defined by its minimum and maximum points.
+    struct Bounds
+    {
+        /// The bottom-left corner of the bounding box.
+        Vector2 min;
+        /// The top-right corner of the bounding box.
+        Vector2 max;
+        
+        /// Constructor that initializes the bounding box to the given minimum and maximum points.
+        /// @param min The minimum point (bottom-left corner).
+        /// @param max The maximum point (top-right corner).
+        Bounds(const Vector2& min, const Vector2& max) : min(min), max(max) {}
+        
+        /// Calculates the width of the bounding box.
+        /// @return The measured width.
+        float GetWidth() const
+        {
+            return max.x - min.x;
+        }
+        
+        /// Calculates the height of the bounding box.
+        /// @return The measured height.
+        float GetHeight() const
+        {
+            return max.y - min.y;
+        }
+        
+        /// Calculates the center point of the bounding box.
+        /// @return The position representing the center point.
+        Vector2 GetCenter() const
+        {
+            return (min + max) * 0.5f;
+        }
+        
+        /// Returns true if this bounding box completely contains the other box.
+        /// @param other The other box to check.
+        /// @return True if the other box is entirely within this box, false otherwise.
+        bool Contains(const Bounds& other) const
+        {
+            return other.min.x >= min.x && other.max.x <= max.x && other.min.y >= min.y && other.max.y <= max.y;
+        }
+        
+        /// Returns true if this bounding box contains the given position.
+        /// @param position The position to check.
+        /// @return True if the position is inside or on the boundary of this box, false otherwise.
+        bool Contains(const Vector2& position) const
+        {
+            return position.x >= min.x && position.y >= min.y && position.x <= max.x && position.y <= max.y;
+        }
+        
+        /// Returns true if this bounding box overlaps the other box.
+        /// @param other The other box to check against.
+        /// @return True if the two boxes overlap, false otherwise.
+        bool Intersects(const Bounds& other) const
+        {
+            if (max.x < other.min.x || min.x > other.max.x)
+            {
+                return false;
+            }
+            
+            if (max.y < other.min.y || min.y > other.max.y)
+            {
+                return false;
+            }
+            
+            return true;
+        }
+    };
+
     /// Represents a node in the Quadtree that may be a leaf or a branch.
     /// @tparam T The type of data representing elements in the node.
     template<typename T>
@@ -43,7 +111,7 @@ namespace QuadtreeDetail
         std::array<std::unique_ptr<Node>, 4> children;
         
         /// Defines the area covered by this node.
-        AABB bounds;
+        Bounds bounds;
         
         /// How many levels down the node is from the root.
         int depth;
@@ -57,7 +125,7 @@ namespace QuadtreeDetail
         /// Construct a node with the given bounds
         /// @param bounds The area covered by the node.
         /// @param depth How many levels down the node is from the root.
-        Node(const AABB& bounds, int depth) : bounds(bounds), depth(depth)
+        Node(const Bounds& bounds, int depth) : bounds(bounds), depth(depth)
         {
         }
         
@@ -110,14 +178,14 @@ namespace QuadtreeDetail
                 int index = GetChildIndex(position);
                 return children[index]->Insert(data, position, capacity, maxDepth);
             }
-
+            
             elements.push_back({data, position});
-
+            
             if (elements.size() > capacity && depth < maxDepth)
             {
                 Subdivide(capacity, maxDepth);
             }
-
+            
             return true;
         }
         
@@ -144,14 +212,14 @@ namespace QuadtreeDetail
                 
                 return false;
             }
-
+            
             int index = GetChildIndex(position);
             if (children[index]->Remove(data, position, capacity))
             {
                 TryMerge(capacity);
                 return true;
             }
-
+            
             return false;
         }
         
@@ -181,7 +249,7 @@ namespace QuadtreeDetail
             Vector2 center = bounds.GetCenter();
             int isRight = target.x >= center.x;
             int isBottom = target.y < center.y;
-
+            
             // Bias the search toward the quadrant that contains the target.
             std::array<int, 4> sortedIndices;
             sortedIndices[0] = isBottom * 2 + isRight;
@@ -202,37 +270,37 @@ namespace QuadtreeDetail
             }
         }
         
-        /// Recursive helper for finding all elements within a region.
+        /// Recursive helper for finding all elements within a search area.
         /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
-        /// @param region The search area.
+        /// @param searchArea The area to search within.
         /// @param filter The filter to pass for an element to qualify.
         /// @param foundElements The collection of elements found by the search.
         template<typename Filter>
-        void FindAll(const AABB& region, Filter filter, std::vector<QuadtreeElement<T>>& foundElements) const
+        void FindAll(const Bounds& searchArea, Filter filter, std::vector<QuadtreeElement<T>>& foundElements) const
         {
-            if (region.Contains(bounds))
+            if (searchArea.Contains(bounds))
             {
                 GetAllElements(filter, foundElements);
                 return;
             }
-
+            
             if (isLeaf)
             {
                 for (const auto& element : elements)
                 {
-                    if (region.Contains(element.position) && filter(element))
+                    if (searchArea.Contains(element.position) && filter(element))
                     {
                         foundElements.push_back(element);
                     }
                 }
                 return;
             }
-
+            
             for (const auto& child : children)
             {
-                if (child->bounds.Intersects(region))
+                if (child->bounds.Intersects(searchArea))
                 {
-                    child->FindAll(region, filter, foundElements);
+                    child->FindAll(searchArea, filter, foundElements);
                 }
             }
         }
@@ -292,28 +360,28 @@ namespace QuadtreeDetail
             Vector2 min = bounds.min;
             Vector2 max = bounds.max;
             Vector2 center = bounds.GetCenter();
-
-            AABB topLeft({min.x, center.y}, {center.x, max.y});
-            AABB topRight(center, {max.x, max.y});
-            AABB bottomLeft({min.x, min.y}, center);
-            AABB bottomRight({center.x, min.y}, {max.x, center.y});
-
+            
+            Bounds topLeft({min.x, center.y}, {center.x, max.y});
+            Bounds topRight(center, {max.x, max.y});
+            Bounds bottomLeft({min.x, min.y}, center);
+            Bounds bottomRight({center.x, min.y}, {max.x, center.y});
+            
             int childDepth = depth + 1;
             children[0] = std::make_unique<Node>(topLeft, childDepth);
             children[1] = std::make_unique<Node>(topRight, childDepth);
             children[2] = std::make_unique<Node>(bottomLeft, childDepth);
             children[3] = std::make_unique<Node>(bottomRight, childDepth);
-
+            
             for (auto& element : elements)
             {
                 int index = GetChildIndex(element.position);
                 children[index]->Insert(std::move(element.data), element.position, capacity, maxDepth);
             }
-
+            
             isLeaf = false;
             elements.clear();
         }
-
+        
         /// Attempts to merge the children back into this node if their elements fit within this node's capacity.
         /// @param capacity The maximum number of elements a node can hold.
         void TryMerge(size_t capacity)
@@ -325,13 +393,13 @@ namespace QuadtreeDetail
                     return;
                 }
             }
-
+            
             size_t elementCount = 0;
             for (const auto& child : children)
             {
                 elementCount += child->elements.size();
             }
-
+            
             if (elementCount <= capacity)
             {
                 elements.reserve(elementCount);
@@ -342,12 +410,12 @@ namespace QuadtreeDetail
                         elements.push_back(std::move(element));
                     }
                 }
-
+                
                 for (auto& child : children)
                 {
                     child.reset();
                 }
-
+                
                 isLeaf = true;
             }
         }
@@ -361,10 +429,11 @@ class Quadtree
 {
 public:
     /// Construct a Quadtree that covers the given bounds.
-    /// @param bounds The area covered by the tree.
+    /// @param min The minimum point describing the area covered by the tree.
+    /// @param max The maximum point describing the area covered by the tree.
     /// @param nodeCapacity The maximum number of elements that a node within the tree can store before subdividing.
     /// @param maxDepth The maximum depth the tree can have from its root to the furthest leaf.
-    Quadtree(const AABB& bounds, size_t nodeCapacity = 8, int maxDepth = 4) : mRoot(bounds, 0), mNodeCapacity(nodeCapacity), mMaxDepth(maxDepth)
+    Quadtree(const Vector2& min, const Vector2& max, size_t nodeCapacity = 8, int maxDepth = 4) : mRoot({min, max}, 0), mNodeCapacity(nodeCapacity), mMaxDepth(maxDepth)
     {
     }
     
@@ -374,13 +443,6 @@ public:
     /// Move constructor is defaulted to allow efficient transfer of ownership.
     Quadtree(Quadtree&& other) = default;
     
-    /// Returns the bounding box representing the area covered by the tree.
-    /// @return A constant reference to the bounding box.
-    const AABB& GetBounds() const
-    {
-       return mRoot.bounds;
-    }
-
     /// Calculates the height of the tree from its deepest branch.
     /// @return The height of the tree.
     size_t GetHeight() const
@@ -401,11 +463,11 @@ public:
     /// @return True if the element was successfully inserted.
     bool Insert(T data, const Vector2& position)
     {
-        if (!GetBounds().Contains(position))
+        if (!mRoot.bounds.Contains(position))
         {
             return false;
         }
-
+        
         return mRoot.Insert(data, position, mNodeCapacity, mMaxDepth);
     }
     
@@ -415,11 +477,11 @@ public:
     /// @return True if the element was successfully removed.
     bool Remove(T data, const Vector2& position)
     {
-        if (!GetBounds().Contains(position))
+        if (!mRoot.bounds.Contains(position))
         {
             return false;
         }
-
+        
         return mRoot.Remove(data, position, mNodeCapacity);
     }
     
@@ -449,32 +511,36 @@ public:
     
     /// Finds elements within the region that pass a filter.
     /// @tparam Filter A function that takes in an element and returns true if it qualifies for the search.
-    /// @param region The search area.
+    /// @param min The minimum point describing the search area.
+    /// @param max The maximum point describing the search area.
     /// @param filter The filter to pass for an element to qualify.
     /// @return The collection of elements found within the region.
     template<typename Filter>
-    std::vector<QuadtreeElement<T>> FindAll(const AABB& region, Filter filter) const
+    std::vector<QuadtreeElement<T>> FindAll(const Vector2& min, const Vector2& max, Filter filter) const
     {
         std::vector<QuadtreeElement<T>> foundElements;
-        if (GetBounds().Intersects(region))
+        
+        QuadtreeDetail::Bounds searchArea(min, max);
+        if (mRoot.bounds.Intersects(searchArea))
         {
-            mRoot.FindAll(region, filter, foundElements);
+            mRoot.FindAll(searchArea, filter, foundElements);
         }
         
         return foundElements;
     }
     
-    /// Finds elements within the region.
-    /// @param region The search area.
+    /// Finds elements within the search area.
+    /// @param min The minimum point describing the search area.
+    /// @param max The maximum point describing the search area.
     /// @return The collection of elements found within the region.
-    std::vector<QuadtreeElement<T>> FindAll(const AABB& region) const
+    std::vector<QuadtreeElement<T>> FindAll(const Vector2& min, const Vector2& max) const
     {
-        return FindAll(region, QuadtreeDetail::NoFilter{});
+        return FindAll(min, max, QuadtreeDetail::NoFilter{});
     }
     
     /// Copy assignment is deleted to avoid accidental copies.
     Quadtree& operator=(const Quadtree&) = delete;
-
+    
     /// Move assignment is defaulted to allow efficient transfer of ownership.
     Quadtree& operator=(Quadtree&&) = default;
     
