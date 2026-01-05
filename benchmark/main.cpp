@@ -76,9 +76,9 @@ std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vector2>& positio
     for (size_t i = 0; i < positions.size(); i = ++i)
     {
         Vector2 position = positions[i];
-        Vector2 min = { std::min(-position.x, position.x), std::min(-position.y, position.y) };
-        Vector2 max = { std::max(-position.x, position.x), std::max(-position.y, position.y) };
-        tree.FindAll(AABB(min, max));
+        Vector2 min = {std::min(-position.x, position.x), std::min(-position.y, position.y)};
+        Vector2 max = {std::max(-position.x, position.x), std::max(-position.y, position.y)};
+        tree.FindAll(min, max);
     }
     
     auto end = std::chrono::high_resolution_clock::now();
@@ -107,11 +107,10 @@ std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vector2>& positio
 
 int main()
 {
-    AABB bounds = {{ -1000, -1000 }, { 1000, 1000 }};
     size_t nodeCapacity = 8;
     int maxDepth = 4;
-    Tree tree = { bounds, nodeCapacity, maxDepth };
-
+    Tree tree = {{-1000, -1000}, {1000, 1000}, nodeCapacity, maxDepth};
+    
     std::vector<Vector2> positions;
     if (!TryReadPositions(positions))
     {

@@ -29,17 +29,16 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 ### Find Nearest
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
-AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
-Quadtree<int> tree = { bounds, nodeCapacity };
+Quadtree<int> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
-tree.Insert(1, { 25, 25 });
-tree.Insert(2, { 87, 87 });
-tree.Insert(3, { 87, 68 });
-tree.Insert(4, { 56, 56 });
-tree.Insert(5, { 56, 68 });
-tree.Insert(6, { 68, 68 });
+tree.Insert(1, {25, 25});
+tree.Insert(2, {87, 87});
+tree.Insert(3, {87, 68});
+tree.Insert(4, {56, 56});
+tree.Insert(5, {56, 68});
+tree.Insert(6, {68, 68});
 
 //  __________ ___________
 // |          |     |  2  |
@@ -53,22 +52,21 @@ tree.Insert(6, { 68, 68 });
 
 // Find the nearest odd element to the "x" mark.
 auto isOdd = [](const auto& element) { return element.data % 2 == 1; };
-auto nearest = tree.FindNearest({ 75, 75 }, isOdd); // nearest is 3
+auto nearest = tree.FindNearest({75, 75}, isOdd); // nearest is 3
 ```
 ### Find All
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
-AABB bounds = {{ 0, 0 }, { 100, 100 }};
 size_t nodeCapacity = 1;
-Quadtree<int> tree = { bounds, nodeCapacity };
+Quadtree<int> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
-tree.Insert(1, { 25, 25 });
-tree.Insert(2, { 87, 87 });
-tree.Insert(3, { 87, 68 });
-tree.Insert(4, { 56, 56 });
-tree.Insert(5, { 56, 68 });
-tree.Insert(6, { 68, 68 });
+tree.Insert(1, {25, 25});
+tree.Insert(2, {87, 87});
+tree.Insert(3, {87, 68});
+tree.Insert(4, {56, 56});
+tree.Insert(5, {56, 68});
+tree.Insert(6, {68, 68});
 
 //  __________ ___________
 // |        ..|.....|. 2  |
@@ -80,10 +78,9 @@ tree.Insert(6, { 68, 68 });
 // |          |           |
 // |__________|___________|
 
-// Find all even elements inside the region.
-AABB region = {{40, 38}, {75, 88}};
+// Find all even elements inside the search area.
 auto isEven = [](const auto& element) { return element.data % 2 == 0; };
-auto elements = tree.FindAll(region, isEven); // elements contains 4 and 6
+auto elements = tree.FindAll({40, 38}, {75, 88}, isEven); // elements contains 4 and 6
 ```
 
 ## Performance
@@ -96,10 +93,10 @@ auto elements = tree.FindAll(region, isEven); // elements contains 4 and 6
 ### Results (Apple M2 Pro)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 188 ns     |
-| Find Nearest  | 1435 ns    |
-| Find All      | 46374 ns   |
-| Removal       | 391 ns     |
+| Insertion     | 185 ns     |
+| Find Nearest  | 1440 ns    |
+| Find All      | 46068 ns   |
+| Removal       | 381 ns     |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
