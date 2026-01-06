@@ -23,7 +23,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 
 ## Installation
 1. Open the `include` folder and copy `Quadtree.h` into your project's include path.
-2. Copy the files inside the `external` folder if your project doesn't have definitions for `Vector2` and `AABB`.
+2. Open the `external` folder and copy `Vector2.h` into your project's include path if you don't have a 2D vector type already.
 
 ## Usage
 ### Find Nearest
