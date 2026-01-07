@@ -9,7 +9,8 @@
 
 /// Represents an item stored in the tree.
 /// @tparam T The type of data representing the element.
-template<typename T>
+/// @tparam Vec2 The type of 2D vector to use.
+template<typename T, typename Vec2 = Vector2>
 struct QuadtreeElement
 {
     /// The data representing the element.
@@ -34,6 +35,8 @@ namespace QuadtreeDetail
     };
 
     /// An Axis-Aligned Bounding Box (AABB) defined by its minimum and maximum points.
+    /// @tparam Vec2 The type of 2D vector to use.
+    template<typename Vec2 = Vector2>
     struct Bounds
     {
         /// The bottom-left corner of the bounding box.
@@ -104,9 +107,12 @@ namespace QuadtreeDetail
 
     /// Represents a node in the Quadtree that may be a leaf or a branch.
     /// @tparam T The type of data representing elements in the node.
-    template<typename T>
+    /// @tparam Vec2 The type of 2D vector to use.
+    template<typename T, typename Vec2 = Vector2>
     struct Node
     {
+        using Bounds = Bounds<Vec2>;
+        
         /// Array containing the four child quadrants in Z-order: Top-Left, Top-Right, Bottom-Left, Bottom-Right.
         std::array<std::unique_ptr<Node>, 4> children;
         
@@ -424,7 +430,8 @@ namespace QuadtreeDetail
 
 /// A data structure that partitions a two-dimensional space into quadrants and provides efficient spatial queries.
 /// @tparam T The type of data representing elements in the tree.
-template<typename T>
+/// @tparam Vec2 The type of 2D vector to use.
+template<typename T, typename Vec2 = Vector2>
 class Quadtree
 {
 public:
