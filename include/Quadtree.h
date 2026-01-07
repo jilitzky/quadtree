@@ -17,7 +17,7 @@ struct QuadtreeElement
     T data;
     
     /// The position linked to the data.
-    Vector2 position;
+    Vec2 position;
 };
 
 namespace QuadtreeDetail
@@ -40,14 +40,14 @@ namespace QuadtreeDetail
     struct Bounds
     {
         /// The bottom-left corner of the bounding box.
-        Vector2 min;
+        Vec2 min;
         /// The top-right corner of the bounding box.
-        Vector2 max;
+        Vec2 max;
         
         /// Constructor that initializes the bounding box to the given minimum and maximum points.
         /// @param min The minimum point (bottom-left corner).
         /// @param max The maximum point (top-right corner).
-        Bounds(const Vector2& min, const Vector2& max) : min(min), max(max) {}
+        Bounds(const Vec2& min, const Vec2& max) : min(min), max(max) {}
         
         /// Calculates the width of the bounding box.
         /// @return The measured width.
@@ -65,7 +65,7 @@ namespace QuadtreeDetail
         
         /// Calculates the center point of the bounding box.
         /// @return The position representing the center point.
-        Vector2 GetCenter() const
+        Vec2 GetCenter() const
         {
             return (min + max) * 0.5f;
         }
@@ -81,7 +81,7 @@ namespace QuadtreeDetail
         /// Returns true if this bounding box contains the given position.
         /// @param position The position to check.
         /// @return True if the position is inside or on the boundary of this box, false otherwise.
-        bool Contains(const Vector2& position) const
+        bool Contains(const Vec2& position) const
         {
             return position.x >= min.x && position.y >= min.y && position.x <= max.x && position.y <= max.y;
         }
@@ -177,7 +177,7 @@ namespace QuadtreeDetail
         /// @param capacity The maximum number of elements to hold before subdividing.
         /// @param maxDepth The maximum depth a node can be from the root.
         /// @return True if the element was successfully inserted.
-        bool Insert(T data, const Vector2& position, size_t capacity, int maxDepth)
+        bool Insert(T data, const Vec2& position, size_t capacity, int maxDepth)
         {
             if (!isLeaf)
             {
@@ -200,7 +200,7 @@ namespace QuadtreeDetail
         /// @param position The position where the element is.
         /// @param capacity The maximum number of elements a node can hold.
         /// @return True if the element was successfully removed.
-        bool Remove(T data, const Vector2& position, size_t capacity)
+        bool Remove(T data, const Vec2& position, size_t capacity)
         {
             if (isLeaf)
             {
@@ -236,7 +236,7 @@ namespace QuadtreeDetail
         /// @param bestDistanceSq The best squared distance found so far.
         /// @param nearest The closest element if found, or empty.
         template<typename Filter>
-        void FindNearest(const Vector2& target, Filter filter, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
+        void FindNearest(const Vec2& target, Filter filter, float& bestDistanceSq, std::optional<QuadtreeElement<T>>& nearest) const
         {
             if (isLeaf)
             {
@@ -252,7 +252,7 @@ namespace QuadtreeDetail
                 return;
             }
             
-            Vector2 center = bounds.GetCenter();
+            Vec2 center = bounds.GetCenter();
             int isRight = target.x >= center.x;
             int isBottom = target.y < center.y;
             
@@ -315,14 +315,14 @@ namespace QuadtreeDetail
         /// Determines the index to the children array based on where the position belongs to.
         /// @param position The position to check.
         /// @return The index to the corresponding child.
-        int GetChildIndex(const Vector2& position) const
+        int GetChildIndex(const Vec2& position) const
         {
             // Use a Z-order curve to map the children into a one-dimensional sequence.
             // 0: Left-Top
             // 1: Right-Top
             // 2: Left-Bottom
             // 3: Right-Bottom
-            Vector2 center = bounds.GetCenter();
+            Vec2 center = bounds.GetCenter();
             return (position.x >= center.x) + ((position.y < center.y) * 2);
         }
         
@@ -363,9 +363,9 @@ namespace QuadtreeDetail
         /// @param maxDepth The maximum depth a node can be from the root.
         void Subdivide(size_t capacity, int maxDepth)
         {
-            Vector2 min = bounds.min;
-            Vector2 max = bounds.max;
-            Vector2 center = bounds.GetCenter();
+            Vec2 min = bounds.min;
+            Vec2 max = bounds.max;
+            Vec2 center = bounds.GetCenter();
             
             Bounds topLeft({min.x, center.y}, {center.x, max.y});
             Bounds topRight(center, {max.x, max.y});
@@ -440,7 +440,7 @@ public:
     /// @param max The maximum point describing the area covered by the tree.
     /// @param nodeCapacity The maximum number of elements that a node within the tree can store before subdividing.
     /// @param maxDepth The maximum depth the tree can have from its root to the furthest leaf.
-    Quadtree(const Vector2& min, const Vector2& max, size_t nodeCapacity = 8, int maxDepth = 4) : mRoot({min, max}, 0), mNodeCapacity(nodeCapacity), mMaxDepth(maxDepth)
+    Quadtree(const Vec2& min, const Vec2& max, size_t nodeCapacity = 8, int maxDepth = 4) : mRoot({min, max}, 0), mNodeCapacity(nodeCapacity), mMaxDepth(maxDepth)
     {
     }
     
@@ -468,7 +468,7 @@ public:
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully inserted.
-    bool Insert(T data, const Vector2& position)
+    bool Insert(T data, const Vec2& position)
     {
         if (!mRoot.bounds.Contains(position))
         {
@@ -482,7 +482,7 @@ public:
     /// @param data The data representing the element.
     /// @param position The position where the element is.
     /// @return True if the element was successfully removed.
-    bool Remove(T data, const Vector2& position)
+    bool Remove(T data, const Vec2& position)
     {
         if (!mRoot.bounds.Contains(position))
         {
@@ -499,7 +499,7 @@ public:
     /// @param maxRadius The maximum distance from the target to consider.
     /// @return The closest element if found, or empty.
     template<typename Filter>
-    std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, Filter filter, float maxRadius = std::numeric_limits<float>::max()) const
+    std::optional<QuadtreeElement<T>> FindNearest(const Vec2& target, Filter filter, float maxRadius = std::numeric_limits<float>::max()) const
     {
         std::optional<QuadtreeElement<T>> nearest = std::nullopt;
         float bestDistanceSq = maxRadius * maxRadius;
@@ -511,7 +511,7 @@ public:
     /// @param target The position to search around.
     /// @param maxRadius The maximum distance from the target to consider.
     /// @return The closest element if found, or empty.
-    std::optional<QuadtreeElement<T>> FindNearest(const Vector2& target, float maxRadius = std::numeric_limits<float>::max()) const
+    std::optional<QuadtreeElement<T>> FindNearest(const Vec2& target, float maxRadius = std::numeric_limits<float>::max()) const
     {
         return FindNearest(target, QuadtreeDetail::NoFilter{}, maxRadius);
     }
@@ -523,7 +523,7 @@ public:
     /// @param filter The filter to pass for an element to qualify.
     /// @return The collection of elements found within the region.
     template<typename Filter>
-    std::vector<QuadtreeElement<T>> FindAll(const Vector2& min, const Vector2& max, Filter filter) const
+    std::vector<QuadtreeElement<T>> FindAll(const Vec2& min, const Vec2& max, Filter filter) const
     {
         std::vector<QuadtreeElement<T>> foundElements;
         
@@ -540,7 +540,7 @@ public:
     /// @param min The minimum point describing the search area.
     /// @param max The maximum point describing the search area.
     /// @return The collection of elements found within the region.
-    std::vector<QuadtreeElement<T>> FindAll(const Vector2& min, const Vector2& max) const
+    std::vector<QuadtreeElement<T>> FindAll(const Vec2& min, const Vec2& max) const
     {
         return FindAll(min, max, QuadtreeDetail::NoFilter{});
     }
