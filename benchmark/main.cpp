@@ -3,8 +3,9 @@
 #include <fstream>
 #include <iostream>
 #include "Quadtree.h"
+#include "Vector2.h"
 
-using Tree = Quadtree<size_t>;
+using Tree = Quadtree<size_t, Vector2>;
 
 std::istream& operator>>(std::istream& stream, Vector2& vector)
 {

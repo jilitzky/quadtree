@@ -16,7 +16,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 
 ## Features
 * **Modern Design:** Written in C++17.
-* **Generic:** The templated data type allows you to store any custom structure or pointer.
+* **Generic:** The templated arguments allow you to configure the type of data and 2D vectors stored by the tree.
 * **Dynamic:** Efficient insertion, removal and automatic subdivision/merging of nodes.
 * **Performant:** Fast searches for nearest neighbour and to find all elements contained within a region.
 * **Header-only:** Easy to drop into any project.
@@ -30,7 +30,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 size_t nodeCapacity = 1;
-Quadtree<int> tree = {{0, 0}, {100, 100}, nodeCapacity};
+Quadtree<int, Vector2> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
 tree.Insert(1, {25, 25});
@@ -58,7 +58,7 @@ auto nearest = tree.FindNearest({75, 75}, isOdd); // nearest is 3
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 size_t nodeCapacity = 1;
-Quadtree<int> tree = {{0, 0}, {100, 100}, nodeCapacity};
+Quadtree<int, Vector2> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
 tree.Insert(1, {25, 25});

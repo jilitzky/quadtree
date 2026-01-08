@@ -4,13 +4,16 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include "Quadtree.h"
+#include "Vector2.h"
 
 class QuadtreeTest : public ::testing::Test
 {
-protected:
-    Quadtree<int> tree = {{0, 0}, {100, 100}, 1};
+    using Tree = Quadtree<int, Vector2>;
     
-    bool ContainsData(const std::vector<QuadtreeElement<int>>& elements, int data)
+protected:
+    Tree tree = {{0, 0}, {100, 100}, 1};
+    
+    bool ContainsData(const std::vector<Tree::Element>& elements, int data)
     {
         for (const auto& element : elements)
         {
