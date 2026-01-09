@@ -242,7 +242,9 @@ namespace QuadtreeDetail
             {
                 for (const auto& element : elements)
                 {
-                    float distanceSq = element.position.DistanceSquared(target);
+                    float distanceX = target.x - element.position.x;
+                    float distanceY = target.y - element.position.y;
+                    float distanceSq = (distanceX * distanceX) + (distanceY * distanceY);
                     if (distanceSq < bestDistanceSq && filter(element))
                     {
                         bestDistanceSq = distanceSq;

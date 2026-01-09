@@ -5,6 +5,18 @@ project(Quadtree VERSION 1.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0")
 
 include(FetchContent)
+
+# --- GLM ---
+
+FetchContent_Declare(
+    glm
+    URL https://github.com/g-truc/glm/archive/refs/tags/1.0.3.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(glm)
+
+# --- GoogleTest ---
+
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
@@ -26,10 +38,10 @@ target_compile_features(QuadtreeTest PRIVATE cxx_std_17)
 
 target_include_directories(QuadtreeTest PRIVATE
     include
-    external
 )
 
 target_link_libraries(QuadtreeTest PRIVATE 
+    glm::glm
     GTest::gtest_main
 )
 
@@ -44,7 +56,10 @@ target_compile_features(QuadtreeBenchmark PRIVATE cxx_std_17)
 
 target_include_directories(QuadtreeBenchmark PRIVATE
     include
-    external
+)
+
+target_link_libraries(QuadtreeBenchmark PRIVATE 
+    glm::glm
 )
 
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD

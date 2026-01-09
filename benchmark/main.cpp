@@ -2,12 +2,13 @@
 
 #include <fstream>
 #include <iostream>
+#include <glm/vec2.hpp>
 #include "Quadtree.h"
-#include "Vector2.h"
 
-using Tree = Quadtree<size_t, Vector2>;
+using Vec2 = glm::vec2;
+using Tree = Quadtree<size_t, Vec2>;
 
-std::istream& operator>>(std::istream& stream, Vector2& vector)
+std::istream& operator>>(std::istream& stream, Vec2& vector)
 {
     char separator;
     if (stream >> vector.x >> separator >> vector.y)
@@ -20,7 +21,7 @@ std::istream& operator>>(std::istream& stream, Vector2& vector)
     return stream;
 }
 
-bool TryReadPositions(std::vector<Vector2>& positions)
+bool TryReadPositions(std::vector<Vec2>& positions)
 {
     std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
@@ -28,7 +29,7 @@ bool TryReadPositions(std::vector<Vector2>& positions)
         return false;
     }
     
-    Vector2 position;
+    Vec2 position;
     while (stream >> position)
     {
         positions.push_back(position);
@@ -38,7 +39,7 @@ bool TryReadPositions(std::vector<Vector2>& positions)
     return true;
 }
 
-std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -57,7 +58,7 @@ std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vector2>& posit
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -70,15 +71,15 @@ std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vector2>& pos
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
     for (size_t i = 0; i < positions.size(); i = ++i)
     {
-        Vector2 position = positions[i];
-        Vector2 min = {std::min(-position.x, position.x), std::min(-position.y, position.y)};
-        Vector2 max = {std::max(-position.x, position.x), std::max(-position.y, position.y)};
+        Vec2 position = positions[i];
+        Vec2 min = {std::min(-position.x, position.x), std::min(-position.y, position.y)};
+        Vec2 max = {std::max(-position.x, position.x), std::max(-position.y, position.y)};
         tree.FindAll(min, max);
     }
     
@@ -86,7 +87,7 @@ std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vector2>& positio
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vector2>& positions)
+std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -112,7 +113,7 @@ int main()
     int maxDepth = 4;
     Tree tree = {{-1000, -1000}, {1000, 1000}, nodeCapacity, maxDepth};
     
-    std::vector<Vector2> positions;
+    std::vector<Vec2> positions;
     if (!TryReadPositions(positions))
     {
         std::cout << "ERROR: Failed to read positions" << std::endl;

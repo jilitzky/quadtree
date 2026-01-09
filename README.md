@@ -22,15 +22,14 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 * **Header-only:** Easy to drop into any project.
 
 ## Installation
-1. Open the `include` folder and copy `Quadtree.h` into your project's include path.
-2. Open the `external` folder and copy `Vector2.h` into your project's include path if you don't have a 2D vector type already.
+Open the `include` folder and copy `Quadtree.h` into your project's include path.
 
 ## Usage
 ### Find Nearest
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 size_t nodeCapacity = 1;
-Quadtree<int, Vector2> tree = {{0, 0}, {100, 100}, nodeCapacity};
+Quadtree<int, glm::vec2> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
 tree.Insert(1, {25, 25});
@@ -58,7 +57,7 @@ auto nearest = tree.FindNearest({75, 75}, isOdd); // nearest is 3
 ```cpp
 // Create a Quadtree that covers an area of 100 x 100 and can hold up to 1 element per node.
 size_t nodeCapacity = 1;
-Quadtree<int, Vector2> tree = {{0, 0}, {100, 100}, nodeCapacity};
+Quadtree<int, glm::vec2> tree = {{0, 0}, {100, 100}, nodeCapacity};
 
 // Insert a few elements into it.
 tree.Insert(1, {25, 25});
@@ -93,10 +92,10 @@ auto elements = tree.FindAll({40, 38}, {75, 88}, isEven); // elements contains 4
 ### Results (Apple M2 Pro)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 185 ns     |
-| Find Nearest  | 1440 ns    |
-| Find All      | 46068 ns   |
-| Removal       | 381 ns     |
+| Insertion     | 197 ns     |
+| Find Nearest  | 1392 ns    |
+| Find All      | 47573 ns   |
+| Removal       | 387 ns     |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
