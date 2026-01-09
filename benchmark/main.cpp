@@ -5,8 +5,8 @@
 #include <glm/vec2.hpp>
 #include "Quadtree.h"
 
-using Tree = Quadtree<size_t, glm::vec2>;
 using Vec2 = glm::vec2;
+using Tree = Quadtree<size_t, Vec2>;
 
 std::istream& operator>>(std::istream& stream, Vec2& vector)
 {
