@@ -2,13 +2,13 @@
 
 #include <optional>
 #include <vector>
+#include <glm/vec2.hpp>
 #include <gtest/gtest.h>
 #include "Quadtree.h"
-#include "Vector2.h"
 
 class QuadtreeTest : public ::testing::Test
 {
-    using Tree = Quadtree<int, Vector2>;
+    using Tree = Quadtree<int, glm::vec2>;
     
 protected:
     Tree tree = {{0, 0}, {100, 100}, 1};
