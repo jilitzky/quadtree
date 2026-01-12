@@ -18,7 +18,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 * **Modern Design:** Written in C++17.
 * **Generic:** The templated arguments allow you to configure the type of data and 2D vectors stored by the tree.
 * **Dynamic:** Efficient insertion, removal and automatic subdivision/merging of nodes.
-* **Performant:** Fast searches for nearest neighbour and to find all elements contained within a region.
+* **Performant:** Fast searches for nearest neighbour and to find all elements within a search area.
 * **Header-only:** Easy to drop into any project.
 
 ## Installation
@@ -92,10 +92,10 @@ auto elements = tree.FindAll({40, 38}, {75, 88}, isEven); // elements contains 4
 ### Results on a 13th Gen Intel(R) Core(TM) i7-13700H (2.40 GHz)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 60 ns      |
-| Find Nearest  | 365 ns     |
-| Find All      | 19075 ns   |
-| Removal       | 82 ns      |
+| Insertion     | 59 ns      |
+| Find Nearest  | 356 ns     |
+| Find All      | 26808 ns   |
+| Removal       | 84 ns      |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
