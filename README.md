@@ -89,7 +89,7 @@ auto elements = tree.FindAll({40, 38}, {75, 88}, isEven); // elements contains 4
 3. Allow the tree to have a max depth of 4 (0 being the root level)
 4. Read a pre-generated file with 10,000 positions
 5. Measure inserting an element at every position, run find queries and then remove all elements
-### Results on a 13th Gen Intel(R) Core(TM) i7-13700H (2.40 GHz)
+### Results (Intel i7-13700H)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
 | Insertion     | 59 ns      |
