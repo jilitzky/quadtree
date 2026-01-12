@@ -1,10 +1,8 @@
 #!/bin/bash
 
-source ./build_dir.sh
-
 (
     cd .. &&
-    rm -rf "$BUILD_DIR"
+    rm -rf "build"
 )
 
 source ./make_xcode.sh
