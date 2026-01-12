@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <array>
 #include <optional>
 #include <type_traits>
 #include <vector>

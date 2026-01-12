@@ -1,5 +1,6 @@
 /// Copyright (c) 2025 Jose Ilitzky
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <glm/vec2.hpp>
@@ -8,7 +9,7 @@
 using Vec2 = glm::vec2;
 using Tree = Quadtree<size_t, Vec2>;
 
-std::istream& operator>>(std::istream& stream, Vec2& vector)
+static std::istream& operator>>(std::istream& stream, Vec2& vector)
 {
     char separator;
     if (stream >> vector.x >> separator >> vector.y)
@@ -21,7 +22,7 @@ std::istream& operator>>(std::istream& stream, Vec2& vector)
     return stream;
 }
 
-bool TryReadPositions(std::vector<Vec2>& positions)
+static bool TryReadPositions(std::vector<Vec2>& positions)
 {
     std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
@@ -39,7 +40,7 @@ bool TryReadPositions(std::vector<Vec2>& positions)
     return true;
 }
 
-std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vec2>& positions)
+static std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -58,7 +59,7 @@ std::chrono::nanoseconds Insertion(Tree& tree, const std::vector<Vec2>& position
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vec2>& positions)
+static std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
@@ -71,15 +72,16 @@ std::chrono::nanoseconds FindNearest(Tree& tree, const std::vector<Vec2>& positi
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vec2>& positions)
+static std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     
     for (size_t i = 0; i < positions.size(); i = ++i)
     {
-        Vec2 position = positions[i];
-        Vec2 min = {std::min(-position.x, position.x), std::min(-position.y, position.y)};
-        Vec2 max = {std::max(-position.x, position.x), std::max(-position.y, position.y)};
+        float xAbs = std::abs(positions[i].x);
+        float yAbs = std::abs(positions[i].y);
+        Vec2 min = {-xAbs, -yAbs};
+        Vec2 max = {xAbs, yAbs};
         tree.FindAll(min, max);
     }
     
@@ -87,7 +89,7 @@ std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vec2>& positions)
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 }
 
-std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vec2>& positions)
+static std::chrono::nanoseconds Removal(Tree& tree, const std::vector<Vec2>& positions)
 {
     auto start = std::chrono::high_resolution_clock::now();
     

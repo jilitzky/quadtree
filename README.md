@@ -18,7 +18,7 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 * **Modern Design:** Written in C++17.
 * **Generic:** The templated arguments allow you to configure the type of data and 2D vectors stored by the tree.
 * **Dynamic:** Efficient insertion, removal and automatic subdivision/merging of nodes.
-* **Performant:** Fast searches for nearest neighbour and to find all elements contained within a region.
+* **Performant:** Fast searches for nearest neighbour and to find all elements within a search area.
 * **Header-only:** Easy to drop into any project.
 
 ## Installation
@@ -84,18 +84,18 @@ auto elements = tree.FindAll({40, 38}, {75, 88}, isEven); // elements contains 4
 
 ## Performance
 ### Benchmark
-1. Create a Quadtree that covers an area of 2000 x 2000.
-2. Configure its nodes to hold up to 8 elements before subdividing.
-3. Allow the tree to have a max depth of 4 (0 being the root level).
-4. Read a pre-generated file with 10,000 positions.
-5. Measure inserting an element at every position, run find queries and then remove all elements.
-### Results (Apple M2 Pro)
+1. Create a Quadtree that covers an area of 2000 x 2000
+2. Configure its nodes to hold up to 8 elements before subdividing
+3. Allow the tree to have a max depth of 4 (0 being the root level)
+4. Read a pre-generated file with 10,000 positions
+5. Measure inserting an element at every position, run find queries and then remove all elements
+### Results on a 13th Gen Intel(R) Core(TM) i7-13700H (2.40 GHz)
 | Operation     | Time (Avg) |
 | ------------- | ---------- |
-| Insertion     | 197 ns     |
-| Find Nearest  | 1392 ns    |
-| Find All      | 47573 ns   |
-| Removal       | 387 ns     |
+| Insertion     | 59 ns      |
+| Find Nearest  | 356 ns     |
+| Find All      | 26808 ns   |
+| Removal       | 84 ns      |
 
 ## License
 Distributed under the MIT License. See LICENSE for more information.
