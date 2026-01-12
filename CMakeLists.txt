@@ -62,6 +62,10 @@ target_link_libraries(QuadtreeBenchmark PRIVATE
     glm::glm
 )
 
+set_target_properties(QuadtreeBenchmark PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:QuadtreeBenchmark>"
+)
+
 add_custom_command(TARGET QuadtreeBenchmark POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/benchmark/data"

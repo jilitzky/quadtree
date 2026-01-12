@@ -22,7 +22,7 @@ static std::istream& operator>>(std::istream& stream, Vec2& vector)
     return stream;
 }
 
-bool TryReadPositions(std::vector<Vec2>& positions)
+static bool TryReadPositions(std::vector<Vec2>& positions)
 {
     std::ifstream stream("benchmark/data/Positions.txt");
     if (!stream.is_open())
@@ -78,9 +78,10 @@ static std::chrono::nanoseconds FindAll(Tree& tree, const std::vector<Vec2>& pos
     
     for (size_t i = 0; i < positions.size(); i = ++i)
     {
-        Vec2 position = positions[i];
-        Vec2 min = {std::min(-position.x, position.x), std::min(-position.y, position.y)};
-        Vec2 max = {std::max(-position.x, position.x), std::max(-position.y, position.y)};
+        float xAbs = std::abs(positions[i].x);
+        float yAbs = std::abs(positions[i].y);
+        Vec2 min = {-xAbs, -yAbs};
+        Vec2 max = {xAbs, yAbs};
         tree.FindAll(min, max);
     }
     
