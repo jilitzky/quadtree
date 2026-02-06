@@ -5,8 +5,6 @@
 
 **A modern C++ implementation of a quadtree spatial partition.**
 
-Provides a fast, lightweight and generic Quadtree data structure for efficient 2D spatial partitioning and querying.
-
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
@@ -18,8 +16,8 @@ Provides a fast, lightweight and generic Quadtree data structure for efficient 2
 * **Modern Design:** Written in C++17.
 * **Generic:** The templated arguments allow you to configure the type of data and 2D vectors stored by the tree.
 * **Dynamic:** Efficient insertion, removal and automatic subdivision/merging of nodes.
-* **Performant:** Fast searches for nearest neighbour and to find all elements within a search area.
-* **Header-only:** Easy to drop into any project.
+* **Performant:** Fast searches to find the nearest neighbour or all elements within a search area.
+* **Header-Only:** Easy to drop into any project.
 
 ## Installation
 Open the `include` folder and copy `Quadtree.h` into your project's include path.
